@@ -1,17 +1,17 @@
-# schoco
-> 🛠️️ This project is under heavy development! It's planned to have it 'finished' by ~September 2023
+> 🛠️️ This project is pre-alpha and under heavy development! It's planned to have it 'finished' by ~September 2023
 
-Online Coding IDE for School
 
-# What is schoco?
+# What is schoco? {🍫}
 
 SCHOCO stands for **SCH**ool **O**nline **CO**ding.
 
 The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github](https://github.com/codeboardio)). Since codeboard didn't receive any more updates since end of 2015 and as we need slightly other features, we now try to create a similar web-based IDE which fits to our needs for **learning (Java)-Programming explicitly at School**! 
 
-> It is mainly developed to enable coding-homeworks for pupils what has failed so far in reality for two reasons:
-> 1. Installation of the cumbersome JRE and IDEs
-> 2. Saving and sharing the solutions via Mail/USB/Messenger??? WTF!?
+---
+It is mainly developed to enable coding-homeworks for pupils what has failed so far in reality for two reasons:
+ 1. Installation of the cumbersome JRE and IDEs
+ 2. Saving and sharing the solutions via Mail/USB/Messenger??? WTF!?
+---
 
 ## Planned main-features
 - No registration methods for pupils. Only teachers can register pupils who will always be part of a class or course.
