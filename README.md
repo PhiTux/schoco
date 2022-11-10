@@ -21,3 +21,21 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 - Explicitly no possibility to open foreign projects based on a project-id or similar (other than codeboard!). That's first because of privacy-reasons and second to minimize copying from others.
 - Use gitea on backend for storing all code.
 - Compilation and running the programms completely on the server.
+
+
+# Start developing
+
+## Frontend (Vite + Vue)
+`cd frontend` 
+
+Initial Installation: `npm install`
+
+On every start: `npm run dev`
+
+## Backend (Fastapi)
+
+`cd fastapi`
+
+Initial Installation (Python 3 and pip required): `pip install "fastapi[all] fastapi-jwt-auth"`
+
+On every start: `python -m uvicorn main:app --reload`
