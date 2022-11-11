@@ -36,6 +36,6 @@ On every start: `npm run dev`
 
 `cd fastapi`
 
-Initial Installation (Python 3 and pip required): `pip install "fastapi[all] fastapi-jwt-auth"`
+Initial Installation (Python 3 and pip required): `pip install -r requirements.txt`
 
-On every start: `python -m uvicorn main:app --reload`
+On every start: `python -m uvicorn main:schoco --reload`
