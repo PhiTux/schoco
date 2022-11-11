@@ -1,7 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-#from fastapi import router
-#from fastapi.users import users
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import JSONResponse
 from fastapi import Request
@@ -33,8 +31,3 @@ schoco.add_middleware(CORSMiddleware, allow_origins=origins,
 @schoco.on_event("startup")
 def startup_event():
     database.create_db_and_tables()
-
-
-@schoco.on_event("shutdown")
-def shutdown_event():
-    database.shutdown()

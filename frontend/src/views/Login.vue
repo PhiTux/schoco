@@ -24,29 +24,37 @@ let loginValid = computed(() => {
   <h1>Login</h1>
   <div class="text-center">
     <div class="container w-100 m-auto">
-      <form @submit.prevent="login">
-        <div class="form-floating">
-          <input
-            type="text"
-            id="floatingInput"
-            class="form-control"
-            v-model="state.username"
-          />
-          <label for="floatingInput">Username</label>
+      <div class="row">
+        <div class="col">
+          {🍫}<br />SCHOCO<br />
+          SCHool Online COding
         </div>
-        <div class="form-floating">
-          <input
-            type="password"
-            id="floatingPassword"
-            class="form-control"
-            v-model="state.password"
-          />
-          <label for="floatingPassword">Password</label>
+        <div class="col">
+          <form @submit.prevent="login">
+            <div class="form-floating">
+              <input
+                type="text"
+                id="floatingInput"
+                class="form-control"
+                v-model="state.username"
+              />
+              <label for="floatingInput">Username</label>
+            </div>
+            <div class="form-floating">
+              <input
+                type="password"
+                id="floatingPassword"
+                class="form-control"
+                v-model="state.password"
+              />
+              <label for="floatingPassword">Password</label>
+            </div>
+            <button class="btn btn-primary" :class="{ disabled: !loginValid }">
+              Huhuh
+            </button>
+          </form>
         </div>
-        <button class="btn btn-primary" :class="{ disabled: !loginValid }">
-          Huhuh
-        </button>
-      </form>
+      </div>
     </div>
   </div>
 </template>

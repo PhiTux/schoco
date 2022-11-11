@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { router } from '../router'
+//import { router } from '../router'
 
-//const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
 const API_URL = import.meta.env.VITE_API_URL
 
 export const useAuthStore = defineStore({
@@ -14,25 +13,23 @@ export const useAuthStore = defineStore({
     }),
     actions: {
         async login(username, password) {
-            axios.post(API_URL + 'login', {
-                username: username,
-                password: password
-            })
+        var bodyFormData = new FormData()
+        bodyFormData.append('username', username)
+        bodyFormData.append('password', password)
+            axios.post(API_URL + 'login', bodyFormData)
             .then(response => {
-                if (response.data.token) {
-                    // update pinia state
-                    this.user = response.data;
-                    
+                if (response.data.access_token) {
+                    this.user = response.data;                    
                     localStorage.setItem('user', JSON.stringify(response.data))
                 }
-                router.push(this.returnUrl || '/home');
+                this.$router.push(this.returnUrl || '/home');
             })
 
         },
         logout() {
             this.user = null;
             localStorage.removeItem('user');
-            router.push('/login');
+            this.$router.push('/login');
         }
     }
 });

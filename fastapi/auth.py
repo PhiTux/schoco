@@ -3,6 +3,7 @@ import models_and_schemas
 from jose import jwt
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import Depends, HTTPException
 import os
 
 
@@ -39,3 +40,20 @@ def create_access_token(user: models_and_schemas.User):
         "exp": datetime.utcnow() + timedelta(days=get_exp_days())
     }
     return jwt.encode(claims=claims, key=get_secret_key(), algorithm="HS256")
+
+
+def decode_token(token):
+    claims = jwt.decode(token, key=get_secret_key())
+    return claims
+
+
+def check_teacher(token: str = Depends(oauth2_scheme)):
+    claims = decode_token(token)
+    role = claims.get('role')
+    if role != "teacher":
+        raise HTTPException(
+            status_code=403,
+            detail="Only teachers!",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    return claims

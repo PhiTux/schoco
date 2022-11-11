@@ -1,11 +1,13 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
 import { useAuthStore } from '../stores/auth.store.js'
-import Login from "../views/Login.vue";
-import Home from "../views/Home.vue";
+import Login from "../views/Login.vue"
+import Home from "../views/Home.vue"
+import Users from "../views/Users.vue"
 
 const routes = [
     {path: '/login', component: Login},
     {path: '/home', component: Home},
+    {path: '/users', component: Users}
 ]
 
 export const router = createRouter({
@@ -18,9 +20,21 @@ router.beforeEach(async (to) => {
     const authRequired = !publicPages.includes(to.path)
     const auth = useAuthStore()
 
+    const teacherPages = ['/users']
+    const teacherRequired = teacherPages.includes(to.path)
+
     if (authRequired && !auth.user) {
         auth.returnUrl = to.fullPath;
         return '/login'
+    }
+
+    if (teacherRequired && (!auth.user || auth.user.role != 'teacher')) {
+        auth.returnUrl = '/home'
+        return '/home'
+    }
+
+    if (to.path == '/login' && auth.user) {
+        return '/home'
     }
 })
 
