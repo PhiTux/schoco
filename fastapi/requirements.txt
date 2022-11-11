@@ -4,3 +4,5 @@ jose==1.0.0
 passlib==1.7.4
 python_jose==3.3.0
 sqlmodel==0.0.8
+uvicorn
+python-multipart
