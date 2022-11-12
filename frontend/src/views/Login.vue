@@ -3,26 +3,79 @@ import { reactive, computed } from "vue";
 import { useAuthStore } from "../stores/auth.store";
 
 const state = reactive({
-  username: "",
-  password: "",
-  showPassword: false,
+  loginUsername: "",
+  loginPassword: "",
+  registerTeacherKey: "",
+  registerUsername: "",
+  registerPassword1: "",
+  registerPassword2: "",
+  showLoginPassword: false,
+  showRegisterPassword1: false,
+  showRegisterPassword2: false,
+  loginIncomplete: false,
+  registerIncomplete: false,
 });
 
 async function login() {
+  if (!this.loginValid) {
+    state.loginIncomplete = true;
+    return;
+  }
   const authStore = useAuthStore();
   return authStore.login(state.username, state.password);
 }
 
-function showPassword() {
-  state.showPassword = true;
+async function registerTeacher() {
+  if (!this.registerValid || !this.registerPasswordsEqual) {
+    state.registerIncomplete = true;
+    return;
+  }
+  const authStore = useAuthStore();
+  return authStore.registerTeacher(state.registerTeacherKey, state);
 }
 
-function hidePassword() {
-  state.showPassword = false;
+function showLoginPassword() {
+  state.showLoginPassword = true;
 }
+
+function showRegisterPassword1() {
+  state.showRegisterPassword1 = true;
+}
+
+function showRegisterPassword2() {
+  state.showRegisterPassword2 = true;
+}
+
+function hideLoginPassword() {
+  state.showLoginPassword = false;
+}
+
+function hideRegisterPassword1() {
+  state.showRegisterPassword1 = false;
+}
+
+function hideRegisterPassword2() {
+  state.showRegisterPassword2 = false;
+}
+
+let registerValid = computed(() => {
+  let tmp =
+    state.registerTeacherKey != "" &&
+    state.registerUsername != "" &&
+    state.registerPassword1 != "" &&
+    state.registerPassword2 != "";
+  if (tmp) state.registerIncomplete = false;
+  return tmp;
+});
 
 let loginValid = computed(() => {
-  return state.username != "" && state.password != "";
+  var tmp = state.loginUsername != "" && state.loginPassword != "";
+  if (tmp) state.loginIncomplete = false;
+  return tmp;
+});
+
+let registerPasswordsEqual = computed(() => {
+  return state.registerPassword1 === state.registerPassword2;
 });
 </script>
 
@@ -59,7 +112,7 @@ let loginValid = computed(() => {
               data-bs-parent="#loginAccordion"
             >
               <div class="accordion-body">
-                <form @submit.prevent="login">
+                <form @submit.prevent="login()">
                   <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">
                       <font-awesome-icon icon="fa-solid fa-user"
@@ -67,12 +120,12 @@ let loginValid = computed(() => {
                     <div class="form-floating">
                       <input
                         type="text"
-                        id="floatingInput"
+                        id="floatingInputLogin"
                         class="form-control"
-                        v-model="state.username"
+                        v-model="state.loginUsername"
                         placeholder="Username"
                       />
-                      <label for="floatingInput">Username</label>
+                      <label for="floatingInputLogin">Username</label>
                     </div>
                   </div>
 
@@ -82,27 +135,35 @@ let loginValid = computed(() => {
                     /></span>
                     <div class="form-floating">
                       <input
-                        :type="[state.showPassword ? 'text' : 'password']"
-                        id="floatingPassword"
+                        :type="[state.showLoginPassword ? 'text' : 'password']"
+                        id="floatingPasswordLogin"
                         class="form-control"
-                        v-model="state.password"
+                        v-model="state.loginPassword"
                         placeholder="Password"
                       />
-                      <label for="floatingPassword">Password</label>
+                      <label for="floatingPasswordLogin">Password</label>
                     </div>
                     <span class="input-group-text" id="basic-addon1">
                       <a
                         class="greyButton"
-                        @mousedown="showPassword()"
-                        @mouseup="hidePassword()"
-                        @mouseleave="hidePassword()"
+                        @mousedown="showLoginPassword()"
+                        @mouseup="hideLoginPassword()"
+                        @mouseleave="hideLoginPassword()"
                         ><font-awesome-icon
-                          v-if="!state.showPassword"
+                          v-if="!state.showLoginPassword"
                           icon="fa-solid fa-eye-slash" /><font-awesome-icon
                           v-else
                           icon="fa-solid fa-eye" /></a
                     ></span>
                   </div>
+                  <div
+                    v-if="state.loginIncomplete"
+                    class="alert alert-danger"
+                    role="alert"
+                  >
+                    Eingabe unvollständig
+                  </div>
+
                   <button
                     class="btn btn-primary"
                     :class="{ disabled: !loginValid }"
@@ -133,15 +194,131 @@ let loginValid = computed(() => {
               data-bs-parent="#loginAccordion"
             >
               <div class="accordion-body">
-                <strong>This is the second item's accordion body.</strong> It is
-                hidden by default, until the collapse plugin adds the
-                appropriate classes that we use to style each element. These
-                classes control the overall appearance, as well as the showing
-                and hiding via CSS transitions. You can modify any of this with
-                custom CSS or overriding our default variables. It's also worth
-                noting that just about any HTML can go within the
-                <code>.accordion-body</code>, though the transition does limit
-                overflow.
+                <form @submit.prevent="registerTeacher()">
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">
+                      <font-awesome-icon icon="fa-solid fa-lock"
+                    /></span>
+                    <div class="form-floating">
+                      <input
+                        type="password"
+                        id="floatingInputTeacherKey"
+                        class="form-control"
+                        v-model="state.registerTeacherKey"
+                        placeholder="Lehrer-Passwort"
+                      />
+                      <label for="floatingInputTeacherKey"
+                        >Lehrer-Passwort</label
+                      >
+                    </div>
+                  </div>
+
+                  <hr />
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">
+                      <font-awesome-icon icon="fa-solid fa-user"
+                    /></span>
+                    <div class="form-floating">
+                      <input
+                        :disabled="state.registerTeacherKey == ''"
+                        type="text"
+                        id="floatingInputRegister"
+                        class="form-control"
+                        v-model="state.registerUsername"
+                        placeholder="Username"
+                      />
+                      <label for="floatingInputRegister">Username</label>
+                    </div>
+                  </div>
+
+                  <hr />
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1"
+                      ><font-awesome-icon icon="fa-solid fa-key"
+                    /></span>
+                    <div class="form-floating">
+                      <input
+                        :disabled="state.registerTeacherKey == ''"
+                        :type="[
+                          state.showRegisterPassword1 ? 'text' : 'password',
+                        ]"
+                        id="floatingPassword1Register"
+                        class="form-control"
+                        v-model="state.registerPassword1"
+                        placeholder="Password"
+                      />
+                      <label for="floatingPassword1Register">Passwort</label>
+                    </div>
+                    <span class="input-group-text" id="basic-addon1">
+                      <a
+                        class="greyButton"
+                        @mousedown="showRegisterPassword1()"
+                        @mouseup="hideRegisterPassword1()"
+                        @mouseleave="hideRegisterPassword1()"
+                        ><font-awesome-icon
+                          v-if="!state.showRegisterPassword1"
+                          icon="fa-solid fa-eye-slash" /><font-awesome-icon
+                          v-else
+                          icon="fa-solid fa-eye" /></a
+                    ></span>
+                  </div>
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1"
+                      ><font-awesome-icon icon="fa-solid fa-key"
+                    /></span>
+                    <div class="form-floating">
+                      <input
+                        :disabled="state.registerTeacherKey == ''"
+                        :type="[
+                          state.showRegisterPassword2 ? 'text' : 'password',
+                        ]"
+                        id="floatingPassword2Register"
+                        class="form-control"
+                        v-model="state.registerPassword2"
+                        placeholder="Password"
+                      />
+                      <label for="floatingPassword2Register"
+                        >Passwort wiederholen</label
+                      >
+                    </div>
+                    <span class="input-group-text" id="basic-addon1">
+                      <a
+                        class="greyButton"
+                        @mousedown="showRegisterPassword2()"
+                        @mouseup="hideRegisterPassword2()"
+                        @mouseleave="hideRegisterPassword2()"
+                        ><font-awesome-icon
+                          v-if="!state.showRegisterPassword2"
+                          icon="fa-solid fa-eye-slash" /><font-awesome-icon
+                          v-else
+                          icon="fa-solid fa-eye" /></a
+                    ></span>
+                  </div>
+                  <div
+                    v-if="state.registerIncomplete"
+                    class="alert alert-danger"
+                    role="alert"
+                  >
+                    Eingabe unvollständig
+                  </div>
+                  <div
+                    v-if="!registerPasswordsEqual"
+                    class="alert alert-danger"
+                    role="alert"
+                  >
+                    Passwörter nicht identisch
+                  </div>
+
+                  <button
+                    class="btn btn-primary"
+                    :class="{ disabled: !registerValid }"
+                  >
+                    Login
+                  </button>
+                </form>
               </div>
             </div>
           </div>

@@ -6,9 +6,9 @@ import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye)
+library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock)
 
 const pinia = createPinia()
 pinia.use(({store}) => {
