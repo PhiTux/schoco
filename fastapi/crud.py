@@ -7,6 +7,8 @@ def create_user(db: Session, user: models_and_schemas.UserSchema):
     hashed_password = auth.create_password_hash(user.password)
     db_user = models_and_schemas.User(
         username=user.username,
+        first_name=user.first_name,
+        last_name=user.last_name,
         role=user.role,
         hashed_password=hashed_password
     )

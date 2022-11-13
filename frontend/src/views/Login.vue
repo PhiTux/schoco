@@ -1,11 +1,14 @@
 <script setup>
 import { reactive, computed } from "vue";
 import { useAuthStore } from "../stores/auth.store";
+import UserService from "../services/user.service";
 
 const state = reactive({
   loginUsername: "",
   loginPassword: "",
   registerTeacherKey: "",
+  registerFirstName: "",
+  registerLastName: "",
   registerUsername: "",
   registerPassword1: "",
   registerPassword2: "",
@@ -14,6 +17,8 @@ const state = reactive({
   showRegisterPassword2: false,
   loginIncomplete: false,
   registerIncomplete: false,
+  showLoginError: false,
+  showRegistrationSuccess: false,
 });
 
 async function login() {
@@ -22,7 +27,14 @@ async function login() {
     return;
   }
   const authStore = useAuthStore();
-  return authStore.login(state.username, state.password);
+  const result = await authStore.login(
+    state.loginUsername,
+    state.loginPassword
+  );
+  if (result && result.response.status == 401) {
+    state.loginIncomplete = false;
+    state.showLoginError = true;
+  }
 }
 
 async function registerTeacher() {
@@ -30,8 +42,22 @@ async function registerTeacher() {
     state.registerIncomplete = true;
     return;
   }
-  const authStore = useAuthStore();
-  return authStore.registerTeacher(state.registerTeacherKey, state);
+  UserService.registerTeacher(
+    state.registerTeacherKey,
+    state.registerFirstName,
+    state.registerLastName,
+    state.registerUsername,
+    state.registerPassword1
+  ).then(
+    (response) => {
+      state.showRegistrationSuccess = true;
+      state.showRegistrationError = false;
+    },
+    (error) => {
+      state.showRegistrationError = true;
+      state.showRegistrationSuccess = false;
+    }
+  );
 }
 
 function showLoginPassword() {
@@ -163,6 +189,13 @@ let registerPasswordsEqual = computed(() => {
                   >
                     Eingabe unvollständig
                   </div>
+                  <div
+                    v-if="state.showLoginError"
+                    class="alert alert-danger"
+                    role="alert"
+                  >
+                    Falscher Benutzername oder Passwort
+                  </div>
 
                   <button
                     class="btn btn-primary"
@@ -214,6 +247,40 @@ let registerPasswordsEqual = computed(() => {
                   </div>
 
                   <hr />
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">
+                      <font-awesome-icon icon="fa-solid fa-signature"
+                    /></span>
+                    <div class="form-floating">
+                      <input
+                        :disabled="state.registerTeacherKey == ''"
+                        type="text"
+                        id="floatingInputRegisterFirst"
+                        class="form-control"
+                        v-model="state.registerFirstName"
+                        placeholder="Vorname"
+                      />
+                      <label for="floatingInputRegisterFirst">Vorname</label>
+                    </div>
+                  </div>
+
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">
+                      <font-awesome-icon icon="fa-solid fa-signature"
+                    /></span>
+                    <div class="form-floating">
+                      <input
+                        :disabled="state.registerTeacherKey == ''"
+                        type="text"
+                        id="floatingInputRegisterLast"
+                        class="form-control"
+                        v-model="state.registerLastName"
+                        placeholder="Nachname"
+                      />
+                      <label for="floatingInputRegisterLast">Nachname</label>
+                    </div>
+                  </div>
 
                   <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">
@@ -310,6 +377,21 @@ let registerPasswordsEqual = computed(() => {
                     role="alert"
                   >
                     Passwörter nicht identisch
+                  </div>
+                  <div
+                    v-if="state.showRegistrationSuccess"
+                    class="alert alert-success"
+                    role="alert"
+                  >
+                    Account erfolgreich erstellt. Bitte einloggen.
+                  </div>
+                  <div
+                    v-if="state.showRegistrationError"
+                    class="alert alert-danger"
+                    role="alert"
+                  >
+                    Account konnte nicht erstellt werden. Möglicherweise stimmt
+                    das Lehrer-Passwort nicht.
                   </div>
 
                   <button

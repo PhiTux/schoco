@@ -12,7 +12,9 @@ class Roles(str, Enum):
 
 class BaseUser(SQLModel):
     username: str = Field(unique=True)
-    role: str
+    first_name: Optional[str] = ""
+    last_name: Optional[str] = ""
+    role: Roles
 
 
 class User(BaseUser, table=True):

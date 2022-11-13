@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-//import { router } from '../router'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -25,9 +24,10 @@ export const useAuthStore = defineStore({
                     localStorage.setItem('user', JSON.stringify(response.data))
                 }
             } catch (err) {
-                console.log(err)
+                return err
             }
             this.$router.push(this.returnUrl || '/home');
+            return 
         },
         logout() {
             this.user = null;

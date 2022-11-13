@@ -1,17 +1,29 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException
 import auth
 import database
 import models_and_schemas
 import crud
 from sqlmodel import Session
 from fastapi.security import OAuth2PasswordRequestForm
+import os
 
 
 users = APIRouter()
 
 
-@users.post('/register')
-def register_user(user: models_and_schemas.UserSchema, db: Session = Depends(database.get_db)):
+def get_teacherkey():
+    teacherkey: str = os.urandom(24)
+    if 'TEACHER_KEY' in os.environ:
+        teacherkey: str = os.environ.get('TEACHER_KEY')
+    return teacherkey
+
+
+@users.post('/registerTeacher')
+def register_user(teacherkey: str = Form(), username: str = Form(), first_name: str = Form(), last_name: str = Form(), password: str = Form(), db: Session = Depends(database.get_db)):
+    if teacherkey != get_teacherkey():
+        raise HTTPException(status_code=401, detail="Teacherkey invalid")
+    user = models_and_schemas.UserSchema(
+        username=username, first_name=first_name, last_name=last_name, role="teacher", password=password)
     db_user = crud.create_user(db=db, user=user)
     return db_user
 
