@@ -15,4 +15,4 @@ pinia.use(({store}) => {
     store.$router = markRaw(router)
 })
 
-createApp(App).use(router).use(pinia).component('font-awesome-icon', FontAwesomeIcon).mount('#app')
+createApp(App).use(pinia).use(router).component('font-awesome-icon', FontAwesomeIcon).mount('#app')

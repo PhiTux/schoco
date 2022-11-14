@@ -1,7 +1,9 @@
 <script setup>
 import { useAuthStore } from "../stores/auth.store";
+import { useRoute } from "vue-router";
 
 const authStore = useAuthStore();
+const route = useRoute();
 
 async function logout() {
   const authStore = useAuthStore();
@@ -27,31 +29,21 @@ async function logout() {
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
+            <a class="nav-link active" aria-current="page" href="/#/home"
+              >Home</a
             >
-              Dropdown
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider" /></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
           </li>
-          <li class="nav-item">
-            <a class="nav-link disabled">Disabled</a>
-          </li>
+
+          <a
+            v-if="authStore.isTeacher() && route.name !== 'users'"
+            class="btn btn-outline-secondary"
+            href="/#/users"
+          >
+            Benutzerverwaltung
+          </a>
         </ul>
         <button
-          v-if="this.authStore.user"
+          v-if="authStore.user"
           class="btn btn-outline-secondary"
           type="submit"
           @click.prevent="logout()"

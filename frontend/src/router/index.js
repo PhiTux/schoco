@@ -5,9 +5,9 @@ import Home from "../views/Home.vue"
 import Users from "../views/Users.vue"
 
 const routes = [
-    {path: '/login', component: Login},
-    {path: '/home', component: Home},
-    {path: '/users', component: Users}
+    {path: '/login', name: 'login', component: Login},
+    {path: '/home', name: "home", component: Home},
+    {path: '/users', name: "users", component: Users}
 ]
 
 export const router = createRouter({
@@ -28,7 +28,7 @@ router.beforeEach(async (to) => {
         return '/login'
     }
 
-    if (teacherRequired && (!auth.user || auth.user.role != 'teacher')) {
+    if (teacherRequired && (!auth.user || !auth.isTeacher())) {
         auth.returnUrl = '/home'
         return '/home'
     }

@@ -39,7 +39,7 @@ def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordReque
     raise HTTPException(status_code=401, detail="Bad username or password")
 
 
-@users.get('/users')
+@users.get('/getAllUsers', dependencies=[Depends(auth.check_teacher)])
 def get_users(db: Session = Depends(database.get_db)):
     db_user = crud.get_all_users(db=db)
     return db_user

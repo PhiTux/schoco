@@ -33,6 +33,9 @@ export const useAuthStore = defineStore({
             this.user = null;
             localStorage.removeItem('user');
             this.$router.push('/login');
+        },
+        isTeacher() {
+            return (this.user && this.user.role == 'teacher')
         }
     }
 });
