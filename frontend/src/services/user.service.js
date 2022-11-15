@@ -21,11 +21,10 @@ axiosAuth.interceptors.request.use((config) => {
 
 
 class UserService {
-    registerTeacher(teacherkey, first_name, last_name, username, password) {
+    registerTeacher(teacherkey, name, username, password) {
         var bodyFormData = new FormData()
         bodyFormData.append("teacherkey", teacherkey);
-        bodyFormData.append("first_name", first_name);
-        bodyFormData.append("last_name", last_name);
+        bodyFormData.append("full_name", name);
         bodyFormData.append("username", username);
         bodyFormData.append("password", password);
         return axios.post(API_URL + 'registerTeacher', bodyFormData)

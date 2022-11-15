@@ -12,18 +12,17 @@ users = APIRouter()
 
 
 def get_teacherkey():
-    teacherkey: str = os.urandom(24)
     if 'TEACHER_KEY' in os.environ:
-        teacherkey: str = os.environ.get('TEACHER_KEY')
-    return teacherkey
+        return os.environ.get('TEACHER_KEY')
+    return os.urandom(24)
 
 
 @users.post('/registerTeacher')
-def register_user(teacherkey: str = Form(), username: str = Form(), first_name: str = Form(), last_name: str = Form(), password: str = Form(), db: Session = Depends(database.get_db)):
+def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database.get_db)):
     if teacherkey != get_teacherkey():
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
     user = models_and_schemas.UserSchema(
-        username=username, first_name=first_name, last_name=last_name, role="teacher", password=password)
+        username=username, full_name=full_name, role="teacher", password=password)
     db_user = crud.create_user(db=db, user=user)
     return db_user
 

@@ -12,17 +12,15 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def get_secret_key():
-    authjwt_secret_key: str = os.urandom(24)
     if 'SECRET_KEY' in os.environ:
-        authjwt_secret_key: str = os.environ.get('SECRET_KEY')
-    return authjwt_secret_key
+        return os.environ.get('SECRET_KEY')
+    return os.urandom(24)
 
 
 def get_exp_days():
-    authjwt_exp = 15
     if 'JWT_EXP_DAYS' in os.environ:
-        authjwt_exp = int(os.environ.get('JWT_EXP_DAYS'))
-    return authjwt_exp
+        return int(os.environ.get('JWT_EXP_DAYS'))
+    return 15
 
 
 def create_password_hash(password):
@@ -36,6 +34,7 @@ def verify_password(plain_password, hashed_password):
 def create_access_token(user: models_and_schemas.User):
     claims = {
         "sub": user.username,
+        "name": user.full_name,
         "role": user.role,
         "exp": datetime.utcnow() + timedelta(days=get_exp_days())
     }

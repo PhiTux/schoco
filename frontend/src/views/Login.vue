@@ -7,8 +7,7 @@ const state = reactive({
   loginUsername: "",
   loginPassword: "",
   registerTeacherKey: "",
-  registerFirstName: "",
-  registerLastName: "",
+  registerName: "",
   registerUsername: "",
   registerPassword1: "",
   registerPassword2: "",
@@ -44,8 +43,7 @@ async function registerTeacher() {
   }
   UserService.registerTeacher(
     state.registerTeacherKey,
-    state.registerFirstName,
-    state.registerLastName,
+    state.registerName,
     state.registerUsername,
     state.registerPassword1
   ).then(
@@ -256,29 +254,14 @@ let registerPasswordsEqual = computed(() => {
                       <input
                         :disabled="state.registerTeacherKey == ''"
                         type="text"
-                        id="floatingInputRegisterFirst"
+                        id="floatingInputRegisterName"
                         class="form-control"
-                        v-model="state.registerFirstName"
-                        placeholder="Vorname"
+                        v-model="state.registerName"
+                        placeholder="Vor- und Nachname"
                       />
-                      <label for="floatingInputRegisterFirst">Vorname</label>
-                    </div>
-                  </div>
-
-                  <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon1">
-                      <font-awesome-icon icon="fa-solid fa-signature"
-                    /></span>
-                    <div class="form-floating">
-                      <input
-                        :disabled="state.registerTeacherKey == ''"
-                        type="text"
-                        id="floatingInputRegisterLast"
-                        class="form-control"
-                        v-model="state.registerLastName"
-                        placeholder="Nachname"
-                      />
-                      <label for="floatingInputRegisterLast">Nachname</label>
+                      <label for="floatingInputRegisterName"
+                        >Vor- und Nachname</label
+                      >
                     </div>
                   </div>
 
