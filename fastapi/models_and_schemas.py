@@ -2,8 +2,11 @@
 
 from sqlmodel import SQLModel, Field
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
+from pydantic import BaseModel
 
+
+# database models
 
 class Roles(str, Enum):
     pupil = "pupil"
@@ -23,3 +26,15 @@ class User(BaseUser, table=True):
 
 class UserSchema(BaseUser):
     password: str
+
+
+# other models
+
+class newPupil(BaseModel):
+    fullname: Optional[str] = ""
+    username: str
+    password: str
+
+
+class pupilsList(BaseModel):
+    newPupils: List[newPupil]

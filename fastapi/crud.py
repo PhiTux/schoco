@@ -1,4 +1,5 @@
 from sqlmodel import Session
+from sqlalchemy import exc
 import auth
 import models_and_schemas
 
@@ -11,10 +12,17 @@ def create_user(db: Session, user: models_and_schemas.UserSchema):
         role=user.role,
         hashed_password=hashed_password
     )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    try:
+        db.add(db_user)
+        db.commit()
+    except:
+        db.rollback()
+        print("rolled back")
+        return False
+    else:
+        print("commited " + db_user.username)
+        db.refresh(db_user)
+    return True
 
 
 def get_user_by_username(db: Session, username: str):

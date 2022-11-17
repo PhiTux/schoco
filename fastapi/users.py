@@ -27,6 +27,27 @@ def register_user(teacherkey: str = Form(), username: str = Form(), full_name: s
     return db_user
 
 
+@users.post('/registerPupils', dependencies=[Depends(auth.check_teacher)])
+def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depends(database.get_db)):
+    username_errors = []
+    accounts_created = 0
+    accounts_received = 0
+    for i in newPupils.newPupils:
+        if i.username == "" or i.password == "":
+            continue
+        accounts_received += 1
+        pupil = models_and_schemas.UserSchema(
+            username=i.username, full_name=i.fullname, role="pupil", password=i.password)
+
+        success = crud.create_user(db=db, user=pupil)
+        if success:
+            accounts_created += 1
+        else:
+            username_errors.append(i.username)
+
+    return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received}
+
+
 @users.post('/login')
 def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     db_user = crud.get_user_by_username(db=db, username=form_data.username)

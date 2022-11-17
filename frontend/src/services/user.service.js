@@ -30,6 +30,10 @@ class UserService {
         return axios.post(API_URL + 'registerTeacher', bodyFormData)
     }
 
+    registerPupils(newPupils) {
+        return axiosAuth.post('registerPupils', {'newPupils': newPupils})
+    }
+
     getAllUsers() {
         return axiosAuth.get('getAllUsers')
     }
