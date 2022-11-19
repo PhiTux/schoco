@@ -2,6 +2,7 @@
 import { reactive, onMounted, computed, ref, watch } from "vue";
 import UserService from "../services/user.service";
 import { Modal, Toast } from "bootstrap";
+import { useAuthStore } from "../stores/auth.store";
 
 let allUsers = ref([]);
 
@@ -15,6 +16,10 @@ let state = reactive({
   addNewPupilsLoading: false,
   username_errors: [],
   xAccountsCreated: 0,
+  searchName: "",
+  changePasswordFullname: "",
+  changePasswordUsername: "",
+  newPassword: "",
 });
 
 function preparePupilModal() {
@@ -52,21 +57,21 @@ function createPupilAccounts() {
     });
   }
 
-  //remove all pupils that don't have a username (password was already checked above)
+  //remove all pupils that don't have a fullname or username (password was already checked above)
   for (let i = newPupils.length - 1; i >= 0; i--) {
-    if (newPupils[i].username == "") {
+    if (newPupils[i].fullname == "" || newPupils[i].username == "") {
       newPupils.splice(i, 1);
     }
   }
 
   UserService.registerPupils(newPupils).then(
     (response) => {
+      getAllUsers();
+
       // close modal
       var elem = document.getElementById("addPupilsModal");
       var modal = Modal.getInstance(elem);
       modal.hide();
-
-      console.log(response.data);
 
       if (response.data.accounts_created == response.data.accounts_received) {
         const toast = new Toast(
@@ -92,19 +97,26 @@ function createPupilAccounts() {
       state.addNewPupilsLoading = false;
     },
     (error) => {
-      state.addNewPupilsLoading = false;
+      if (error.response.status == 403) {
+        const user = useAuthStore();
+        user.logout();
+      } else console.log(error);
     }
   );
 }
 
-watch(newPupils, () => {
-  if (!newPupils.length) return;
-  if (newPupils[newPupils.length - 1].username != "") {
-    addPupilToList();
-  }
-});
+function openModalChangePassword(id) {
+  allUsers.value.every((u) => {
+    if (u.id == id) {
+      state.changePasswordFullname = u.full_name;
+      state.changePasswordUsername = u.username;
+      return false;
+    }
+    return true;
+  });
+}
 
-onMounted(() => {
+function getAllUsers() {
   UserService.getAllUsers().then(
     (response) => {
       // remove unnecessary attribute 'hashed_password'
@@ -113,16 +125,40 @@ onMounted(() => {
       );
     },
     (error) => {
-      console.log(error);
+      if (error.response.status == 403) {
+        const user = useAuthStore();
+        user.logout();
+      } else console.log(error);
     }
   );
+}
+
+watch(newPupils, () => {
+  if (!newPupils.length) return;
+  if (
+    newPupils[newPupils.length - 1].fullname != "" &&
+    newPupils[newPupils.length - 1].username != ""
+  ) {
+    addPupilToList();
+  }
+});
+
+onMounted(() => {
+  getAllUsers();
 });
 
 let allUsersFiltered = computed(() => {
   if (allUsers.value.length == 0) {
     return [];
   }
-  return allUsers.value.filter((user) => true); // user.username === "teacher");
+  return allUsers.value.filter((user) => {
+    if (state.searchName == "") return true;
+    else
+      return (
+        user.username.toLowerCase().includes(state.searchName.toLowerCase()) ||
+        user.full_name.toLowerCase().includes(state.searchName.toLowerCase())
+      );
+  });
 });
 
 let allUsersFilteredSorted = computed(() => {
@@ -134,61 +170,84 @@ let allUsersFilteredSorted = computed(() => {
 </script>
 
 <template>
-  <div aria-live="polite" aria-atomic="true" class="position-relative">
-    <div class="toast-container bottom-0 end-0 p-3">
-      <div
-        class="toast align-items-center text-bg-success border-0"
-        id="toastAllAccountsCreated"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="d-flex">
-          <div class="toast-body">Es wurden <b>alle</b> Accounts erstellt.</div>
-        </div>
+  <div class="toast-container position-absolute bottom-0 end-0 p-3">
+    <div
+      class="toast align-items-center text-bg-success border-0"
+      id="toastAllAccountsCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">Es wurden <b>alle</b> Accounts erstellt.</div>
       </div>
-      <!-- </div> -->
+    </div>
 
-      <!-- <div class="toast-container bottom-0 end-0 p-3"> -->
-      <div
-        class="toast align-items-center text-bg-success border-0"
-        id="toastXAccountsCreated"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="d-flex">
-          <div class="toast-body">
-            Es wurden <b>{{ state.xAccountsCreated }}</b> Accounts erstellt.
-          </div>
-        </div>
-      </div>
-      <!-- </div> -->
-
-      <!-- <div class="toast-container bottom-0 end-0 p-3"> -->
-      <div
-        class="toast text-bg-danger"
-        id="toastErrorAccountsCreated"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        data-bs-autohide="false"
-      >
+    <div
+      class="toast align-items-center text-bg-success border-0"
+      id="toastXAccountsCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
         <div class="toast-body">
-          Folgende Accounts konnten nicht erstellt werden. Vielleicht existieren
-          sie bereits?<br />
-          <ul>
-            <li v-for="u in state.username_errors">{{ u }}</li>
-          </ul>
-          <div class="mt-2 pt-2 border-top">
-            <button
-              type="button"
-              class="btn btn-secondary btn-sm"
-              data-bs-dismiss="toast"
-            >
-              Schließen
-            </button>
-          </div>
+          Es wurden <b>{{ state.xAccountsCreated }}</b> Accounts erstellt.
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="toast text-bg-danger"
+      id="toastErrorAccountsCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      data-bs-autohide="false"
+    >
+      <div class="toast-body">
+        Folgende Accounts konnten nicht erstellt werden. Vielleicht existieren
+        sie bereits?<br />
+        <ul>
+          <li v-for="u in state.username_errors">{{ u }}</li>
+        </ul>
+        <div class="mt-2 pt-2 border-top">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            data-bs-dismiss="toast"
+          >
+            Schließen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="changePasswordModal"
+    tabindex="-1"
+    aria-labelledby="changePasswordModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content dark-text">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Passwort ändern</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body text-center">
+          <h4>
+            {{ state.changePasswordFullname }} ({{
+              state.changePasswordUsername
+            }})
+          </h4>
         </div>
       </div>
     </div>
@@ -217,21 +276,23 @@ let allUsersFilteredSorted = computed(() => {
         </div>
         <div class="modal-body">
           <div class="container">
-            <div class="row justify-content-start mb-5">
-              <div class="col-4 form-check form-switch">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id="useUnifiedPassword"
-                  v-model="state.useUnifiedPassword"
-                  checked
-                />
-                <label class="form-check-label" for="useUnifiedPassword"
-                  >Dasselbe Passwort für alle Accounts</label
-                >
+            <div class="row mt-2">
+              <label class="col-4 col-form-label" for="useUnifiedPassword"
+                >Dasselbe Passwort für alle Accounts</label
+              >
+              <div class="col-1">
+                <div class="form-switch form-check pt-2 mb-5">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="useUnifiedPassword"
+                    v-model="state.useUnifiedPassword"
+                    checked
+                  />
+                </div>
               </div>
-              <div class="col-4">
+              <div class="col-5">
                 <div class="form-floating" v-if="state.useUnifiedPassword">
                   <input
                     v-model="state.unifiedPassword"
@@ -245,6 +306,8 @@ let allUsersFilteredSorted = computed(() => {
                   >
                 </div>
               </div>
+
+              <div class="col-4"></div>
             </div>
           </div>
 
@@ -256,17 +319,28 @@ let allUsersFilteredSorted = computed(() => {
             <div class="form-group col-md-1 text-center">
               <label></label>
               <div>
-                <span v-if="pupil.username != ''">{{ index + 1 }}</span
+                <span v-if="pupil.fullname != '' || pupil.username != ''">{{
+                  index + 1
+                }}</span
                 >&nbsp;
-                <span
+                <font-awesome-layers
                   v-if="
+                    pupil.fullname != '' &&
                     pupil.username != '' &&
                     ((!state.useUnifiedPassword && pupil.password != '') ||
                       (state.useUnifiedPassword && state.unifiedPassword != ''))
                   "
-                  class="text-success"
-                  ><font-awesome-icon icon="fa-solid fa-check"
-                /></span>
+                >
+                  <font-awesome-icon
+                    icon="fa-circle"
+                    style="color: var(--bs-success)"
+                  />
+                  <font-awesome-icon
+                    icon="fa-check"
+                    transform="shrink-5"
+                    style="color: white"
+                  />
+                </font-awesome-layers>
               </div>
             </div>
             <div class="col">
@@ -290,7 +364,7 @@ let allUsersFilteredSorted = computed(() => {
                   placeholder="Benutzername"
                   :id="'username_' + index"
                 />
-                <label :for="'username_' + index">Benutzername*</label>
+                <label :for="'username_' + index">Benutzername</label>
               </div>
             </div>
             <div class="col">
@@ -333,6 +407,22 @@ let allUsersFilteredSorted = computed(() => {
             ></button>
           </div>
         </div>
+        <div class="alert alert-info text-center" role="alert">
+          Nur Zeilen mit grünem Haken
+          <span
+            ><font-awesome-layers>
+              <font-awesome-icon
+                icon="fa-circle"
+                style="color: var(--bs-success)"
+              />
+              <font-awesome-icon
+                icon="fa-check"
+                transform="shrink-5"
+                style="color: white"
+              /> </font-awesome-layers
+          ></span>
+          werden berücksichtigt!
+        </div>
 
         <div class="modal-footer">
           <button
@@ -354,7 +444,7 @@ let allUsersFilteredSorted = computed(() => {
               aria-hidden="true"
               v-if="state.addNewPupilsLoading"
             ></span>
-            Save changes
+            Accounts erstellen
           </button>
         </div>
       </div>
@@ -362,7 +452,7 @@ let allUsersFilteredSorted = computed(() => {
   </div>
 
   <h1 class="text-center">Benutzerverwaltung</h1>
-  <div class="btn-group non-flex" role="group">
+  <div class="btn-group non-flex text-center m-4" role="group">
     <button
       type="button"
       class="btn btn-success"
@@ -377,21 +467,64 @@ let allUsersFilteredSorted = computed(() => {
   </div>
 
   <div class="container">
-    <table class="table table-striped">
+    <div class="row">
+      <div class="col-3">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">
+            <font-awesome-icon icon="fa-solid fa-user"
+          /></span>
+          <div class="form-floating">
+            <input
+              type="text"
+              id="floatingInputLogin"
+              class="form-control"
+              v-model="state.searchName"
+              placeholder="Personensuche"
+            />
+            <label class="input-label" for="floatingInputLogin"
+              >Personensuche</label
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="table table-dark table-striped table-hover align-middle">
       <thead>
         <tr>
           <th scope="col">#id</th>
           <th scope="col">Name</th>
           <th scope="col">Username</th>
           <th scope="col">Rolle</th>
+          <th scope="col">Einstellungen</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="x in allUsersFilteredSorted">
+        <tr class="py-1" v-for="x in allUsersFilteredSorted">
           <th scope="row">{{ x.id }}</th>
           <td>{{ x.full_name }}</td>
           <td>{{ x.username }}</td>
           <td>{{ x.role }}</td>
+          <td>
+            <a
+              class="btn-round btn"
+              data-bs-toggle="modal"
+              data-bs-target="#changePasswordModal"
+              @click.prevent="openModalChangePassword(x.id)"
+            >
+              <font-awesome-layers class="fa-lg">
+                <font-awesome-icon
+                  icon="fa-circle"
+                  style="color: var(--bs-danger)"
+                />
+                <font-awesome-icon
+                  icon="fa-key"
+                  transform="shrink-6"
+                  style="color: white"
+                />
+              </font-awesome-layers>
+            </a>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -399,6 +532,15 @@ let allUsersFilteredSorted = computed(() => {
 </template>
 
 <style scoped>
+.input-label {
+  color: var(--bs-dark);
+}
+
+.btn-round {
+  padding: 0;
+  border: 0px;
+}
+
 .non-flex {
   display: block;
 }

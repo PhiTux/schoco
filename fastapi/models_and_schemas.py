@@ -15,7 +15,7 @@ class Roles(str, Enum):
 
 class BaseUser(SQLModel):
     username: str = Field(unique=True)
-    full_name: Optional[str] = ""
+    full_name: str
     role: Roles
 
 
@@ -31,7 +31,7 @@ class UserSchema(BaseUser):
 # other models
 
 class newPupil(BaseModel):
-    fullname: Optional[str] = ""
+    fullname: str
     username: str
     password: str
 

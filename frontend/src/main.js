@@ -5,14 +5,14 @@ import App from './App.vue'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
+import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck)
+library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle)
 
 const pinia = createPinia()
 pinia.use(({store}) => {
     store.$router = markRaw(router)
 })
 
-createApp(App).use(pinia).use(router).component('font-awesome-icon', FontAwesomeIcon).mount('#app')
+createApp(App).use(pinia).use(router).component('font-awesome-icon', FontAwesomeIcon).component('font-awesome-layers', FontAwesomeLayers).mount('#app')

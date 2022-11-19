@@ -33,7 +33,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     accounts_created = 0
     accounts_received = 0
     for i in newPupils.newPupils:
-        if i.username == "" or i.password == "":
+        if i.fullname == "" or i.username == "" or i.password == "":
             continue
         accounts_received += 1
         pupil = models_and_schemas.UserSchema(

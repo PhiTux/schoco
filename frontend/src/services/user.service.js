@@ -34,6 +34,10 @@ class UserService {
         return axiosAuth.post('registerPupils', {'newPupils': newPupils})
     }
 
+    changePassword(username) {
+        return axiosAuth.post('changePassword', {'username': username})
+    }
+
     getAllUsers() {
         return axiosAuth.get('getAllUsers')
     }
