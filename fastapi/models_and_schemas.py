@@ -38,3 +38,8 @@ class newPupil(BaseModel):
 
 class pupilsList(BaseModel):
     newPupils: List[newPupil]
+
+
+class setPassword(BaseModel):
+    username: str
+    password: str

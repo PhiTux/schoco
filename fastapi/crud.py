@@ -17,11 +17,7 @@ def create_user(db: Session, user: models_and_schemas.UserSchema):
         db.commit()
     except:
         db.rollback()
-        print("rolled back")
         return False
-    else:
-        print("commited " + db_user.username)
-        db.refresh(db_user)
     return True
 
 
@@ -29,6 +25,17 @@ def get_user_by_username(db: Session, username: str):
     user = db.query(models_and_schemas.User).filter(
         models_and_schemas.User.username == username).first()
     return user
+
+
+def changePasswordByUsername(username: str, password: str, db: Session):
+    try:
+        db.query(models_and_schemas.User).filter(models_and_schemas.User.username ==
+                                                 username).update({'hashed_password': auth.create_password_hash(password)})
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
 
 
 def get_all_users(db: Session):

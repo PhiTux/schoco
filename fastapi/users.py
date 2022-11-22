@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Body, Request
 import auth
 import database
 import models_and_schemas
@@ -46,6 +46,14 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
             username_errors.append(i.username)
 
     return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received}
+
+
+@users.post('/setNewPassword', dependencies=[Depends(auth.check_teacher)])
+async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Session = Depends(database.get_db)):
+    if not crud.changePasswordByUsername(setPassword.username, setPassword.password, db):
+        raise HTTPException(
+            status_code=500, detail="Password change not successful")
+    return {'success': True}
 
 
 @users.post('/login')

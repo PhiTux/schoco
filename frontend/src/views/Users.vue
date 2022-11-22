@@ -20,6 +20,8 @@ let state = reactive({
   changePasswordFullname: "",
   changePasswordUsername: "",
   newPassword: "",
+  showNewPassword: false,
+  changePasswordLoading: false,
 });
 
 function preparePupilModal() {
@@ -106,6 +108,10 @@ function createPupilAccounts() {
 }
 
 function openModalChangePassword(id) {
+  state.newPassword = "";
+  state.showNewPassword = false;
+  state.changePasswordLoading = false;
+
   allUsers.value.every((u) => {
     if (u.id == id) {
       state.changePasswordFullname = u.full_name;
@@ -114,6 +120,43 @@ function openModalChangePassword(id) {
     }
     return true;
   });
+}
+
+function changePassword() {
+  if (state.newPassword === "") return;
+
+  state.changePasswordLoading = true;
+
+  UserService.setNewPassword(
+    state.changePasswordUsername,
+    state.newPassword
+  ).then(
+    (response) => {
+      state.changePasswordLoading = false;
+
+      var elem = document.getElementById("changePasswordModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        const toast = new Toast(
+          document.getElementById("toastSuccessPasswordChanged")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastPasswordChangeError")
+        );
+        toast.show();
+      }
+    },
+    (error) => {
+      const toast = new Toast(
+        document.getElementById("toastPasswordChangeError")
+      );
+      toast.show();
+    }
+  );
 }
 
 function getAllUsers() {
@@ -167,10 +210,42 @@ let allUsersFilteredSorted = computed(() => {
   }
   return allUsersFiltered.value;
 });
+
+function showNewPassword() {
+  state.showNewPassword = true;
+}
+
+function hideNewPassword() {
+  state.showNewPassword = false;
+}
 </script>
 
 <template>
   <div class="toast-container position-absolute bottom-0 end-0 p-3">
+    <div
+      class="toast align-items-center text-bg-success border-0"
+      id="toastSuccessPasswordChanged"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">Passwort wurde geändert.</div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-danger border-0"
+      id="toastPasswordChangeError"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">Fehler beim Ändern des Passworts.</div>
+      </div>
+    </div>
+
     <div
       class="toast align-items-center text-bg-success border-0"
       id="toastAllAccountsCreated"
@@ -248,6 +323,58 @@ let allUsersFilteredSorted = computed(() => {
               state.changePasswordUsername
             }})
           </h4>
+
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1"
+              ><font-awesome-icon icon="fa-solid fa-key"
+            /></span>
+            <div class="form-floating">
+              <input
+                :type="[state.showNewPassword ? 'text' : 'password']"
+                id="floatingNewPassword"
+                class="form-control"
+                v-model="state.newPassword"
+                placeholder="Neues Password"
+              />
+              <label for="floatingNewPassword">Neues Password</label>
+            </div>
+            <span class="input-group-text" id="basic-addon1">
+              <a
+                class="greyButton"
+                @mousedown="showNewPassword()"
+                @mouseup="hideNewPassword()"
+                @mouseleave="hideNewPassword()"
+                ><font-awesome-icon
+                  v-if="!state.showNewPassword"
+                  icon="fa-solid fa-eye-slash" /><font-awesome-icon
+                  v-else
+                  icon="fa-solid fa-eye" /></a
+            ></span>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Schließen
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click.prevent="changePassword()"
+              :disabled="state.changePasswordLoading"
+            >
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+                v-if="state.changePasswordLoading"
+              ></span>
+              Neues Passwort speichern
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -470,18 +597,18 @@ let allUsersFilteredSorted = computed(() => {
     <div class="row">
       <div class="col-3">
         <div class="input-group mb-3">
-          <span class="input-group-text" id="basic-addon1">
+          <span class="round-left input-group-text" id="basic-addon1">
             <font-awesome-icon icon="fa-solid fa-user"
           /></span>
           <div class="form-floating">
             <input
               type="text"
-              id="floatingInputLogin"
-              class="form-control"
+              id="floatingInputSearchPerson"
+              class="form-control round-right"
               v-model="state.searchName"
               placeholder="Personensuche"
             />
-            <label class="input-label" for="floatingInputLogin"
+            <label class="input-label" for="floatingInputSearchPerson"
               >Personensuche</label
             >
           </div>
@@ -532,6 +659,16 @@ let allUsersFilteredSorted = computed(() => {
 </template>
 
 <style scoped>
+.round-left {
+  border-top-left-radius: var(--bs-border-radius-pill);
+  border-bottom-left-radius: var(--bs-border-radius-pill);
+}
+
+.round-right {
+  border-top-right-radius: var(--bs-border-radius-pill);
+  border-bottom-right-radius: var(--bs-border-radius-pill);
+}
+
 .input-label {
   color: var(--bs-dark);
 }
