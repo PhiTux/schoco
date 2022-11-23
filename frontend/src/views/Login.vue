@@ -37,7 +37,11 @@ async function login() {
 }
 
 async function registerTeacher() {
-  if (!this.registerValid || !this.registerPasswordsEqual) {
+  if (
+    !this.registerValid ||
+    !this.registerPasswordsEqual ||
+    this.registerPasswordTooShort
+  ) {
     state.registerIncomplete = true;
     return;
   }
@@ -85,6 +89,7 @@ function hideRegisterPassword2() {
 let registerValid = computed(() => {
   let tmp =
     state.registerTeacherKey != "" &&
+    state.registerName != "" &&
     state.registerUsername != "" &&
     state.registerPassword1 != "" &&
     state.registerPassword2 != "";
@@ -100,6 +105,12 @@ let loginValid = computed(() => {
 
 let registerPasswordsEqual = computed(() => {
   return state.registerPassword1 === state.registerPassword2;
+});
+
+let registerPasswordTooShort = computed(() => {
+  return (
+    state.registerPassword1.length > 0 && state.registerPassword1.length < 8
+  );
 });
 </script>
 
@@ -362,6 +373,13 @@ let registerPasswordsEqual = computed(() => {
                     Passwörter nicht identisch
                   </div>
                   <div
+                    v-if="registerPasswordTooShort"
+                    class="alert alert-danger"
+                    role="alert"
+                  >
+                    Passwort muss mindestens 8 Zeichen enthalten!
+                  </div>
+                  <div
                     v-if="state.showRegistrationSuccess"
                     class="alert alert-success"
                     role="alert"
@@ -379,9 +397,11 @@ let registerPasswordsEqual = computed(() => {
 
                   <button
                     class="btn btn-primary"
-                    :class="{ disabled: !registerValid }"
+                    :class="{
+                      disabled: !registerValid || registerPasswordTooShort,
+                    }"
                   >
-                    Login
+                    Registrieren
                   </button>
                 </form>
               </div>

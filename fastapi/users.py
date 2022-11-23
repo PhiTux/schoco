@@ -21,6 +21,8 @@ def get_teacherkey():
 def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database.get_db)):
     if teacherkey != get_teacherkey():
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
+    if len(password) < 8:
+        raise HTTPException(status_code=400, detail="Password too short")
     user = models_and_schemas.UserSchema(
         username=username, full_name=full_name, role="teacher", password=password)
     db_user = crud.create_user(db=db, user=user)
@@ -33,8 +35,12 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     accounts_created = 0
     accounts_received = 0
     for i in newPupils.newPupils:
-        if i.fullname == "" or i.username == "" or i.password == "":
+        if i.fullname == "" and i.username == "" and i.password == "":
             continue
+        elif i.fullname == "" or i.username == "" or len(i.password) < 8:
+            print(i)
+            accounts_received += 1
+            username_errors.append(i.fullname + " (" + i.username + ")")
         accounts_received += 1
         pupil = models_and_schemas.UserSchema(
             username=i.username, full_name=i.fullname, role="pupil", password=i.password)
@@ -43,7 +49,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
         if success:
             accounts_created += 1
         else:
-            username_errors.append(i.username)
+            username_errors.append(i.fullname + " (" + i.username + ")")
 
     return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received}
 

@@ -22,6 +22,7 @@ let state = reactive({
   newPassword: "",
   showNewPassword: false,
   changePasswordLoading: false,
+  showPasswordTooShort: false,
 });
 
 function preparePupilModal() {
@@ -29,6 +30,7 @@ function preparePupilModal() {
   addPupilToList();
   state.showUnifiedPasswordMissing = false;
   state.showUniquePasswordMissing = false;
+  state.showPasswordTooShort = false;
 }
 
 function addPupilToList() {
@@ -36,18 +38,27 @@ function addPupilToList() {
 }
 
 function createPupilAccounts() {
-  if (state.useUnifiedPassword && state.unifiedPassword == "") {
-    state.showUnifiedPasswordMissing = true;
-    return;
+  if (state.useUnifiedPassword) {
+    if (state.unifiedPassword == "") {
+      state.showUnifiedPasswordMissing = true;
+      return;
+    } else if (state.unifiedPassword.length < 8) {
+      state.showPasswordTooShort = true;
+      return;
+    }
   }
   if (!state.useUnifiedPassword) {
-    newPupils.forEach((p) => {
-      console.log(p);
-      if (p.username != "" && p.password == "") {
-        state.showUniquePasswordMissing = true;
-        return;
+    for (const p of newPupils) {
+      if (p.username != "") {
+        if (p.password == "") {
+          state.showUniquePasswordMissing = true;
+          return;
+        } else if (p.password.length < 8) {
+          state.showPasswordTooShort = true;
+          return;
+        }
       }
-    });
+    }
   }
 
   state.addNewPupilsLoading = true;
@@ -111,6 +122,7 @@ function openModalChangePassword(id) {
   state.newPassword = "";
   state.showNewPassword = false;
   state.changePasswordLoading = false;
+  state.showPasswordTooShort = false;
 
   allUsers.value.every((u) => {
     if (u.id == id) {
@@ -123,7 +135,11 @@ function openModalChangePassword(id) {
 }
 
 function changePassword() {
-  if (state.newPassword === "") return;
+  if (state.newPassword.length < 8) {
+    state.showPasswordTooShort = true;
+    return;
+  }
+  state.showPasswordTooShort = false;
 
   state.changePasswordLoading = true;
 
@@ -335,6 +351,7 @@ function hideNewPassword() {
                 class="form-control"
                 v-model="state.newPassword"
                 placeholder="Neues Password"
+                @keyup.enter="changePassword()"
               />
               <label for="floatingNewPassword">Neues Password</label>
             </div>
@@ -352,6 +369,20 @@ function hideNewPassword() {
             ></span>
           </div>
 
+          <div
+            v-if="state.showPasswordTooShort"
+            class="alert alert-danger alert-dismissible"
+            role="alert"
+          >
+            Passwort muss mindestens 8 Zeichen lang sein!
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Close"
+              @click.prevent="state.showPasswordTooShort = false"
+            ></button>
+          </div>
+
           <div class="modal-footer">
             <button
               type="button"
@@ -364,7 +395,9 @@ function hideNewPassword() {
               type="button"
               class="btn btn-primary"
               @click.prevent="changePassword()"
-              :disabled="state.changePasswordLoading"
+              :disabled="
+                state.changePasswordLoading || state.newPassword.length < 8
+              "
             >
               <span
                 class="spinner-border spinner-border-sm"
@@ -454,8 +487,10 @@ function hideNewPassword() {
                   v-if="
                     pupil.fullname != '' &&
                     pupil.username != '' &&
-                    ((!state.useUnifiedPassword && pupil.password != '') ||
-                      (state.useUnifiedPassword && state.unifiedPassword != ''))
+                    ((!state.useUnifiedPassword &&
+                      pupil.password.length >= 8) ||
+                      (state.useUnifiedPassword &&
+                        state.unifiedPassword.length >= 8))
                   "
                 >
                   <font-awesome-icon
@@ -531,6 +566,19 @@ function hideNewPassword() {
               class="btn-close"
               aria-label="Close"
               @click.prevent="state.showUniquePasswordMissing = false"
+            ></button>
+          </div>
+          <div
+            v-if="state.showPasswordTooShort"
+            class="alert alert-danger alert-dismissible"
+            role="alert"
+          >
+            Passwort muss mindestens 8 Zeichen lang sein!
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Close"
+              @click.prevent="state.showPasswordTooShort = false"
             ></button>
           </div>
         </div>
