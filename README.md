@@ -38,4 +38,4 @@ On every start: `npm run dev`
 
 Initial Installation (Python 3 and pip required): `pip install -r requirements.txt`
 
-On every start: `python -m uvicorn main:schoco --reload`
+On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey && python -m uvicorn main:schoco --reload`

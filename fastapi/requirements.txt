@@ -6,3 +6,4 @@ python_jose==3.3.0
 sqlmodel==0.0.8
 uvicorn
 python-multipart
+bcrypt==4.0.1
