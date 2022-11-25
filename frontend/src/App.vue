@@ -9,11 +9,18 @@ import NavBar from "./components/NavBar.vue";
   </div>
 </template>
 
+<style>
+body {
+  background-color:  #383838 !important;
+}
+</style>
+
 <style scoped>
+
 .app {
-  /* width: 100vw; */
-  /* height: 100vh; */
-  background: #383838;
+  width: 100vw;
+  height: 100vh;
+  /*background: #383838;*/
   color: rgb(240, 240, 240);
 }
 </style>
