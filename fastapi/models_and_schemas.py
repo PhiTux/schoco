@@ -28,6 +28,13 @@ class UserSchema(BaseUser):
     password: str
 
 
+class Course(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(unique=True)
+    color: str
+    fontDark: bool
+
+
 # other models
 
 class newPupil(BaseModel):

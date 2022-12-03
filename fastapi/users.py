@@ -62,6 +62,12 @@ async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Sessio
     return {'success': True}
 
 
+@users.post('/addNewCourse', dependencies=[Depends(auth.check_teacher)])
+async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depends(database.get_db)):
+    print(newCourse)
+    return {'success': True}
+
+
 @users.post('/login')
 def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     db_user = crud.get_user_by_username(db=db, username=form_data.username)

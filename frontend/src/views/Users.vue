@@ -25,6 +25,7 @@ let state = reactive({
   showPasswordTooShort: false,
   newCourseColor: "#ff8000",
   newCourseName: "",
+  newCourseFontDark: false,
 });
 
 function preparePupilModal() {
@@ -174,6 +175,19 @@ function changePassword() {
       );
       toast.show();
     }
+  );
+}
+
+function addNewCourse() {
+  if (state.newCourseColor == "" || state.newCourseName == "") return;
+
+  UserService.addNewCourse(
+    state.newCourseName,
+    state.newCourseColor,
+    state.newCourseFontDark
+  ).then(
+    (response) => {},
+    (error) => {}
   );
 }
 
@@ -337,10 +351,10 @@ function hideNewPassword() {
         </div>
         <div class="modal-body">
           <div class="mb-3 row">
-            <label for="coursename" class="col-sm-2 col-form-label"
+            <label for="coursename" class="col-sm-4 col-form-label"
               >Kursname</label
             >
-            <div class="col-sm-10">
+            <div class="col-sm-8">
               <input
                 type="text"
                 class="form-control"
@@ -351,26 +365,65 @@ function hideNewPassword() {
             </div>
           </div>
           <div class="mb-3 row">
-            <label for="coursecolor" class="col-sm-2 col-form-label"
-              >Farbe</label
+            <label for="coursebackgroundcolor" class="col-sm-4 col-form-label"
+              >Hintergrundfarbe</label
             >
-            <div class="col-sm-10">
+            <div class="col-sm-8">
               <input
                 type="color"
                 class="form-control form-control-color"
-                id="coursecolor"
+                id="coursebackgroundcolor"
                 v-model="state.newCourseColor"
                 title="Farbe wählen"
               />
             </div>
           </div>
+          <div class="mb-3 row">
+            <label for="coursefontcolor" class="col-sm-4 col-form-label">
+              Schriftfarbe
+            </label>
+            <div class="col-sm-8" style="margin-top: auto; margin-bottom: auto">
+              <div class="d-flex">
+                <label class="form-check-label" for="flexSwitchCheckDefault"
+                  >hell</label
+                >
+                <div
+                  class="form-check form-switch"
+                  style="padding-left: inherit; padding: 0 5px 0 5px"
+                >
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    style="margin-left: inherit"
+                    id="flexSwitchCheckDefault"
+                    v-model="state.newCourseFontDark"
+                  />
+                </div>
+                <label class="form-check-label" for="flexSwitchCheckDefault">
+                  dunkel</label
+                >
+              </div>
+            </div>
+          </div>
 
-          <div class="mb-3 row text-center">
-            <label for="coursepreview" class="col-sm-2 col-form-label"
+          <hr />
+
+          <div class="mb-3 row">
+            <label for="coursepreview" class="col-sm-4 col-form-label"
               ><b>Vorschau</b></label
             >
-            <div class="col-sm-2">
-              <span class="badge rounded-pill text-bg-primary">Primary</span>
+            <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
+              <span
+                class="badge rounded-pill"
+                :style="{
+                  'background-color': state.newCourseColor,
+                  color: state.newCourseFontDark
+                    ? 'var(--bs-dark)'
+                    : 'var(--bs-light)',
+                }"
+                >{{ state.newCourseName }}</span
+              >
             </div>
           </div>
 
