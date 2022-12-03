@@ -12,7 +12,7 @@ async function logout() {
 </script>
 
 <template>
-  <nav class="navbar sticky-top navbar-dark navbar-expand-lg bg-dark">
+  <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="/#/home">{🍫}</a>
       <button
@@ -39,7 +39,7 @@ async function logout() {
             class="btn btn-outline-secondary"
             href="/#/users"
           >
-            Benutzerverwaltung
+            <font-awesome-icon icon="fa-solid fa-users" /> Benutzerverwaltung
           </a>
         </ul>
         <button

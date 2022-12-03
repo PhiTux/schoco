@@ -23,6 +23,8 @@ let state = reactive({
   showNewPassword: false,
   changePasswordLoading: false,
   showPasswordTooShort: false,
+  newCourseColor: "#ff8000",
+  newCourseName: "",
 });
 
 function preparePupilModal() {
@@ -310,6 +312,91 @@ function hideNewPassword() {
           >
             Schließen
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="addCoursesModal"
+    tabindex="-1"
+    aria-labelledby="addCourseModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content dark-text">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Neuen Kurs erstellen</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3 row">
+            <label for="coursename" class="col-sm-2 col-form-label"
+              >Kursname</label
+            >
+            <div class="col-sm-10">
+              <input
+                type="text"
+                class="form-control"
+                id="coursename"
+                placeholder="Kursname"
+                v-model="state.newCourseName"
+              />
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="coursecolor" class="col-sm-2 col-form-label"
+              >Farbe</label
+            >
+            <div class="col-sm-10">
+              <input
+                type="color"
+                class="form-control form-control-color"
+                id="coursecolor"
+                v-model="state.newCourseColor"
+                title="Farbe wählen"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3 row text-center">
+            <label for="coursepreview" class="col-sm-2 col-form-label"
+              ><b>Vorschau</b></label
+            >
+            <div class="col-sm-2">
+              <span class="badge rounded-pill text-bg-primary">Primary</span>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Schließen
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click.prevent="addNewCourse()"
+              :disabled="state.newCourseName.length < 2"
+            >
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+                v-if="state.changePasswordLoading"
+              ></span>
+              Neuen Kurs erstellen
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -630,6 +717,15 @@ function hideNewPassword() {
   <div class="btn-group non-flex text-center m-4" role="group">
     <button
       type="button"
+      class="btn btn-primary"
+      data-bs-toggle="modal"
+      data-bs-target="#addCoursesModal"
+    >
+      Kurse erstellen
+      <font-awesome-icon icon="fa-solid fa-users" />
+    </button>
+    <button
+      type="button"
       class="btn btn-success"
       data-bs-toggle="modal"
       data-bs-target="#addPupilsModal"
@@ -638,10 +734,10 @@ function hideNewPassword() {
       <font-awesome-icon icon="fa-solid fa-user-plus" /> Schüler-Accounts
       erstellen
     </button>
-    <button type="button" class="btn btn-primary">Klassen verwalten</button>
   </div>
 
   <div class="container">
+    <div class="row">Kurse:</div>
     <div class="row">
       <div class="col-3">
         <div class="input-group mb-3">
@@ -692,11 +788,9 @@ function hideNewPassword() {
                   icon="fa-circle"
                   style="color: var(--bs-danger)"
                 />
-                <font-awesome-icon
-                  icon="fa-key"
-                  transform="shrink-6"
-                  style="color: white"
-                />
+                <div style="color: white">
+                  <font-awesome-icon icon="fa-key" transform="shrink-6" />
+                </div>
               </font-awesome-layers>
             </a>
           </td>

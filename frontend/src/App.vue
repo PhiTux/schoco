@@ -5,22 +5,27 @@ import NavBar from "./components/NavBar.vue";
 <template>
   <div class="app d-flex flex-column">
     <NavBar />
-    <router-view />
+    <div class="main">
+      <router-view />
+    </div>
   </div>
 </template>
 
 <style>
 body {
-  background-color:  #383838 !important;
+  background-color: #383838 !important;
 }
 </style>
 
 <style scoped>
-
 .app {
   width: 100vw;
   height: 100vh;
   /*background: #383838;*/
   color: rgb(240, 240, 240);
+}
+
+.main {
+  padding-top: 56px;
 }
 </style>
