@@ -64,7 +64,11 @@ async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Sessio
 
 @users.post('/addNewCourse', dependencies=[Depends(auth.check_teacher)])
 async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depends(database.get_db)):
-    print(newCourse)
+    success = crud.create_course(db=db, course=newCourse)
+    if not success:
+        raise HTTPException(
+            status_code=500, detail="Course creation not successful")
+
     return {'success': True}
 
 
@@ -83,6 +87,12 @@ def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordReque
 def get_users(db: Session = Depends(database.get_db)):
     db_user = crud.get_all_users(db=db)
     return db_user
+
+
+@users.get('/getAllCourses', dependencies=[Depends(auth.check_teacher)])
+def get_courses(db: Session = Depends(database.get_db)):
+    courses = crud.get_all_courses(db=db)
+    return courses
 
 
 @users.post('/loggedin', dependencies=[Depends(auth.oauth2_scheme)])

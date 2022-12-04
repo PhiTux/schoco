@@ -6,6 +6,8 @@ import { useAuthStore } from "../stores/auth.store";
 
 let allUsers = ref([]);
 
+let allCourses = ref([]);
+
 let newPupils = reactive([]);
 
 let state = reactive({
@@ -186,8 +188,56 @@ function addNewCourse() {
     state.newCourseColor,
     state.newCourseFontDark
   ).then(
-    (response) => {},
-    (error) => {}
+    (response) => {
+      if (response.data.success) {
+        const toast = new Toast(
+          document.getElementById("toastSuccessCourseCreated")
+        );
+        toast.show();
+
+        getAllCourses();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastErrorCourseCreated")
+        );
+        toast.show();
+        console.log(response.data);
+      }
+    },
+    (error) => {
+      const toast = new Toast(
+        document.getElementById("toastErrorCourseCreated")
+      );
+      toast.show();
+      console.log(error);
+    }
+  );
+}
+
+//sicherstellen, dass Lehrer keinen Kurs belegen
+function addCourseToPupil(username, coursename) {
+  for (let u of allUsers.value) {
+    if (u.username == username) {
+      if (u.role == "teacher") {
+        return;
+      }
+      break;
+    }
+  }
+}
+
+function getAllCourses() {
+  UserService.getAllCourses().then(
+    (response) => {
+      allCourses.value = response.data;
+      console.log(allCourses.value);
+    },
+    (error) => {
+      if (error.response.status == 403) {
+        const user = useAuthStore();
+        user.logout();
+      } else console.log(error);
+    }
   );
 }
 
@@ -220,6 +270,7 @@ watch(newPupils, () => {
 
 onMounted(() => {
   getAllUsers();
+  getAllCourses();
 });
 
 let allUsersFiltered = computed(() => {
@@ -275,6 +326,33 @@ function hideNewPassword() {
     >
       <div class="d-flex">
         <div class="toast-body">Fehler beim Ändern des Passworts.</div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-success border-0"
+      id="toastSuccessCourseCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">Kurs wurde erstellt.</div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-danger border-0"
+      id="toastErrorCourseCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Fehler beim Erstellen des Kurses. Vielleicht existiert der Kursname
+          bereits?
+        </div>
       </div>
     </div>
 
@@ -790,7 +868,20 @@ function hideNewPassword() {
   </div>
 
   <div class="container">
-    <div class="row">Kurse:</div>
+    <div class="row mb-4 ms-1">
+      Kurse:
+      <div class="col">
+        <span
+          v-for="c in allCourses"
+          class="badge rounded-pill mx-1"
+          :style="{
+            'background-color': c.color,
+            color: c.fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
+          }"
+          >{{ c.name }}</span
+        >
+      </div>
+    </div>
     <div class="row">
       <div class="col-3">
         <div class="input-group mb-3">
@@ -819,6 +910,7 @@ function hideNewPassword() {
           <th scope="col">#id</th>
           <th scope="col">Name</th>
           <th scope="col">Username</th>
+          <th scope="col">Kurse</th>
           <th scope="col">Rolle</th>
           <th scope="col">Einstellungen</th>
         </tr>
@@ -828,6 +920,41 @@ function hideNewPassword() {
           <th scope="row">{{ x.id }}</th>
           <td>{{ x.full_name }}</td>
           <td>{{ x.username }}</td>
+          <td>
+            {{ x.courses }}
+            <div class="btn-group">
+              <a class="btn-round btn" data-bs-toggle="dropdown">
+                <font-awesome-layers class="fa-lg">
+                  <font-awesome-icon
+                    icon="fa-circle"
+                    style="color: var(--bs-secondary)"
+                  />
+                  <div style="color: var(--bs-light)">
+                    <font-awesome-icon icon="fa-plus" transform="shrink-6" />
+                  </div>
+                </font-awesome-layers>
+              </a>
+              <ul class="dropdown-menu">
+                <li v-for="c in allCourses">
+                  <a
+                    class="dropdown-item btn"
+                    @click.prevent="addCourseToPupil(x.username, c.name)"
+                  >
+                    <span
+                      class="badge rounded-pill mx-1"
+                      :style="{
+                        'background-color': c.color,
+                        color: c.fontDark
+                          ? 'var(--bs-dark)'
+                          : 'var(--bs-light)',
+                      }"
+                      >{{ c.name }}</span
+                    ></a
+                  >
+                </li>
+              </ul>
+            </div>
+          </td>
           <td>{{ x.role }}</td>
           <td>
             <a

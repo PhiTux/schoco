@@ -42,6 +42,10 @@ class UserService {
         return axiosAuth.get('getAllUsers')
     }
 
+    getAllCourses() {
+        return axiosAuth.get('getAllCourses')
+    }
+
     addNewCourse(courseName, courseColor, courseFontDark) {
         return axiosAuth.post('addNewCourse', {'name': courseName, 'color': courseColor, 'fontDark': courseFontDark})
     }

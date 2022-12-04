@@ -21,6 +21,16 @@ def create_user(db: Session, user: models_and_schemas.UserSchema):
     return True
 
 
+def create_course(db: Session, course: models_and_schemas.Course):
+    try:
+        db.add(course)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
+
+
 def get_user_by_username(db: Session, username: str):
     user = db.query(models_and_schemas.User).filter(
         models_and_schemas.User.username == username).first()
@@ -41,3 +51,8 @@ def changePasswordByUsername(username: str, password: str, db: Session):
 def get_all_users(db: Session):
     users = db.query(models_and_schemas.User).all()
     return users
+
+
+def get_all_courses(db: Session):
+    courses = db.query(models_and_schemas.Course).all()
+    return courses
