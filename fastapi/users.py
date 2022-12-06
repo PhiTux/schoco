@@ -72,6 +72,34 @@ async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depen
     return {'success': True}
 
 
+@users.post('/addCourseToUser', dependencies=[Depends(auth.check_teacher)])
+def addCourseToUser(addUserCourseLink: models_and_schemas.AddUserCourseLink, db: Session = Depends(database.get_db)):
+    course = crud.get_course_by_coursename(
+        db=db, coursename=addUserCourseLink.coursename)
+    courseUserLink = models_and_schemas.UserCourseLink(
+        user_id=addUserCourseLink.user_id, course_id=course.id)
+    if not crud.create_UserCourseLink(db=db, link=courseUserLink):
+        raise HTTPException(
+            status_code=500, detail="Could not link Course to User")
+
+    return {'success': True}
+
+
+@users.post('/removeCourseFromUser', dependencies=[Depends(auth.check_teacher)])
+def removeCourseFromUser(userCourseLink: models_and_schemas.UserCourseLink, db: Session = Depends(database.get_db)):
+    #user = crud.get_user_by_id(db=db, id=userCourseLink.user_id)
+    #course = crud.get_course_by_id(db=db, id=userCourseLink.course_id)
+    link = crud.get_user_course_link(db=db, link=userCourseLink)
+    if not crud.remove_UserCourseLink(db=db, link=link):
+        raise HTTPException(
+            status_code=500, detail="Could not remove Course from User")
+
+    return {'success': True}
+    # course.users.remove(user)
+    # db.add(user)
+    # db.commit()
+
+
 @users.post('/login')
 def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     db_user = crud.get_user_by_username(db=db, username=form_data.username)
@@ -86,7 +114,10 @@ def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordReque
 @users.get('/getAllUsers', dependencies=[Depends(auth.check_teacher)])
 def get_users(db: Session = Depends(database.get_db)):
     db_user = crud.get_all_users(db=db)
-    return db_user
+    coursesList = []
+    for u in db_user:
+        coursesList.append({'user_id': u.id, 'courses': u.courses})
+    return {'users': db_user, 'coursesList': coursesList}
 
 
 @users.get('/getAllCourses', dependencies=[Depends(auth.check_teacher)])

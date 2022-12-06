@@ -49,6 +49,14 @@ class UserService {
     addNewCourse(courseName, courseColor, courseFontDark) {
         return axiosAuth.post('addNewCourse', {'name': courseName, 'color': courseColor, 'fontDark': courseFontDark})
     }
+
+    addCourseToUser(user_id, coursename) {
+        return axiosAuth.post('addCourseToUser', {'user_id': user_id, 'coursename': coursename})
+    }
+
+    removeCourseFromUser(user_id, course_id) {
+        return axiosAuth.post('removeCourseFromUser', {'user_id': user_id, 'course_id': course_id})
+    }
 }
 
 export default new UserService()

@@ -214,23 +214,44 @@ function addNewCourse() {
   );
 }
 
-//sicherstellen, dass Lehrer keinen Kurs belegen
-function addCourseToPupil(username, coursename) {
-  for (let u of allUsers.value) {
-    if (u.username == username) {
-      if (u.role == "teacher") {
-        return;
+function addCourseToUser(user_id, coursename) {
+  UserService.addCourseToUser(user_id, coursename).then(
+    (response) => {
+      if (response.data.success) {
+        getAllUsers();
+      } else {
+        console.log(response.data.message);
       }
-      break;
+    },
+    (error) => {
+      const toast = new Toast(
+        document.getElementById("toastErrorAddUserToCourse")
+      );
+      toast.show();
+      console.log(error);
     }
-  }
+  );
+}
+
+function removeCourseFromUser(user_id, course_id) {
+  UserService.removeCourseFromUser(user_id, course_id).then(
+    (response) => {
+      if (response.data.success) {
+        getAllUsers();
+      } else {
+        console.log(response.data.message);
+      }
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
 }
 
 function getAllCourses() {
   UserService.getAllCourses().then(
     (response) => {
       allCourses.value = response.data;
-      console.log(allCourses.value);
     },
     (error) => {
       if (error.response.status == 403) {
@@ -245,9 +266,18 @@ function getAllUsers() {
   UserService.getAllUsers().then(
     (response) => {
       // remove unnecessary attribute 'hashed_password'
-      allUsers.value = response.data.map(
+      allUsers.value = response.data.users.map(
         ({ hashed_password, ...keepAttrs }) => keepAttrs
       );
+      for (const u of allUsers.value) {
+        for (const c of response.data.coursesList) {
+          if (c.user_id == u.id) {
+            u.courses = c.courses;
+            break;
+          }
+        }
+      }
+      console.log(allUsers.value);
     },
     (error) => {
       if (error.response.status == 403) {
@@ -352,6 +382,20 @@ function hideNewPassword() {
         <div class="toast-body">
           Fehler beim Erstellen des Kurses. Vielleicht existiert der Kursname
           bereits?
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-danger border-0"
+      id="toastErrorAddUserToCourse"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Konnte User nicht zum Kurs zufügen. Ist er bereits Mitglied?
         </div>
       </div>
     </div>
@@ -921,7 +965,23 @@ function hideNewPassword() {
           <td>{{ x.full_name }}</td>
           <td>{{ x.username }}</td>
           <td>
-            {{ x.courses }}
+            <span
+              v-for="c in x.courses"
+              class="badge rounded-pill mx-1"
+              :style="{
+                'background-color': c.color,
+                color: c.fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
+              }"
+              >{{ c.name }}
+              <a
+                class="mini-btn"
+                @click.prevent="removeCourseFromUser(x.id, c.id)"
+                ><font-awesome-icon
+                  icon="fa-xmark"
+                  :style="{
+                    color: c.fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
+                  }" /></a
+            ></span>
             <div class="btn-group">
               <a class="btn-round btn" data-bs-toggle="dropdown">
                 <font-awesome-layers class="fa-lg">
@@ -938,7 +998,7 @@ function hideNewPassword() {
                 <li v-for="c in allCourses">
                   <a
                     class="dropdown-item btn"
-                    @click.prevent="addCourseToPupil(x.username, c.name)"
+                    @click.prevent="addCourseToUser(x.id, c.name)"
                   >
                     <span
                       class="badge rounded-pill mx-1"
@@ -981,6 +1041,10 @@ function hideNewPassword() {
 </template>
 
 <style scoped>
+.mini-btn {
+  cursor: pointer;
+}
+
 .round-left {
   border-top-left-radius: var(--bs-border-radius-pill);
   border-bottom-left-radius: var(--bs-border-radius-pill);

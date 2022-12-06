@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 # database models
-class PupilCourseLink(SQLModel, table=True):
+class UserCourseLink(SQLModel, table=True):
     user_id: Optional[int] = Field(
         default=None, foreign_key="user.id", primary_key=True)
     course_id: Optional[int] = Field(
@@ -30,7 +30,7 @@ class User(BaseUser, table=True):
     hashed_password: str
 
     courses: List["Course"] = Relationship(
-        back_populates="pupils", link_model=PupilCourseLink)
+        back_populates="users", link_model=UserCourseLink)
 
 
 class UserSchema(BaseUser):
@@ -43,8 +43,8 @@ class Course(SQLModel, table=True):
     color: str
     fontDark: bool
 
-    pupils: List["User"] = Relationship(
-        back_populates="courses", link_model=PupilCourseLink)
+    users: List["User"] = Relationship(
+        back_populates="courses", link_model=UserCourseLink)
 
 
 # other models
@@ -62,3 +62,8 @@ class pupilsList(BaseModel):
 class setPassword(BaseModel):
     username: str
     password: str
+
+
+class AddUserCourseLink(BaseModel):
+    user_id: int
+    coursename: str
