@@ -334,7 +334,7 @@ function hideNewPassword() {
 </script>
 
 <template>
-  <div class="toast-container position-absolute bottom-0 end-0 p-3">
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div
       class="toast align-items-center text-bg-success border-0"
       id="toastSuccessPasswordChanged"

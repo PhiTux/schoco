@@ -19,13 +19,14 @@ body {
 
 <style scoped>
 .app {
-  width: 100vw;
-  height: 100vh;
+  /* width: 100vw;*/
+  /*height: 100%;*/
   /*background: #383838;*/
   color: rgb(240, 240, 240);
 }
 
 .main {
   padding-top: 56px;
+  /* height: 100%; */
 }
 </style>
