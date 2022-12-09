@@ -56,7 +56,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
 
 @users.post('/setNewPassword', dependencies=[Depends(auth.check_teacher)])
 async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Session = Depends(database.get_db)):
-    if not crud.changePasswordByUsername(setPassword.username, setPassword.password, db):
+    if not crud.change_password_by_username(setPassword.username, setPassword.password, db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")
     return {'success': True}
@@ -87,17 +87,20 @@ def addCourseToUser(addUserCourseLink: models_and_schemas.AddUserCourseLink, db:
 
 @users.post('/removeCourseFromUser', dependencies=[Depends(auth.check_teacher)])
 def removeCourseFromUser(userCourseLink: models_and_schemas.UserCourseLink, db: Session = Depends(database.get_db)):
-    #user = crud.get_user_by_id(db=db, id=userCourseLink.user_id)
-    #course = crud.get_course_by_id(db=db, id=userCourseLink.course_id)
     link = crud.get_user_course_link(db=db, link=userCourseLink)
     if not crud.remove_UserCourseLink(db=db, link=link):
         raise HTTPException(
             status_code=500, detail="Could not remove Course from User")
 
     return {'success': True}
-    # course.users.remove(user)
-    # db.add(user)
-    # db.commit()
+
+
+@users.post('/deleteUser', dependencies=[Depends(auth.check_teacher)])
+def delete_user(userById: models_and_schemas.UserById, db: Session = Depends(database.get_db)):
+    db_user = db.get(models_and_schemas.User, userById.user_id)
+    if not crud.remove_user(db=db, user=db_user):
+        return {'success': False}
+    return {'success': True}
 
 
 @users.post('/login')

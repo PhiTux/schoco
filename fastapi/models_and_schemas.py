@@ -67,3 +67,7 @@ class setPassword(BaseModel):
 class AddUserCourseLink(BaseModel):
     user_id: int
     coursename: str
+
+
+class UserById(BaseModel):
+    user_id: int

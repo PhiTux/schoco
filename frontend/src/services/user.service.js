@@ -57,6 +57,10 @@ class UserService {
     removeCourseFromUser(user_id, course_id) {
         return axiosAuth.post('removeCourseFromUser', {'user_id': user_id, 'course_id': course_id})
     }
+
+    deleteUser(user_id) {
+        return axiosAuth.post('deleteUser', {'user_id': user_id})
+    }
 }
 
 export default new UserService()

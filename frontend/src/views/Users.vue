@@ -28,6 +28,9 @@ let state = reactive({
   newCourseColor: "#ff8000",
   newCourseName: "",
   newCourseFontDark: false,
+  deleteUserFullname: "",
+  deleteUserUsername: "",
+  deleteUserId: 0,
 });
 
 function preparePupilModal() {
@@ -123,6 +126,50 @@ function createPupilAccounts() {
   );
 }
 
+function openModalDeleteUser(id) {
+  for (var i = 0; i < allUsers.value.length; i++) {
+    if (allUsers.value[i].id == id) {
+      state.deleteUserFullname = allUsers.value[i].full_name;
+      state.deleteUserUsername = allUsers.value[i].username;
+      state.deleteUserId = id;
+      break;
+    }
+  }
+}
+
+function deleteUser() {
+  UserService.deleteUser(state.deleteUserId).then(
+    (response) => {
+      var elem = document.getElementById("DeleteUserModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        const toast = new Toast(
+          document.getElementById("toastDeleteUserSuccess")
+        );
+        toast.show();
+
+        getAllUsers();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastDeleteUserError")
+        );
+        toast.show();
+      }
+    },
+    (error) => {
+      var elem = document.getElementById("DeleteUserModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      console.log(error);
+      const toast = new Toast(document.getElementById("toastDeleteUserError"));
+      toast.show();
+    }
+  );
+}
+
 function openModalChangePassword(id) {
   state.newPassword = "";
   state.showNewPassword = false;
@@ -172,6 +219,7 @@ function changePassword() {
       }
     },
     (error) => {
+      console.log(error);
       const toast = new Toast(
         document.getElementById("toastPasswordChangeError")
       );
@@ -277,7 +325,6 @@ function getAllUsers() {
           }
         }
       }
-      console.log(allUsers.value);
     },
     (error) => {
       if (error.response.status == 403) {
@@ -356,6 +403,50 @@ function hideNewPassword() {
     >
       <div class="d-flex">
         <div class="toast-body">Fehler beim Ändern des Passworts.</div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-danger border-0"
+      id="toastDeleteUserError"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Benutzer {{ state.deleteUserFullname }} ({{
+            state.deleteUserUsername
+          }}) konnte nicht gelöscht werden.
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-success border-0"
+      id="toastDeleteUserSuccess"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Benutzer {{ state.deleteUserFullname }} ({{
+            state.deleteUserUsername
+          }}) wurde erfolgreich gelöscht.
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="toast align-items-center text-bg-success border-0"
+      id="toastSuccessCourseCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">Kurs wurde erstellt.</div>
       </div>
     </div>
 
@@ -668,6 +759,55 @@ function hideNewPassword() {
                 v-if="state.changePasswordLoading"
               ></span>
               Neues Passwort speichern
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal fade"
+    id="DeleteUserModal"
+    tabindex="-1"
+    aria-labelledby="deleteUserdModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content dark-text">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Benutzer löschen</h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body text-center">
+          <h4>
+            Folgenden Benutzer wirklich löschen?<br />
+            <b
+              >{{ state.deleteUserFullname }} ({{
+                state.deleteUserUsername
+              }})</b
+            >
+          </h4>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Schließen
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click.prevent="deleteUser()"
+            >
+              Benutzer löschen
             </button>
           </div>
         </div>
@@ -1026,10 +1166,26 @@ function hideNewPassword() {
               <font-awesome-layers class="fa-lg">
                 <font-awesome-icon
                   icon="fa-circle"
+                  style="color: var(--bs-warning)"
+                />
+                <div style="color: black">
+                  <font-awesome-icon icon="fa-key" transform="shrink-6" />
+                </div>
+              </font-awesome-layers>
+            </a>
+            <a
+              class="btn-round btn ps-3"
+              data-bs-toggle="modal"
+              data-bs-target="#DeleteUserModal"
+              @click.prevent="openModalDeleteUser(x.id)"
+            >
+              <font-awesome-layers class="fa-lg">
+                <font-awesome-icon
+                  icon="fa-circle"
                   style="color: var(--bs-danger)"
                 />
                 <div style="color: white">
-                  <font-awesome-icon icon="fa-key" transform="shrink-6" />
+                  <font-awesome-icon icon="fa-trash" transform="shrink-6" />
                 </div>
               </font-awesome-layers>
             </a>

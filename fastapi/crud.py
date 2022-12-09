@@ -55,7 +55,7 @@ def get_user_by_id(db: Session, id: int):
     return user
 
 
-def changePasswordByUsername(username: str, password: str, db: Session):
+def change_password_by_username(username: str, password: str, db: Session):
     try:
         db.query(models_and_schemas.User).filter(models_and_schemas.User.username ==
                                                  username).update({'hashed_password': auth.create_password_hash(password)})
@@ -95,6 +95,16 @@ def get_user_course_link(db: Session, link: models_and_schemas.UserCourseLink):
 def remove_UserCourseLink(db: Session, link: models_and_schemas.UserCourseLink):
     try:
         db.delete(link)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
+
+
+def remove_user(db: Session, user: models_and_schemas.User):
+    try:
+        db.delete(user)
         db.commit()
     except:
         db.rollback()
