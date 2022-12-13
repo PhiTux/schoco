@@ -25,7 +25,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 # Start developing
 
-## Frontend (Vite + Vue)
+## Frontend (Vite 4 + Vue 3)
 `cd frontend` 
 
 Initial Installation: `npm install`
@@ -36,6 +36,6 @@ On every start: `npm run dev`
 
 `cd fastapi`
 
-Initial Installation (Python 3 and pip required): `pip install -r requirements.txt`
+Initial Installation (Python 3.10 and pip required): `pip install -r requirements.txt`
 
 On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey && python -m uvicorn main:schoco --reload`
