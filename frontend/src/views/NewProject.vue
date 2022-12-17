@@ -1,6 +1,7 @@
 <script setup>
 import { reactive } from "vue";
 import { Toast } from "bootstrap";
+import CodeService from "../services/code.service";
 
 let state = reactive({
   helloWorldName: "",
@@ -17,6 +18,11 @@ function newHelloWorld() {
   }
 
   state.creatingProject = true;
+
+  CodeService.createNewHelloWorld(state.helloWorldName).then(
+    (response) => {},
+    (error) => {}
+  );
 }
 </script>
 
