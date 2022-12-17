@@ -3,11 +3,13 @@ import { useAuthStore } from '../stores/auth.store.js'
 import Login from "../views/Login.vue"
 import Home from "../views/Home.vue"
 import Users from "../views/Users.vue"
+import NewProject from "../views/NewProject.vue"
 
 const routes = [
     {path: '/login', name: 'login', component: Login},
     {path: '/home', name: "home", component: Home},
-    {path: '/users', name: "users", component: Users}
+    {path: '/users', name: "users", component: Users},
+    {path: '/newProject', name: "newProject", component: NewProject}
 ]
 
 export const router = createRouter({

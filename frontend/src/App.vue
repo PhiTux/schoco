@@ -1,10 +1,12 @@
 <script setup>
 import NavBar from "./components/NavBar.vue";
+import { useRoute } from "vue-router";
+const route = useRoute();
 </script>
 
 <template>
   <div class="app d-flex flex-column">
-    <NavBar />
+    <NavBar v-if="route.name !== 'ide'" />
     <div class="main">
       <router-view />
     </div>

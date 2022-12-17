@@ -1,11 +1,12 @@
-<script setup>
-defineProps({
-  msg: String,
-});
-</script>
+<script setup></script>
 
 <template>
-  <h1>Home</h1>
+  <div class="container">
+    <a class="btn btn-outline-success my-3" type="submit" href="/#/newProject">
+      Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
+    </a>
+    <h1>Meine Projekte</h1>
+  </div>
 </template>
 
 <style scoped></style>
