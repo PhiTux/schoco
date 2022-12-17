@@ -3,6 +3,7 @@ import { reactive, onMounted, computed, ref, watch } from "vue";
 import UserService from "../services/user.service";
 import { Modal, Toast } from "bootstrap";
 import { useAuthStore } from "../stores/auth.store";
+import CourseBadge from "../components/CourseBadge.vue";
 
 let allUsers = ref([]);
 
@@ -627,16 +628,11 @@ function hideNewPassword() {
               ><b>Vorschau</b></label
             >
             <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
-              <span
-                class="badge rounded-pill"
-                :style="{
-                  'background-color': state.newCourseColor,
-                  color: state.newCourseFontDark
-                    ? 'var(--bs-dark)'
-                    : 'var(--bs-light)',
-                }"
-                >{{ state.newCourseName }}</span
-              >
+              <CourseBadge
+                :color="state.newCourseColor"
+                :font-dark="state.newCourseFontDark"
+                :name="state.newCourseName"
+              />
             </div>
           </div>
 
@@ -1055,15 +1051,12 @@ function hideNewPassword() {
     <div class="row mb-4 ms-1">
       Kurse:
       <div class="col">
-        <span
+        <CourseBadge
           v-for="c in allCourses"
-          class="badge rounded-pill mx-1"
-          :style="{
-            'background-color': c.color,
-            color: c.fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
-          }"
-          >{{ c.name }}</span
-        >
+          :color="c.color"
+          :font-dark="c.fontDark"
+          :name="c.name"
+        />
       </div>
     </div>
     <div class="row">
@@ -1105,23 +1098,14 @@ function hideNewPassword() {
           <td>{{ x.full_name }}</td>
           <td>{{ x.username }}</td>
           <td>
-            <span
+            <CourseBadge
               v-for="c in x.courses"
-              class="badge rounded-pill mx-1"
-              :style="{
-                'background-color': c.color,
-                color: c.fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
-              }"
-              >{{ c.name }}
-              <a
-                class="mini-btn"
-                @click.prevent="removeCourseFromUser(x.id, c.id)"
-                ><font-awesome-icon
-                  icon="fa-xmark"
-                  :style="{
-                    color: c.fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
-                  }" /></a
-            ></span>
+              :color="c.color"
+              :font-dark="c.fontDark"
+              :name="c.name"
+              :is-deletable="true"
+              @remove="removeCourseFromUser(x.id, c.id)"
+            />
             <div class="btn-group">
               <a class="btn-round btn" data-bs-toggle="dropdown">
                 <font-awesome-layers class="fa-lg">
@@ -1140,17 +1124,11 @@ function hideNewPassword() {
                     class="dropdown-item btn"
                     @click.prevent="addCourseToUser(x.id, c.name)"
                   >
-                    <span
-                      class="badge rounded-pill mx-1"
-                      :style="{
-                        'background-color': c.color,
-                        color: c.fontDark
-                          ? 'var(--bs-dark)'
-                          : 'var(--bs-light)',
-                      }"
-                      >{{ c.name }}</span
-                    ></a
-                  >
+                    <CourseBadge
+                      :color="c.color"
+                      :font-dark="c.fontDark"
+                      :name="c.name"
+                  /></a>
                 </li>
               </ul>
             </div>
@@ -1197,10 +1175,6 @@ function hideNewPassword() {
 </template>
 
 <style scoped>
-.mini-btn {
-  cursor: pointer;
-}
-
 .round-left {
   border-top-left-radius: var(--bs-border-radius-pill);
   border-bottom-left-radius: var(--bs-border-radius-pill);
