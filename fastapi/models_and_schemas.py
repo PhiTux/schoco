@@ -71,3 +71,7 @@ class AddUserCourseLink(BaseModel):
 
 class UserById(BaseModel):
     user_id: int
+
+
+class ProjectName(BaseModel):
+    projectName: str

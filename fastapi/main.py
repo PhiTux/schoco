@@ -5,10 +5,12 @@ from fastapi.responses import JSONResponse
 from fastapi import Request
 import database
 import users
+import code
 
 schoco = FastAPI()
 
 schoco.include_router(users.users)
+schoco.include_router(code.code)
 
 
 @schoco.exception_handler(AuthJWTException)

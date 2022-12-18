@@ -25,14 +25,22 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 # Start developing
 
-## Frontend (Vite 4 + Vue 3)
+## 1) Gitea
+You have to use Gitea as git-repo, since schoco uses the gitea-API.
+
+Install gitea using the docker-compose.yml file from this repo. You can choose to set gitea public available via browser, but actually that's not necessary and you can skip reverse-proxying gitea -> it's enough to have it only available at localhost.
+
+If you used the docker-compose.yml from this repo, then you'll need to do a second step **only once for installation**. Run the following command to create the git-user (adapt username and password):
+`docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
+
+## 2) Frontend (Vite 4 + Vue 3)
 `cd frontend` 
 
 Initial Installation: `npm install`
 
 On every start: `npm run dev`
 
-## Backend (Fastapi)
+## 3) Backend (Fastapi)
 
 `cd fastapi`
 

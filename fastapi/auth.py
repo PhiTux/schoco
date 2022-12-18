@@ -46,6 +46,11 @@ def decode_token(token):
     return claims
 
 
+def get_username_by_token(token: str = Depends(oauth2_scheme)):
+    claims = jwt.decode(token, key=get_secret_key())
+    return claims.get('sub')
+
+
 def check_teacher(token: str = Depends(oauth2_scheme)):
     claims = decode_token(token)
     role = claims.get('role')
