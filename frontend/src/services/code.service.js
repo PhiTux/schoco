@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { router } from '../router'
 import { useAuthStore } from '../stores/auth.store';
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -22,6 +23,10 @@ axiosAuth.interceptors.request.use((config) => {
 class CodeService {
     createNewHelloWorld(helloWorldName) {
         return axiosAuth.post('createNewHelloWorld', {'projectName': helloWorldName})
+    }
+
+    openIDE(project_uuid) {
+        router.push({name: 'ide', params: {project_uuid: project_uuid}})
     }
 }
 

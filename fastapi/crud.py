@@ -110,3 +110,14 @@ def remove_user(db: Session, user: models_and_schemas.User):
         db.rollback()
         return False
     return True
+
+
+def create_project(db: Session, project: models_and_schemas.Project):
+    return False
+    try:
+        db.add(project)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True

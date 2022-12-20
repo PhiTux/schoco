@@ -20,10 +20,14 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without sending directories or files.
 - Explicitly no possibility to open foreign projects based on a project-id or similar (other than codeboard!). That's first because of privacy-reasons and second to minimize copying from others.
 - Use gitea on backend for storing all code.
-- Compilation and running the programms completely on the server.
+- Compilation and running the programs completely on the server (see [cookies](https://github.com/PhiTux/cookies) - is yet to be done).
 
+## Architecture
+<img src="./schoco_architecture.svg">
 
 # Start developing
+
+On the linux-host both following packages need to be installed: `libcurl4-openssl-dev libssl-dev`
 
 ## 1) Gitea
 You have to use Gitea as git-repo, since schoco uses the gitea-API.
