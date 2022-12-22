@@ -19,7 +19,7 @@ function newHelloWorld() {
 
   state.creatingProject = true;
 
-  CodeService.openIDE("84c3ea1d-f1cf-4d2d-b2d2-0e982fba8c77");
+  CodeService.openIDE("0840baae-eca9-450b-885a-e0759d60f028");
   return;
 
   CodeService.createNewHelloWorld(state.helloWorldName).then(

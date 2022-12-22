@@ -50,4 +50,4 @@ On every start: `npm run dev`
 
 Initial Installation (Python 3.10 and pip required): `pip install -r requirements.txt`
 
-On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey && python -m uvicorn main:schoco --reload`
+On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:schoco --reload`

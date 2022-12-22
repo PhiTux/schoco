@@ -28,6 +28,10 @@ class CodeService {
     openIDE(project_uuid) {
         router.push({name: 'ide', params: {project_uuid: project_uuid}})
     }
+
+    loadAllFiles(project_uuid) {
+        return axiosAuth.post('loadAllFiles', {'project_uuid': project_uuid})
+    }
 }
 
 export default new CodeService()

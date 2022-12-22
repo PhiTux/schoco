@@ -113,11 +113,17 @@ def remove_user(db: Session, user: models_and_schemas.User):
 
 
 def create_project(db: Session, project: models_and_schemas.Project):
-    return False
     try:
         db.add(project)
         db.commit()
-    except:
+    except Exception as e:
+        print(e)
         db.rollback()
         return False
     return True
+
+
+def get_project_by_project_uuid(db: Session, project_uuid: str):
+    project = db.query(models_and_schemas.Project).filter(
+        models_and_schemas.Project.uuid == project_uuid).first()
+    return project

@@ -13,8 +13,8 @@ except:
 
 
 def get_port():
-    if 'GITEA_PORT' in os.environ:
-        return os.environ.get('GITEA_PORT')
+    if 'GITEA_LOCALHOST_PORT' in os.environ:
+        return os.environ.get('GITEA_LOCALHOST_PORT')
     return 3000
 
 
@@ -31,7 +31,13 @@ def get_password():
 
 
 def api_base_url():
-    return f"http://localhost:{get_port()}/api/v1"
+    full_host = f"http://localhost:{get_port()}"
+    if 'GITEA_HOST' in os.environ:
+        full_host = os.environ.get('GITEA_HOST')
+        while full_host.endswith('/'):
+            full_host = full_host[:-1]
+
+    return f"{full_host}/api/v1"
 
 
 def api_full_url(path: str):
@@ -90,3 +96,48 @@ def add_file(project_uuid: str, file_name: str, file_content: bytes):
     if (res_code >= 200 and res_code < 300):
         return True
     return False
+
+
+def load_all_meta_content(project_uuid: str, path: str):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{get_username()}/{project_uuid}/contents{path}"))
+    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    if not (res_code >= 200 and res_code < 300):
+        raise HTTPException(
+            status_code=500, detail="Could not load contents from repo!")
+
+    res = json.loads(buffer.getvalue().decode('utf-8'))
+
+    content = []
+    for i in range(len(res)):
+        if res[i]['type'] == 'dir':
+            content.append({'path': res[i]['path'], 'isDir': True})
+        else:
+            content.append({'path': res[i]['path'], 'isDir': False,
+                            'download_url': res[i]['download_url']})
+
+    return content
+
+
+def download_file_by_url(url: str):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, url)
+    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    if not (res_code >= 200 and res_code < 300):
+        raise HTTPException(
+            status_code=500, detail="Could not load contents from repo!")
+
+    return buffer.getvalue().decode('utf-8')

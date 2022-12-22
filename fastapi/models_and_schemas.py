@@ -85,3 +85,7 @@ class UserById(BaseModel):
 
 class ProjectName(BaseModel):
     projectName: str
+
+
+class ProjectUuid(BaseModel):
+    project_uuid: str
