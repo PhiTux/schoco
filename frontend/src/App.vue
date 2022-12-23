@@ -7,7 +7,7 @@ const route = useRoute();
 <template>
   <div class="app d-flex flex-column">
     <NavBar v-if="route.name !== 'ide'" />
-    <div class="main">
+    <div :class="{ main: route.name !== 'ide' }">
       <router-view />
     </div>
   </div>

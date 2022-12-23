@@ -81,6 +81,8 @@ def recursively_download_all_files(project_uuid: str, path: str):
 @code.post('/loadAllFiles', dependencies=[Depends(auth.oauth2_scheme)])
 def loadAllFiles(project_uuid: models_and_schemas.ProjectUuid, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
     project_uuid = project_uuid.project_uuid
+    global results
+    results = []
 
     # check if user may open this project
     if not project_access_allowed(project_uuid=project_uuid, username=username, db=db):

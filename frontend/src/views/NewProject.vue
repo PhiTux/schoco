@@ -1,7 +1,10 @@
 <script setup>
 import { reactive } from "vue";
+import { useRouter } from "vue-router";
 import { Toast } from "bootstrap";
 import CodeService from "../services/code.service";
+
+const router = useRouter();
 
 let state = reactive({
   helloWorldName: "",
@@ -19,7 +22,11 @@ function newHelloWorld() {
 
   state.creatingProject = true;
 
-  CodeService.openIDE("0840baae-eca9-450b-885a-e0759d60f028");
+  router.push({
+    name: "ide",
+    params: { project_uuid: "0840baae-eca9-450b-885a-e0759d60f028" },
+  });
+  //CodeService.openIDE("0840baae-eca9-450b-885a-e0759d60f028");
   return;
 
   CodeService.createNewHelloWorld(state.helloWorldName).then(

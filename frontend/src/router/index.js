@@ -4,14 +4,15 @@ import Login from "../views/Login.vue"
 import Home from "../views/Home.vue"
 import Users from "../views/Users.vue"
 import NewProject from "../views/NewProject.vue"
-import IDE from "../views/IDE.vue"
+import Ide from "../views/IDE.vue"
+
 
 const routes = [
     {path: '/login', name: 'login', component: Login},
     {path: '/home', name: "home", component: Home},
     {path: '/users', name: "users", component: Users},
     {path: '/newProject', name: "newProject", component: NewProject},
-    {path: '/ide/:project_uuid', name: "ide", component: IDE, params: {project_uuid: ""}}
+    {path: '/ide/:project_uuid', name: "ide", component: Ide, params: {project_uuid: ""}}
 ]
 
 export const router = createRouter({
