@@ -14,6 +14,21 @@ const route = useRoute();
 </template>
 
 <style>
+:root {
+  --green: #008e00;
+  --green-hover: #007200;
+  --green-disabled: #004700;
+  --yellow: #ffd500;
+  --yellow-hover: #ccaa00;
+  --yellow-disabled: #806a00;
+  --blue: #1b7cff;
+  --blue-hover: #1662cc;
+  --blue-disabled: #0e3d80;
+  --indigo: #9003f7;
+  --indigo-hover: #7302c6;
+  --indigo-disabled: #48017b;
+}
+
 body {
   background-color: #383838 !important;
 }
