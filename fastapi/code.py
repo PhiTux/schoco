@@ -92,3 +92,10 @@ def loadAllFiles(project_uuid: models_and_schemas.ProjectUuid, db: Session = Dep
     res = recursively_download_all_files(project_uuid=project_uuid, path="/")
 
     return res
+
+
+@code.post('/getProjectName', dependencies=[Depends(auth.oauth2_scheme)])
+def getProjectName(project_uuid: models_and_schemas.ProjectUuid, db: Session = Depends(database.get_db)):
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid.project_uuid)
+    return project.name

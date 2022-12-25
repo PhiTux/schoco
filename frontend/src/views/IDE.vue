@@ -1,34 +1,54 @@
 <script setup>
-import { onBeforeMount } from "vue";
+import { onBeforeMount, reactive } from "vue";
 import { useRoute } from "vue-router";
 import { Toast } from "bootstrap";
+import { Splitpanes, Pane } from "splitpanes";
+import "splitpanes/dist/splitpanes.css";
 import CodeService from "../services/code.service";
+import IDEFileTree from "../components/IDEFileTree.vue";
 
 const route = useRoute();
+
+let state = reactive({
+  projectName: "",
+  files: [],
+});
 
 onBeforeMount(() => {
   CodeService.loadAllFiles(route.params.project_uuid).then(
     (response) => {
-      console.log(response.data);
-      // TODO: https://stackoverflow.com/questions/36248245/how-to-convert-an-array-of-paths-into-json-structure
-      // -> die response-liste mit files in json umwandeln
+      if (response.status == 200) {
+        state.files = response.data;
+      }
     },
     (error) => {
-      if (error.response.status == 405) {
+      if (
+        typeof error.response === "undefined" ||
+        error.response.status == 500
+      ) {
         const toast = new Toast(
-          document.getElementById("toastProjectAccessError")
+          document.getElementById("toastLoadingProjectError")
         );
         toast.show();
       } else {
         console.log(error.response);
 
-        if (error.response.status == 500) {
+        if (error.response.status == 405) {
           const toast = new Toast(
-            document.getElementById("toastLoadingProjectError")
+            document.getElementById("toastProjectAccessError")
           );
           toast.show();
         }
       }
+    }
+  );
+
+  CodeService.getProjectName(route.params.project_uuid).then(
+    (response) => {
+      if (response.status == 200) state.projectName = response.data;
+    },
+    (error) => {
+      console.log(error);
     }
   );
 });
@@ -158,11 +178,51 @@ onBeforeMount(() => {
       </div>
     </nav>
 
-    <h1>IDE</h1>
+    <div class="ide-main">
+      <splitpanes
+        class="default-theme"
+        height="100%"
+        horizontal
+        :push-other-panes="false"
+      >
+        <pane>
+          <splitpanes :push-other-panes="false">
+            <pane
+              min-size="15"
+              size="20"
+              max-size="30"
+              style="background-color: #383838"
+            >
+              <div class="projectName"></div>
+              <IDEFileTree :files="state.files" />
+            </pane>
+            <pane>
+              <span>3</span>
+            </pane>
+          </splitpanes>
+        </pane>
+        <pane max-size="50" size="20">
+          <span>5</span>
+        </pane>
+      </splitpanes>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.projectName {
+  background-color: red;
+  height: 56px;
+}
+
+.ide {
+  height: 100vh;
+}
+
+.ide-main {
+  height: calc(100% - 56px);
+}
+
 .btn-green {
   background-color: var(--green);
   color: var(--bs-light);

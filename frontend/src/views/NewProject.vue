@@ -26,7 +26,6 @@ function newHelloWorld() {
     name: "ide",
     params: { project_uuid: "0840baae-eca9-450b-885a-e0759d60f028" },
   });
-  //CodeService.openIDE("0840baae-eca9-450b-885a-e0759d60f028");
   return;
 
   CodeService.createNewHelloWorld(state.helloWorldName).then(

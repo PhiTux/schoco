@@ -27,6 +27,10 @@ class CodeService {
     loadAllFiles(project_uuid) {
         return axiosAuth.post('loadAllFiles', {'project_uuid': project_uuid})
     }
+
+    getProjectName(project_uuid) {
+        return axiosAuth.post('getProjectName', {'project_uuid': project_uuid})
+    }
 }
 
 export default new CodeService()
