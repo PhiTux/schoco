@@ -32,10 +32,15 @@ On the linux-host both following packages need to be installed: `libcurl4-openss
 ## 1) Gitea
 You have to use Gitea as git-repo, since schoco uses the gitea-API.
 
+### Option A: *Localhost*
 Install gitea using the docker-compose.yml file from this repo. You can choose to set gitea public available via browser, but actually that's not necessary and you can skip reverse-proxying gitea -> it's enough to have it only available at localhost.
 
 If you used the docker-compose.yml from this repo, then you'll need to do a second step **only once for installation**. Run the following command to create the git-user (adapt username and password):
 `docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
+
+### Option B: *External instance (public available)*
+
+Host your gitea-instance anywhere (secured by TLS!!) and connect to it. This might lead to a speed drop caused by increased latency.
 
 ## 2) Frontend (Vite 4 + Vue 3)
 `cd frontend` 
@@ -51,3 +56,5 @@ On every start: `npm run dev`
 Initial Installation (Python 3.10 and pip required): `pip install -r requirements.txt`
 
 On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:schoco --log-level debug --reload`
+
+If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHOST_PORT` with `GITEA_HOST=https://git.mydomain.tld`

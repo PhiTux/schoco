@@ -7,3 +7,4 @@ sqlmodel==0.0.8
 uvicorn
 python-multipart
 bcrypt==4.0.1
+pycurl==7.45.2

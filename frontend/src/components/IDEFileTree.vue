@@ -1,14 +1,10 @@
 <script setup>
-import { reactive, computed, watch } from "vue";
+import { computed } from "vue";
+import TreeNode from "./TreeNode.vue"
 
 const props = defineProps(["files"]);
 
-let state = reactive({
-  files: props.files,
-  test: 0,
-});
-
-function createNestedObject() {
+const nestedFiles = computed(() => {
   let f = [];
   for (const o of props.files) {
     f.push(Object.keys(o)[0]);
@@ -30,39 +26,9 @@ function createNestedObject() {
       }
     }
   }
+
   return output;
-}
-
-function printList(list, container) {
-  for (const [key, value] of Object.entries(list)) {
-    var li = document.createElement("li");
-    li.innerHTML = key;
-    if (Object.keys(value).length !== 0) {
-      var fa = document.createElement("font-awesome-icon");
-      fa.setAttribute("icon", "fa-solid fa-folder-open");
-      li.appendChild(fa);
-      var ul = document.createElement("ul");
-      li.appendChild(ul);
-
-      printList(value, ul);
-      li.classList.add("treeFolder");
-    } else {
-      li.classList.add("treeFile");
-    }
-    container.appendChild(li);
-  }
-}
-
-//<font-awesome-icon icon="fa-solid fa-file-circle-plus" />
-
-watch(
-  () => props.files,
-  () => {
-    let nestedFiles = createNestedObject();
-
-    printList(nestedFiles, document.getElementById("root"));
-  }
-);
+})
 </script>
 
 <template>
@@ -76,17 +42,13 @@ watch(
     </p>
   </div>
   <div class="tree">
-    <ul id="root"></ul>
+    <ul id="root">
+      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue" :path="newKey + '/'" ></TreeNode>
+    </ul>
   </div>
 </template>
 
 <style scoped>
-.treeFolder:before {
-  content: "\f07c";
-  font-family: FontAwesome;
-  display: inline-block;
-}
-
 ul {
   list-style: none;
 }
