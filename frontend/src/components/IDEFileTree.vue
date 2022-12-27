@@ -2,6 +2,9 @@
 import { computed } from "vue";
 import TreeNode from "./TreeNode.vue"
 
+
+const emit = defineEmits(['openFile'])
+
 const props = defineProps(["files"]);
 
 const nestedFiles = computed(() => {
@@ -29,6 +32,10 @@ const nestedFiles = computed(() => {
 
   return output;
 })
+
+function openFile(path) {
+  emit('openFile', path)
+}
 </script>
 
 <template>
@@ -43,7 +50,7 @@ const nestedFiles = computed(() => {
   </div>
   <div class="tree">
     <ul id="root">
-      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue" :path="newKey + '/'" ></TreeNode>
+      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue" :path="newKey + '/'" @openFile="openFile"></TreeNode>
     </ul>
   </div>
 </template>

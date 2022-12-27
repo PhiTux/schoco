@@ -52,6 +52,10 @@ onBeforeMount(() => {
     }
   );
 });
+
+function openFile(path) {
+  console.log(path)
+}
 </script>
 
 <template>
@@ -194,7 +198,7 @@ onBeforeMount(() => {
               style="background-color: #383838"
             >
               <div class="projectName"></div>
-              <IDEFileTree :files="state.files" />
+              <IDEFileTree :files="state.files" @openFile="openFile"/>
             </pane>
             <pane>
               <span>3</span>
