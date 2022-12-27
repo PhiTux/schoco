@@ -1,20 +1,43 @@
 <script setup>
-import { onBeforeMount, reactive } from "vue";
+import { onBeforeMount, reactive, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { Toast } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import CodeService from "../services/code.service";
 import IDEFileTree from "../components/IDEFileTree.vue";
+import 'ace-builds';
+import 'ace-builds/src-min-noconflict/mode-java'
+import 'ace-builds/src-min-noconflict/theme-monokai'
+import 'ace-builds/src-min-noconflict/ext-language_tools'
+
 
 const route = useRoute();
 
 let state = reactive({
   projectName: "",
   files: [],
+  content: ["huhu"]
 });
 
+
+
+function editorInit() {
+  var editor = ace.edit('editor')
+  editor.setOptions({
+    tabSize: 4,
+    useSoftTabs: true,
+    navigateWithinSoftTabs: true,
+    fontSize: 16,
+    scrollPastEnd: 0.5,
+    enableBasicAutocompletion: true,
+    showPrintMargin: false
+  })
+}
+
+
 onBeforeMount(() => {
+
   CodeService.loadAllFiles(route.params.project_uuid).then(
     (response) => {
       if (response.status == 200) {
@@ -62,13 +85,8 @@ function openFile(path) {
   <div class="ide">
     <!-- Toasts -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div
-        class="toast align-items-center text-bg-danger border-0"
-        id="toastLoadingProjectError"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div class="toast align-items-center text-bg-danger border-0" id="toastLoadingProjectError" role="alert"
+        aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Laden des Projekts. Bitte zurück oder neu laden.
@@ -76,13 +94,8 @@ function openFile(path) {
         </div>
       </div>
 
-      <div
-        class="toast align-items-center text-bg-danger border-0"
-        id="toastProjectAccessError"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div class="toast align-items-center text-bg-danger border-0" id="toastProjectAccessError" role="alert"
+        aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
             Du kannst nur deine eigenen Projekte öffnen!
@@ -94,62 +107,44 @@ function openFile(path) {
     <!-- Navbar -->
     <nav class="navbar sticky-top navbar-expand-lg bg-dark navbar-dark">
       <div class="container-fluid">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav">
             <li class="nav-item dropdown mx-3">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 Projekt
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
-                    Neue Datei</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
+                    Neue Datei</a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-folder-plus" /> Neuer
-                    Ordner</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-folder-plus" /> Neuer
+                    Ordner</a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
-                    löschen</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
+                    löschen</a>
                 </li>
-                <li><hr class="dropdown-divider" /></li>
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-floppy-disk" />
-                    Änderungen speichern</a
-                  >
+                  <hr class="dropdown-divider" />
                 </li>
-                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-floppy-disk" />
+                    Änderungen speichern</a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
 
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-xmark" /> Projekt
-                    schließen</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-xmark" /> Projekt
+                    schließen</a>
                 </li>
               </ul>
             </li>
@@ -183,25 +178,16 @@ function openFile(path) {
     </nav>
 
     <div class="ide-main">
-      <splitpanes
-        class="default-theme"
-        height="100%"
-        horizontal
-        :push-other-panes="false"
-      >
+      <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false">
         <pane>
           <splitpanes :push-other-panes="false">
-            <pane
-              min-size="15"
-              size="20"
-              max-size="30"
-              style="background-color: #383838"
-            >
+            <pane min-size="15" size="20" max-size="30" style="background-color: #383838">
               <div class="projectName"></div>
-              <IDEFileTree :files="state.files" @openFile="openFile"/>
+              <IDEFileTree :files="state.files" @openFile="openFile" />
             </pane>
             <pane>
-              <span>3</span>
+              <v-ace-editor id="editor" v-model:value="state.content[0]" @init="editorInit" lang="java"
+                theme="monokai" />
             </pane>
           </splitpanes>
         </pane>
@@ -214,6 +200,11 @@ function openFile(path) {
 </template>
 
 <style scoped>
+#editor {
+  width: 100%;
+  height: 100%;
+}
+
 .projectName {
   background-color: red;
   height: 56px;
