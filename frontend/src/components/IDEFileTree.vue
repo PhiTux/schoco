@@ -36,6 +36,11 @@ const nestedFiles = computed(() => {
 function openFile(path) {
   emit('openFile', path)
 }
+
+function toggleFolder(path, event) {
+  console.log(path)
+  console.log(event.target)
+}
 </script>
 
 <template>
@@ -50,7 +55,8 @@ function openFile(path) {
   </div>
   <div class="tree">
     <ul id="root">
-      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue" :path="newKey + '/'" @openFile="openFile"></TreeNode>
+      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue"
+        :path="newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile"></TreeNode>
     </ul>
   </div>
 </template>

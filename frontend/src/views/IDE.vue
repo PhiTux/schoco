@@ -17,10 +17,36 @@ const route = useRoute();
 let state = reactive({
   projectName: "",
   files: [],
-  content: ["huhu"]
+  openFiles: [],
+  activeTab: 0,
+  tabsWithChanges: []
 });
 
 
+function editorChange() {
+  for (let i = 0; i < state.openFiles.length; i++) {
+    if (state.openFiles[i]['tab'] == state.activeTab) {
+      var editor = ace.edit('editor')
+      // if no change to original
+      if (state.openFiles[i]['content'] == editor.getSession().getValue()) {
+        if (state.tabsWithChanges.includes(state.activeTab)) {
+          for (let x = 0; x < state.tabsWithChanges.length; x++) {
+            if (state.tabsWithChanges[x] === state.activeTab) {
+              state.tabsWithChanges.splice(x, 1);
+              break
+            }
+          }
+        }
+      } else {
+        if (!state.tabsWithChanges.includes(state.activeTab)) {
+          state.tabsWithChanges.push(state.activeTab)
+        }
+      }
+
+      break
+    }
+  }
+}
 
 function editorInit() {
   var editor = ace.edit('editor')
@@ -33,6 +59,7 @@ function editorInit() {
     enableBasicAutocompletion: true,
     showPrintMargin: false
   })
+  editor.on('change', editorChange);
 }
 
 
@@ -76,8 +103,61 @@ onBeforeMount(() => {
   );
 });
 
-function openFile(path) {
-  console.log(path)
+function openFile(inputPath) {
+  let path = inputPath
+  if (inputPath.endsWith('/')) {
+    path = inputPath.slice(0, -1)
+  }
+
+  // check if Tab is already existing
+  let tab = -1
+  for (let i = 0; i < state.openFiles.length; i++) {
+    if (state.openFiles[i].path === path) {
+      tab = state.openFiles[i].tab
+      break;
+    }
+  }
+
+  // it's not yet open
+  if (tab == -1) {
+    let content = ""
+    for (let i = 0; i < state.files.length; i++) {
+      if (Object.keys(state.files[i])[0] === path) {
+        content = state.files[i][path]
+        break
+      }
+    }
+    let newTab = 0;
+    for (let i = 0; i < state.openFiles.length; i++) {
+      if (state.openFiles[i].tab > newTab) {
+        newTab = state.openFiles[i].tab
+      }
+    }
+
+    tab = newTab + 1
+
+    let session = ace.createEditSession(content, "ace/mode/java")
+
+    let newFileTab = { 'path': path, 'content': content, 'tab': tab, 'session': session }
+    let editor = ace.edit('editor')
+    editor.setSession(session)
+    editor.focus()
+
+    state.openFiles.push(newFileTab)
+    state.activeTab = tab
+    return
+  }
+
+  // find session in openFiles
+  for (let i = 0; i < state.openFiles.length; i++) {
+    if (state.openFiles[i].tab == tab) {
+      let editor = ace.edit('editor')
+      editor.setSession(state.openFiles[i]['session'])
+      editor.focus()
+      state.activeTab = tab
+      break
+    }
+  }
 }
 </script>
 
@@ -186,7 +266,15 @@ function openFile(path) {
               <IDEFileTree :files="state.files" @openFile="openFile" />
             </pane>
             <pane>
-              <v-ace-editor id="editor" v-model:value="state.content[0]" @init="editorInit" lang="java"
+              <ul class="nav nav-tabs pt-2">
+                <li class="nav-item" v-for="f in state.openFiles">
+                  <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab"
+                    :class="{ 'active': f.tab == state.activeTab, 'changed': state.tabsWithChanges.includes(f.tab) }">{{
+    f.path
+}}</div>
+                </li>
+              </ul>
+              <v-ace-editor id="editor" v-model:value="state.projectName" @init="editorInit" lang="java"
                 theme="monokai" />
             </pane>
           </splitpanes>
@@ -200,6 +288,33 @@ function openFile(path) {
 </template>
 
 <style scoped>
+.changed {
+  font-style: italic;
+}
+
+.changed::after {
+  content: '*'
+}
+
+ul.nav-tabs {
+  background-color: #383838;
+}
+
+.tab:not(.active) {
+  border-left: 1px solid #ccc;
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  background-color: #ddd;
+}
+
+.tab:hover {
+  cursor: pointer;
+}
+
+.active {
+  font-weight: bold;
+}
+
 #editor {
   width: 100%;
   height: 100%;
