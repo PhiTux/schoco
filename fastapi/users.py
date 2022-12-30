@@ -38,7 +38,6 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
         if i.fullname == "" and i.username == "" and i.password == "":
             continue
         elif i.fullname == "" or i.username == "" or len(i.password) < 8:
-            print(i)
             accounts_received += 1
             username_errors.append(i.fullname + " (" + i.username + ")")
         accounts_received += 1

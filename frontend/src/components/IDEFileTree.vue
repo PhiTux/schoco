@@ -10,7 +10,7 @@ const props = defineProps(["files"]);
 const nestedFiles = computed(() => {
   let f = [];
   for (const o of props.files) {
-    f.push(Object.keys(o)[0]);
+    f.push(o['path']);
   }
 
   const output = {};

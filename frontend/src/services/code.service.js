@@ -11,7 +11,7 @@ axiosAuth.interceptors.request.use((config) => {
     if (authStore.user) {
         const token = authStore.user.access_token
         if (token) {
-            config.headers['Authorization'] = `Bearer ${token}` 
+            config.headers['Authorization'] = `Bearer ${token}`
         }
         return config
     }
@@ -21,15 +21,19 @@ axiosAuth.interceptors.request.use((config) => {
 
 class CodeService {
     createNewHelloWorld(helloWorldName) {
-        return axiosAuth.post('createNewHelloWorld', {'projectName': helloWorldName})
+        return axiosAuth.post('createNewHelloWorld', { 'projectName': helloWorldName })
     }
 
     loadAllFiles(project_uuid) {
-        return axiosAuth.post('loadAllFiles', {'project_uuid': project_uuid})
+        return axiosAuth.post('loadAllFiles', { 'project_uuid': project_uuid })
     }
 
     getProjectName(project_uuid) {
-        return axiosAuth.post('getProjectName', {'project_uuid': project_uuid})
+        return axiosAuth.post('getProjectName', { 'project_uuid': project_uuid })
+    }
+
+    saveFileChanges(changes, project_uuid) {
+        return axiosAuth.post('saveFileChanges', { 'changes': changes, 'project_uuid': project_uuid })
     }
 }
 

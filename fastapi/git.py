@@ -121,7 +121,7 @@ def load_all_meta_content(project_uuid: str, path: str):
             content.append({'path': res[i]['path'], 'isDir': True})
         else:
             content.append({'path': res[i]['path'], 'isDir': False,
-                            'download_url': res[i]['download_url']})
+                            'download_url': res[i]['download_url'], 'sha': res[i]['sha']})
 
     return content
 
@@ -141,3 +141,28 @@ def download_file_by_url(url: str):
             status_code=500, detail="Could not load contents from repo!")
 
     return buffer.getvalue().decode('utf-8')
+
+
+def update_file(project_uuid: str, path: str, content: str, sha: str):
+    c = pycurl.Curl()
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{get_username()}/{project_uuid}/contents/{path}"))
+    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+    post_data = {'content': base64.b64encode(
+        content.encode('utf-8')), 'sha': sha}
+
+    c.setopt(c.POSTFIELDS, urlencode(post_data))
+    c.setopt(c.CUSTOMREQUEST, 'PUT')
+    buffer = BytesIO()
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    if not (res_code >= 200 and res_code < 300):
+        return {}
+
+    res = buffer.getvalue().decode('utf8')
+    res = json.loads(res)
+
+    return {'sha': res['content']['sha']}

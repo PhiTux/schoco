@@ -89,3 +89,14 @@ class ProjectName(BaseModel):
 
 class ProjectUuid(BaseModel):
     project_uuid: str
+
+
+class FileChanges(BaseModel):
+    path: str
+    content: str
+    sha: str
+
+
+class FileChangesList(BaseModel):
+    changes: List[FileChanges]
+    project_uuid: str

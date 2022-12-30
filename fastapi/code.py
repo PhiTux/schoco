@@ -69,8 +69,8 @@ def recursively_download_all_files(project_uuid: str, path: str):
     # download all files
     for c in root:
         if not c['isDir']:
-            results.append({c['path']:  git.download_file_by_url(
-                url=c['download_url'])})
+            results.append({'path': c['path'], 'content': git.download_file_by_url(
+                url=c['download_url']), 'sha': c['sha']})
         else:
             recursively_download_all_files(
                 project_uuid=project_uuid, path=f"/{c['path']}/")
@@ -99,3 +99,22 @@ def getProjectName(project_uuid: models_and_schemas.ProjectUuid, db: Session = D
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid.project_uuid)
     return project.name
+
+
+@code.post('/saveFileChanges', dependencies=[Depends(auth.oauth2_scheme)])
+def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, username=Depends(auth.get_username_by_token), db: Session = Depends(database.get_db)):
+    project_uuid = fileChanges.project_uuid
+
+    # check if user may edit this project
+    if not project_access_allowed(project_uuid=project_uuid, username=username, db=db):
+        raise HTTPException(
+            status_code=405, detail="You're not allowed to open this project")
+
+    success = []
+    for f in fileChanges.changes:
+        res = git.update_file(project_uuid, f.path, f.content, f.sha)
+        if res:
+            success.append(
+                {'path': f.path, 'content': f.content, 'sha': res['sha']})
+
+    return success

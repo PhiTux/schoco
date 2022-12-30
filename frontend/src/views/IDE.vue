@@ -19,7 +19,8 @@ let state = reactive({
   files: [],
   openFiles: [],
   activeTab: 0,
-  tabsWithChanges: []
+  tabsWithChanges: [],
+  isSaving: false
 });
 
 
@@ -98,7 +99,7 @@ onBeforeMount(() => {
       if (response.status == 200) state.projectName = response.data;
     },
     (error) => {
-      console.log(error);
+      //console.log(error);
     }
   );
 });
@@ -122,8 +123,8 @@ function openFile(inputPath) {
   if (tab == -1) {
     let content = ""
     for (let i = 0; i < state.files.length; i++) {
-      if (Object.keys(state.files[i])[0] === path) {
-        content = state.files[i][path]
+      if (state.files[i]['path'] === path) {
+        content = state.files[i]['content']
         break
       }
     }
@@ -158,6 +159,81 @@ function openFile(inputPath) {
       break
     }
   }
+}
+
+function undo() {
+  ace.edit('editor').session.getUndoManager().undo();
+  ace.edit('editor').focus()
+}
+
+function redo() {
+  ace.edit('editor').session.getUndoManager().redo();
+  ace.edit('editor').focus()
+}
+
+function updateTabsWithChanges() {
+  while (state.tabsWithChanges.length) {
+    state.tabsWithChanges.pop()
+  }
+  for (let i = 0; i < state.openFiles.length; i++) {
+    if (state.openFiles[i]['session'].getValue() != state.openFiles[i]['content']) {
+      state.tabsWithChanges.push(state.openFiles[i]['tab'])
+    }
+  }
+}
+
+function saveAll() {
+
+  state.isSaving = true
+
+  let changes = []
+  for (let i = 0; i < state.tabsWithChanges.length; i++) {
+    for (let x = 0; x < state.openFiles.length; x++) {
+      if (state.openFiles[x]['tab'] === state.tabsWithChanges[i]) {
+        let sha = ''
+        for (let y = 0; y < state.files.length; y++) {
+          if (state.files[y]['path'] === state.openFiles[x]['path']) {
+            sha = state.files[y]['sha']
+            break
+          }
+        }
+        changes.push({ 'path': state.openFiles[x]['path'], 'content': state.openFiles[x]['session'].getValue(), 'sha': sha })
+        continue
+      }
+    }
+  }
+
+
+
+  CodeService.saveFileChanges(changes, route.params.project_uuid).then(
+    response => {
+      state.isSaving = false
+
+      for (let i = 0; i < response.data.length; i++) {
+        for (let x = 0; x < state.files.length; x++) {
+          if (state.files[x]['path'] === response.data[i]['path']) {
+            state.files[x]['sha'] = response.data[i]['sha']
+            state.files[x]['content'] = response.data[i]['content']
+            continue
+          }
+        }
+        for (let x = 0; x < state.openFiles.length; x++) {
+          if (state.openFiles[x]['path'] === response.data[i]['path']) {
+            state.openFiles[x]['content'] = response.data[i]['content']
+          }
+        }
+      }
+
+      //editorChange()
+      updateTabsWithChanges()
+      ace.edit('editor').focus()
+    },
+    error => {
+      state.isSaving = false
+      console.log(error)
+    })
+
+
 }
 </script>
 
@@ -214,13 +290,6 @@ function openFile(inputPath) {
                 <li>
                   <hr class="dropdown-divider" />
                 </li>
-                <li>
-                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-floppy-disk" />
-                    Änderungen speichern</a>
-                </li>
-                <li>
-                  <hr class="dropdown-divider" />
-                </li>
 
                 <li>
                   <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-xmark" /> Projekt
@@ -229,17 +298,21 @@ function openFile(inputPath) {
               </ul>
             </li>
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button type="button" class="btn btn-outline-secondary">
+              <button @click.prevent="undo()" type="button" class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-left-long" />
               </button>
-              <button type="button" class="btn btn-outline-secondary">
+              <button @click.prevent="redo()" type="button" class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
               </button>
             </div>
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button type="button" class="btn btn-green">
-                <font-awesome-icon icon="fa-solid fa-floppy-disk" /> Speichern
+              <button @click.prevent="saveAll()" type="button" class="btn btn-green"
+                :disabled="state.tabsWithChanges.length == 0">
+                <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div><font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
+                Speichern
               </button>
               <button type="button" class="btn btn-yellow">
                 <font-awesome-icon icon="fa-solid btn-yellow fa-gear" />
