@@ -35,12 +35,12 @@ You have to use Gitea as git-repo, since schoco uses the gitea-API.
 ### Option A: *Localhost*
 Install gitea using the docker-compose.yml file from this repo. You can choose to set gitea public available via browser, but actually that's not necessary and you can skip reverse-proxying gitea -> it's enough to have it only available at localhost.
 
-If you used the docker-compose.yml from this repo, then you'll need to do a second step **only once for installation**. Run the following command to create the git-user (adapt username and password):
+If you used the docker-compose.yml from this repo, then you'll need to do a second step **only once for installation**. Run the following command to create the git-user (use a better password!):
 `docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
 
 ### Option B: *External instance (public available)*
 
-Host your gitea-instance anywhere (secured by TLS!!) and connect to it. This might lead to a speed drop caused by increased latency.
+Host your gitea-instance anywhere (secured by TLS!!) and connect to it. This will lead to a speed drop caused by increased latency, since every file sadly needs a separate API-call.
 
 ## 2) Frontend (Vite 4 + Vue 3)
 `cd frontend` 
@@ -58,3 +58,7 @@ Initial Installation (Python 3.10 and pip required): `pip install -r requirement
 On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:schoco --log-level debug --reload`
 
 If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHOST_PORT` with `GITEA_HOST=https://git.mydomain.tld`
+
+## 4) Backend ('Cookies' for compilation/execution)
+Also necessary in production:  
+Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`

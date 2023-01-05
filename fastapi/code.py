@@ -118,3 +118,9 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, username=De
                 {'path': f.path, 'content': f.content, 'sha': res['sha']})
 
     return success
+
+
+@code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
+def getMyProjects(db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+    projects = crud.get_projects_by_username(db=db, username=username)
+    return {'projects': projects}

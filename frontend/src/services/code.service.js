@@ -35,6 +35,10 @@ class CodeService {
     saveFileChanges(changes, project_uuid) {
         return axiosAuth.post('saveFileChanges', { 'changes': changes, 'project_uuid': project_uuid })
     }
+
+    getMyProjects() {
+        return axiosAuth.get('getMyProjects')
+    }
 }
 
 export default new CodeService()

@@ -1,4 +1,4 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from sqlalchemy import exc
 import auth
 import models_and_schemas
@@ -124,6 +124,14 @@ def create_project(db: Session, project: models_and_schemas.Project):
 
 
 def get_project_by_project_uuid(db: Session, project_uuid: str):
-    project = db.query(models_and_schemas.Project).filter(
-        models_and_schemas.Project.uuid == project_uuid).first()
+    project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.uuid == project_uuid)).first()
     return project
+
+
+def get_projects_by_username(db: Session, username: str):
+    owner = db.exec(select(models_and_schemas.User).where(
+        models_and_schemas.User.username == username)).first()
+    projects = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.owner == owner)).all()
+    return projects

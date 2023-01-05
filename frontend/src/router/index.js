@@ -12,7 +12,8 @@ const routes = [
     {path: '/home', name: "home", component: Home},
     {path: '/users', name: "users", component: Users},
     {path: '/newProject', name: "newProject", component: NewProject},
-    {path: '/ide/:project_uuid', name: "ide", component: Ide, params: {project_uuid: ""}}
+    {path: '/ide/:project_uuid', name: "ide", component: Ide, params: {project_uuid: ""}},
+    {path: '/:pathMath(.*)*', redirect: "/home"}
 ]
 
 export const router = createRouter({

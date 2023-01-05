@@ -22,24 +22,33 @@ function newHelloWorld() {
 
   state.creatingProject = true;
 
-  router.push({
+  /* router.push({
     name: "ide",
     params: { project_uuid: "0840baae-eca9-450b-885a-e0759d60f028" },
   });
-  return;
+  return; */
 
   CodeService.createNewHelloWorld(state.helloWorldName).then(
     (response) => {
       console.log(response.data);
+      router.push({
+        name: "ide",
+        params: { project_uuid: response.data },
+      });
     },
     (error) => {
-      console.log(error);
+      console.log(error.response);
+      const toast = new Toast(
+        document.getElementById("toastProjectNotCreated")
+      );
+      toast.show();
     }
   );
 }
 </script>
 
 <template>
+  <!-- Toasts -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div
       class="toast align-items-center text-bg-danger border-0"
@@ -54,7 +63,22 @@ function newHelloWorld() {
         </div>
       </div>
     </div>
+
+    <div
+      class="toast align-items-center text-bg-danger border-0"
+      id="toastProjectNotCreated"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">
+          Das Projekt konnte leider nicht erstellt werden.
+        </div>
+      </div>
+    </div>
   </div>
+
   <div class="container">
     <h1>Wähle dein Ausgangs-Projekt</h1>
     <h2>1) Hello World</h2>
