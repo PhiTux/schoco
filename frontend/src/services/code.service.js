@@ -39,6 +39,10 @@ class CodeService {
     getMyProjects() {
         return axiosAuth.get('getMyProjects')
     }
+
+    compile(projectFiles, project_uuid) {
+        return axiosAuth.post('compile', {'files': projectFiles, 'project_uuid': project_uuid})
+    }
 }
 
 export default new CodeService()

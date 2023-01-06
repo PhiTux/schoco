@@ -100,3 +100,13 @@ class FileChanges(BaseModel):
 class FileChangesList(BaseModel):
     changes: List[FileChanges]
     project_uuid: str
+
+
+class File(BaseModel):
+    path: str
+    content: str
+
+
+class Compile(BaseModel):
+    files: List[File]
+    project_uuid: str

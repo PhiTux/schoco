@@ -20,6 +20,7 @@ let state = reactive({
   activeTab: 0,
   tabsWithChanges: [],
   isSaving: false,
+  isCompiling: false,
 });
 
 function editorChange() {
@@ -28,12 +29,10 @@ function editorChange() {
       var editor = ace.edit("editor");
       // if no change to original
       if (state.openFiles[i]["content"] == editor.getSession().getValue()) {
-        if (state.tabsWithChanges.includes(state.activeTab)) {
-          for (let x = 0; x < state.tabsWithChanges.length; x++) {
-            if (state.tabsWithChanges[x] === state.activeTab) {
-              state.tabsWithChanges.splice(x, 1);
-              break;
-            }
+        for (let x = 0; x < state.tabsWithChanges.length; x++) {
+          if (state.tabsWithChanges[x] === state.activeTab) {
+            state.tabsWithChanges.splice(x, 1);
+            break;
           }
         }
       } else {
@@ -95,7 +94,7 @@ onBeforeMount(() => {
       if (response.status == 200) state.projectName = response.data;
     },
     (error) => {
-      //console.log(error);
+      console.log(error);
     }
   );
 });
@@ -186,6 +185,8 @@ function updateTabsWithChanges() {
 }
 
 function saveAll() {
+  if (state.isSaving) return;
+
   state.isSaving = true;
 
   let changes = [];
@@ -235,6 +236,32 @@ function saveAll() {
     (error) => {
       state.isSaving = false;
       console.log(error);
+    }
+  );
+}
+
+function compile() {
+  if (state.isCompiling) return;
+
+  state.isCompiling = true;
+
+  let projectFiles = [];
+  for (let i = 0; i < state.files.length; i++) {
+    projectFiles.push({
+      path: state.files[i]["path"],
+      content: state.files[i]["content"],
+    });
+  }
+  console.log(projectFiles);
+
+  CodeService.compile(projectFiles, route.params.project_uuid).then(
+    (response) => {
+      state.isCompiling = false;
+      console.log(response.data);
+    },
+    (error) => {
+      state.isCompiling = false;
+      console.log(error.response);
     }
   );
 }
@@ -364,8 +391,19 @@ function saveAll() {
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
                 Speichern
               </button>
-              <button type="button" class="btn btn-yellow">
-                <font-awesome-icon icon="fa-solid btn-yellow fa-gear" />
+              <button
+                @click.prevent="compile()"
+                type="button"
+                class="btn btn-yellow"
+              >
+                <div
+                  v-if="state.isCompiling"
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                >
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                 Kompilieren
               </button>
               <button type="button" class="btn btn-blue">
@@ -423,7 +461,7 @@ function saveAll() {
               </ul>
               <v-ace-editor
                 id="editor"
-                v-model:value="state.projectName"
+                value=""
                 @init="editorInit"
                 lang="java"
                 theme="monokai"

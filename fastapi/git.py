@@ -60,9 +60,6 @@ def create_repo(project_uuid: str):
         return True
     return False
 
-    res = json.loads(buffer.getvalue().decode('utf-8'))
-    print(res['id'])
-
 
 def remove_repo(project_uuid: str):
     buffer = BytesIO()

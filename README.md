@@ -3,7 +3,7 @@
 
 # What is schoco? {🍫}
 
-SCHOCO stands for **SCH**ool **O**nline **CO**ding.
+SCHOCO stands for <ins>**SCH**</ins>ool <ins>**O**</ins>nline <ins>**CO**</ins>ding.
 
 The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github](https://github.com/codeboardio)). Since codeboard didn't receive any more updates since end of 2015 and as we need slightly other features, we now try to create a similar web-based IDE which fits to our needs for **learning (Java)-Programming explicitly at School**! 
 
@@ -20,10 +20,24 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without sending directories or files.
 - Explicitly no possibility to open foreign projects based on a project-id or similar (other than codeboard!). That's first because of privacy-reasons and second to minimize copying from others.
 - Use gitea on backend for storing all code.
-- Compilation and running the programs completely on the server (see [cookies](https://github.com/PhiTux/cookies) - is yet to be done).
+- Compilation and running the programs completely on the server (see /cookies - WIP).
 
 ## Architecture
 <img src="./schoco_architecture.svg">
+
+
+## Progress
+Even a completed task just means, that the specific base-work is done, but that the feature might still need some fine tuning...
+- [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
+- [x] Classroom-management (Creation of courses and assigning pupils to courses)
+- [x] Create a new Java-Project based on a Hello-World-template
+- [x] Open my own Projects in the IDE
+- [x] Interaction with Gitea on localhost or different Host (HTTPS): (Loading all files and save changes)
+- [ ] WIP: Make cookies work (see /cookies)
+- [ ] Worker-Queue (or comparable) for cookies
+- [ ] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
+- [ ] Mark projects as templates (when being a teacher)
+- [ ] Import/export projects/templates as zip
 
 # Start developing
 
@@ -60,5 +74,11 @@ On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST
 If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHOST_PORT` with `GITEA_HOST=https://git.mydomain.tld`
 
 ## 4) Backend ('Cookies' for compilation/execution)
-Also necessary in production:  
-Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
+**This chapter is currently WIP and may receive large changes!**
+
+Probably only necessary in production:  
+- Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
+
+- Make Docker-API public available to enable to attach WSS to running container.  
+See: https://docs.docker.com/config/daemon/remote-access/  
+**IMPORTANT: Only allow URL /containers/{id}/attach to pass through the webserver!**
