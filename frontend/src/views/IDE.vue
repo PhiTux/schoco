@@ -252,9 +252,8 @@ function compile() {
       content: state.files[i]["content"],
     });
   }
-  console.log(projectFiles);
 
-  CodeService.compile(projectFiles, route.params.project_uuid).then(
+  CodeService.prepareCompile(projectFiles, route.params.project_uuid).then(
     (response) => {
       state.isCompiling = false;
       console.log(response.data);

@@ -6,7 +6,10 @@ COPY api/Java_api.class /
 RUN apk add --no-cache openjdk8 junit libc6-compat bash \
     #&& groupadd -r cookies \
     #&& useradd -r -s /bin/false -g cookies cookies \
-    && chown 1234:1234 /app/cookies.sh
+    && chown 1234:1234 /app/cookies.sh \
+    && adduser -H schoco
+
+USER schoco
 
 # The Entrypoint starts the minimum-API written in Java.
 # The container just waits for commands via the API.

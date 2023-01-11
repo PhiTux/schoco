@@ -6,6 +6,7 @@ from fastapi import Request
 import database
 import users
 import code
+import cookies_api
 
 schoco = FastAPI()
 
@@ -33,3 +34,4 @@ schoco.add_middleware(CORSMiddleware, allow_origins=origins,
 @schoco.on_event("startup")
 def startup_event():
     database.create_db_and_tables()
+    cookies_api.fillNewContainersQueue()

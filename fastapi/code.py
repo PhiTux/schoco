@@ -3,7 +3,7 @@ import auth
 import database
 import models_and_schemas
 import crud
-import docker_api
+import cookies_api
 import uuid
 import os
 import git
@@ -127,15 +127,15 @@ def getMyProjects(db: Session = Depends(database.get_db), username=Depends(auth.
     return {'projects': projects}
 
 
-@code.post('/compile', dependencies=[Depends(auth.oauth2_scheme)])
-def compile(compile: models_and_schemas.Compile, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+@code.post('/prepareCompile', dependencies=[Depends(auth.oauth2_scheme)])
+def prepareCompile(compile: models_and_schemas.Compile, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
 
     # check if user may compile this project
     if not project_access_allowed(project_uuid=compile.project_uuid, username=username, db=db):
         raise HTTPException(
             status_code=405, detail="You're not allowed to compile this project")
 
-    # create container and return Start-URL and WS-URL
-    docker_api.createCompile(compile.files, compile.project_uuid)
+    # write files to container-mount and return WS-URL
+    cookies_api.prepareCompile(compile.files, compile.project_uuid)
 
     return True

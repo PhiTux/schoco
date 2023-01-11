@@ -40,8 +40,8 @@ class CodeService {
         return axiosAuth.get('getMyProjects')
     }
 
-    compile(projectFiles, project_uuid) {
-        return axiosAuth.post('compile', {'files': projectFiles, 'project_uuid': project_uuid})
+    prepareCompile(projectFiles, project_uuid) {
+        return axiosAuth.post('prepareCompile', {'files': projectFiles, 'project_uuid': project_uuid})
     }
 }
 
