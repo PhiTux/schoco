@@ -80,7 +80,7 @@ Probably only necessary in production:
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
 
 
-Following part should <ins>**NOT**</ins> be necessary, when using nginx to reverse-proxy incoming WS to docker.sock!
+*Following part should <ins>**NOT**</ins> be necessary, when using nginx to reverse-proxy incoming WS to docker.sock!*
 - Make Docker-API public available to enable to attach WSS to running container.  
 See: https://docs.docker.com/config/daemon/remote-access/  
 **IMPORTANT: Only allow URL /containers/{id}/attach to pass through the webserver!**

@@ -107,6 +107,11 @@ class File(BaseModel):
     content: str
 
 
-class Compile(BaseModel):
+class prepareCompile(BaseModel):
     files: List[File]
     project_uuid: str
+
+
+class startCompile(BaseModel):
+    ip: str
+    port: int

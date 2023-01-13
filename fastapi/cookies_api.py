@@ -1,4 +1,6 @@
+import asyncio
 import datetime
+import queue
 from typing import List
 from pathlib import Path
 import os
@@ -6,27 +8,49 @@ import shutil
 import docker
 from math import ceil
 import uuid
-from multiprocessing import Queue
+from multiprocessing import Queue, Manager
+from threading import Lock, Thread
+from config import settings
 
 HOME = "/home/schoco"
 
 
-def get_max_containers():
-    """Amount of running (=executing) containers. Defaults to 8."""
+class ThreadSaveList():
+    """List implementation, that stores a maximum number of items."""
 
-    if 'MAX_CONTAINERS' in os.environ:
-        return os.environ.get('MAX_CONTAINERS')
-    return 8
+    def __init__(self):
+        self._list = list()
+        self._lock = Lock()
+        #self._size = settings.MAX_CONTAINERS
+
+    def append(self, value):
+        with self._lock:
+            # if len(self._list) < self._size:
+            self._list.append(value)
+            return True
+            # return False
+
+    def get(self, index):
+        with self._lock:
+            return self._list[index]
+
+    def remove(self, index):
+        with self._lock:
+            self._list.pop(index)
+
+    def length(self):
+        with self._lock:
+            return len(self._list)
 
 
-newContainers = Queue(maxsize=ceil(get_max_containers()/3))
-"""Holds the infos of the new (running) cookies-containers, that are WAITING for usage. Defaults to MAX_CONTAINERS/3"""
+newContainers = Queue(maxsize=settings.MAX_CONTAINERS)
+"""Holds the infos of the new (running) cookies-containers, that are WAITING for usage."""
 
-runningContainers = Queue(maxsize=get_max_containers())
+runningContainers = ThreadSaveList()
 
 
 def writeFiles(files: List[str], project_uuid: str):
-    dir = os.path.join(HOME, project_uuid)
+    dir = os.path.join(HOME, str(project_uuid))
 
     # check if dir is already existing -> delete content
     if os.path.exists(dir):
@@ -48,31 +72,37 @@ def writeFiles(files: List[str], project_uuid: str):
 
 
 def createNewContainer():
-    """Creates (and runs!) new container and returns the id, uuid, and open Port."""
+    """Creates (and runs!) new container and returns the id, uuid, ip and port."""
     new_uuid = uuid.uuid4()
     new_name = f"cookies-{new_uuid}"
 
     # create directory for this uuid
-    uuid_dir = Path(os.path.join(HOME, new_uuid))
-    uuid_dir.parent.mkdir(exist_ok=True, parents=True)
+    uuid_dir = Path(os.path.join(HOME, str(new_uuid)))
+    uuid_dir.mkdir(exist_ok=True, parents=True)
 
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=1024, hard=1536)
     new_container = client.containers.run(
-        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={8080: ('127.0.0.1', 80)}, stdout=True, stderr=True, stop_signal="SIGKILL", ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{HOME}/{new_uuid}:/app/tmp"])
+        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={8080: ('127.0.0.1', None)}, stdout=True, stderr=True, stop_signal="SIGKILL", ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{HOME}/{new_uuid}:/app/tmp"])
     # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
     # -> user-defined bridge
 
+    print("next created")
+
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
-    print(apiclient.inspect_container(new_container.name)[
-          'NetworkSettings']['Networks']['bridge']['IPAddress'])
+    ip = apiclient.inspect_container(new_container.name)[
+        'NetworkSettings']['Networks']['schoco']['IPAddress']
+    port = apiclient.inspect_container(new_container.name)[
+        'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
+
+    return {'id': new_container.id, 'uuid': new_uuid, 'ip': ip, 'port': port}
 
 
 def refillNewContainersQueue():
-    """Just fills up the Queue to the amount of containers needed. 
+    """Just fills up the Queue to the amount of containers needed.
     Creates Containers. Runs every time when a command gets started and a container
     is removed from the Queue."""
-    while not newContainers.full():
+    while not newContainers.qsize() + runningContainers.length() >= settings.MAX_CONTAINERS:
         newContainers.put(createNewContainer())
 
 
@@ -89,20 +119,31 @@ def fillNewContainersQueue():
             else:
                 c.remove(force=True)
 
+    print("create next")
+
     refillNewContainersQueue()
 
+    print("finished")
 
-def prepareCompile(files: List[str], project_uuid: str):
+
+def prepareCompile(files: List[str]):
     # get next container out of queue and refill queue
     # only get container, if running containers is < MAX_CONTAINERS
 
-    c = newContainers.get()
-    refillNewContainersQueue()
+    # grab and prepare new container and place it inside runningContainers
+    try:
+        c = newContainers.get(timeout=3)
+    except queue.Empty:
+        return {'success': False, 'message': 'No worker ready for compilation within 3 seconds 😥 Please retry!'}
+
+    runningContainers.append(c)
 
     # write files to filesystem
-    writeFiles(files, project_uuid)
+    writeFiles(files, c['uuid'])
 
-    return
+    # create websocket-attach-URL??
+
+    return c
 
     # create container via Docker API
     client = docker.from_env()

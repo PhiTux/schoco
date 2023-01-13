@@ -2,6 +2,7 @@ import pycurl
 import os
 from fastapi import HTTPException
 from urllib.parse import urlencode
+from config import settings
 import json
 import base64
 
@@ -12,30 +13,13 @@ except:
         status_code=500, detail="Internel error with BytesIO")
 
 
-def get_port():
-    if 'GITEA_LOCALHOST_PORT' in os.environ:
-        return os.environ.get('GITEA_LOCALHOST_PORT')
-    return 3000
-
-
-def get_username():
-    if 'GITEA_USERNAME' in os.environ:
-        return os.environ.get('GITEA_USERNAME')
-    return 'schoco'
-
-
-def get_password():
-    if 'GITEA_PASSWORD' in os.environ:
-        return os.environ.get('GITEA_PASSWORD')
-    return 'schoco1234'
-
-
 def api_base_url():
-    full_host = f"http://localhost:{get_port()}"
-    if 'GITEA_HOST' in os.environ:
-        full_host = os.environ.get('GITEA_HOST')
+    if settings.GITEA_HOST != "":
+        full_host = settings.GITEA_HOST
         while full_host.endswith('/'):
             full_host = full_host[:-1]
+    else:
+        full_host = f"http://localhost:{settings.GITEA_LOCALHOST_PORT}"
 
     return f"{full_host}/api/v1"
 
@@ -48,7 +32,7 @@ def create_repo(project_uuid: str):
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, api_full_url("/user/repos"))
-    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     post_data = {'name': project_uuid, 'private': True}
     c.setopt(c.POSTFIELDS, urlencode(post_data))
     c.setopt(c.WRITEDATA, buffer)
@@ -64,8 +48,9 @@ def create_repo(project_uuid: str):
 def remove_repo(project_uuid: str):
     buffer = BytesIO()
     c = pycurl.Curl()
-    c.setopt(c.URL, api_full_url(f"/repos/{get_username()}/{project_uuid}"))
-    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{settings.GITEA_USERNAME}/{project_uuid}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     c.setopt(c.WRITEDATA, buffer)
     c.setopt(c.CUSTOMREQUEST, 'DELETE')
     c.perform()
@@ -81,8 +66,8 @@ def add_file(project_uuid: str, file_name: str, file_content: bytes):
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, api_full_url(
-        f"/repos/{get_username()}/{project_uuid}/contents/{file_name}"))
-    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+        f"/repos/{settings.GITEA_USERNAME}/{project_uuid}/contents/{file_name}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     c.setopt(c.WRITEDATA, buffer)
     post_data = {'content': base64.b64encode(file_content)}
     c.setopt(c.POSTFIELDS, urlencode(post_data))
@@ -99,8 +84,8 @@ def load_all_meta_content(project_uuid: str, path: str):
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, api_full_url(
-        f"/repos/{get_username()}/{project_uuid}/contents{path}"))
-    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+        f"/repos/{settings.GITEA_USERNAME}/{project_uuid}/contents{path}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     c.setopt(c.WRITEDATA, buffer)
     c.perform()
     res_code = c.getinfo(c.RESPONSE_CODE)
@@ -127,7 +112,7 @@ def download_file_by_url(url: str):
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, url)
-    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     c.setopt(c.WRITEDATA, buffer)
     c.perform()
     res_code = c.getinfo(c.RESPONSE_CODE)
@@ -143,8 +128,8 @@ def download_file_by_url(url: str):
 def update_file(project_uuid: str, path: str, content: str, sha: str):
     c = pycurl.Curl()
     c.setopt(c.URL, api_full_url(
-        f"/repos/{get_username()}/{project_uuid}/contents/{path}"))
-    c.setopt(c.USERPWD, f"{get_username()}:{get_password()}")
+        f"/repos/{settings.GITEA_USERNAME}/{project_uuid}/contents/{path}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     post_data = {'content': base64.b64encode(
         content.encode('utf-8')), 'sha': sha}
 

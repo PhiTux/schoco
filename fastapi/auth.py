@@ -4,23 +4,12 @@ from jose import jwt
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
+from config import settings
 import os
 
 
 pwd_context = CryptContext(schemes=["bcrypt"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
-
-def get_secret_key():
-    if 'SECRET_KEY' in os.environ:
-        return os.environ.get('SECRET_KEY')
-    return os.urandom(24)
-
-
-def get_exp_days():
-    if 'JWT_EXP_DAYS' in os.environ:
-        return int(os.environ.get('JWT_EXP_DAYS'))
-    return 15
 
 
 def create_password_hash(password):
@@ -36,18 +25,18 @@ def create_access_token(user: models_and_schemas.User):
         "sub": user.username,
         "name": user.full_name,
         "role": user.role,
-        "exp": datetime.utcnow() + timedelta(days=get_exp_days())
+        "exp": datetime.utcnow() + timedelta(days=settings.JWT_EXP_DAYS)
     }
-    return jwt.encode(claims=claims, key=get_secret_key(), algorithm="HS256")
+    return jwt.encode(claims=claims, key=settings.SECRET_KEY, algorithm="HS256")
 
 
 def decode_token(token):
-    claims = jwt.decode(token, key=get_secret_key())
+    claims = jwt.decode(token, key=settings.SECRET_KEY)
     return claims
 
 
 def get_username_by_token(token: str = Depends(oauth2_scheme)):
-    claims = jwt.decode(token, key=get_secret_key())
+    claims = jwt.decode(token, key=settings.SECRET_KEY)
     return claims.get('sub')
 
 

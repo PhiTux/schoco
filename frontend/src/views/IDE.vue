@@ -257,6 +257,17 @@ function compile() {
     (response) => {
       state.isCompiling = false;
       console.log(response.data);
+
+      // attach WSS??
+
+      CodeService.startCompile(response.data.ip, response.data.port).then(
+        (response) => {
+          console.log(response.data);
+        },
+        (error) => {
+          console.log(error.response);
+        }
+      );
     },
     (error) => {
       state.isCompiling = false;
