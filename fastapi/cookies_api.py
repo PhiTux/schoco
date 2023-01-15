@@ -1,18 +1,24 @@
 import asyncio
 import datetime
+from io import BytesIO
+import json
 import queue
 from typing import List
 from pathlib import Path
 import os
 import shutil
+from urllib.parse import urlencode
 import docker
 from math import ceil
 import uuid
 from multiprocessing import Queue, Manager
 from threading import Lock, Thread
 from config import settings
+import pycurl
 
 HOME = "/home/schoco"
+
+COMPILETIME = 10
 
 
 class ThreadSaveList():
@@ -127,7 +133,7 @@ def fillNewContainersQueue():
 
 
 def prepareCompile(files: List[str]):
-    # get next container out of queue and refill queue
+    # get next container out of queue
     # only get container, if running containers is < MAX_CONTAINERS
 
     # grab and prepare new container and place it inside runningContainers
@@ -144,6 +150,22 @@ def prepareCompile(files: List[str]):
     # create websocket-attach-URL??
 
     return c
+
+
+def startCompile(ip: str, port: int):
+
+    # pycurl to cookies-java-server "/compile"
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, f"http://localhost:{port}/compile")
+    post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
+    c.setopt(c.POSTFIELDS, json.dumps(post_data))
+    c.setopt(c.WRITEDATA, buffer)
+    c.setopt(pycurl.VERBOSE, 1)
+    c.perform()
+    c.close()
+
+    return json.loads(buffer.getvalue().decode('utf-8'))
 
     # create container via Docker API
     client = docker.from_env()

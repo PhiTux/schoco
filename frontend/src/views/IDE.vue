@@ -260,17 +260,25 @@ function compile() {
 
       // attach WSS??
 
-      CodeService.startCompile(response.data.ip, response.data.port).then(
-        (response) => {
-          console.log(response.data);
-        },
-        (error) => {
-          console.log(error.response);
-        }
+      startCompile(
+        response.data.ip,
+        response.data.port,
+        route.params.project_uuid
       );
     },
     (error) => {
       state.isCompiling = false;
+      console.log(error.response);
+    }
+  );
+}
+
+function startCompile(ip, port, project_uuid) {
+  CodeService.startCompile(ip, port, project_uuid).then(
+    (response) => {
+      console.log(response.data);
+    },
+    (error) => {
       console.log(error.response);
     }
   );

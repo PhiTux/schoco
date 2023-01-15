@@ -5,21 +5,15 @@ import models_and_schemas
 import crud
 from sqlmodel import Session
 from fastapi.security import OAuth2PasswordRequestForm
-import os
+from config import settings
 
 
 users = APIRouter()
 
 
-def get_teacherkey():
-    if 'TEACHER_KEY' in os.environ:
-        return os.environ.get('TEACHER_KEY')
-    return os.urandom(24)
-
-
 @users.post('/registerTeacher')
 def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database.get_db)):
-    if teacherkey != get_teacherkey():
+    if teacherkey != settings.TEACHER_KEY:
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="Password too short")

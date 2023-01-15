@@ -115,3 +115,4 @@ class prepareCompile(BaseModel):
 class startCompile(BaseModel):
     ip: str
     port: int
+    project_uuid: str

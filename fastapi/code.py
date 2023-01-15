@@ -141,5 +141,15 @@ def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, db: Sessio
     return c
 
 
-# @code.post('/startCompile', dependencies=[Depends(auth.oauth2_scheme)])
-# def startCompile(startCompile: models_and_schemas.startCompile, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+@code.post('/startCompile', dependencies=[Depends(auth.oauth2_scheme)])
+def startCompile(startCompile: models_and_schemas.startCompile, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+
+    # check if user may compile this project
+    if not project_access_allowed(project_uuid=startCompile.project_uuid, username=username, db=db):
+        raise HTTPException(
+            status_code=405, detail="You're not allowed to compile this project")
+
+    result = cookies_api.startCompile(startCompile.ip, startCompile.port)
+    return result
+
+    # before return: start background_task to refill new_containers
