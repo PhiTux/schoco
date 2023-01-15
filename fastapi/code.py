@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 import auth
 import database
 import models_and_schemas
@@ -142,7 +142,7 @@ def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, db: Sessio
 
 
 @code.post('/startCompile', dependencies=[Depends(auth.oauth2_scheme)])
-def startCompile(startCompile: models_and_schemas.startCompile, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
 
     # check if user may compile this project
     if not project_access_allowed(project_uuid=startCompile.project_uuid, username=username, db=db):
@@ -150,6 +150,14 @@ def startCompile(startCompile: models_and_schemas.startCompile, db: Session = De
             status_code=405, detail="You're not allowed to compile this project")
 
     result = cookies_api.startCompile(startCompile.ip, startCompile.port)
+
+    # save compilation-results (.class-files)
+    cookies_api.save_compilation_result(
+        startCompile.container_uuid, startCompile.project_uuid)
+
+    background_tasks.add_task(
+        cookies_api.kill_n_create, startCompile.container_uuid)
+
     return result
 
     # before return: start background_task to refill new_containers

@@ -44,8 +44,8 @@ class CodeService {
         return axiosAuth.post('prepareCompile', {'files': projectFiles, 'project_uuid': project_uuid})
     }
 
-    startCompile(ip, port, project_uuid) {
-        return axiosAuth.post('startCompile', {'ip': ip, 'port': port, 'project_uuid': project_uuid})
+    startCompile(ip, port, container_uuid, project_uuid) {
+        return axiosAuth.post('startCompile', {'ip': ip, 'port': port, 'container_uuid': container_uuid, 'project_uuid': project_uuid})
     }
 }
 

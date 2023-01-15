@@ -21,6 +21,7 @@ let state = reactive({
   tabsWithChanges: [],
   isSaving: false,
   isCompiling: false,
+  results: "",
 });
 
 function editorChange() {
@@ -244,6 +245,7 @@ function compile() {
   if (state.isCompiling) return;
 
   state.isCompiling = true;
+  state.results = "Kompilierung gestartet... 🛠";
 
   let projectFiles = [];
   for (let i = 0; i < state.files.length; i++) {
@@ -255,14 +257,21 @@ function compile() {
 
   CodeService.prepareCompile(projectFiles, route.params.project_uuid).then(
     (response) => {
-      state.isCompiling = false;
       console.log(response.data);
+
+      if (response.data.success == false) {
+        state.isCompiling = false;
+        state.results =
+          "Der Server war leider gerade überlastet 😥 Bitte erneut versuchen!";
+        return;
+      }
 
       // attach WSS??
 
       startCompile(
         response.data.ip,
         response.data.port,
+        response.data.uuid,
         route.params.project_uuid
       );
     },
@@ -273,12 +282,17 @@ function compile() {
   );
 }
 
-function startCompile(ip, port, project_uuid) {
-  CodeService.startCompile(ip, port, project_uuid).then(
+function startCompile(ip, port, container_uuid, project_uuid) {
+  CodeService.startCompile(ip, port, container_uuid, project_uuid).then(
     (response) => {
+      state.isCompiling = false;
       console.log(response.data);
+      if (response.data.exitCode == 0) {
+        state.results = "Erfolgreich kompiliert 🎉";
+      }
     },
     (error) => {
+      state.isCompiling = false;
       console.log(error.response);
     }
   );
@@ -488,7 +502,9 @@ function startCompile(ip, port, project_uuid) {
           </splitpanes>
         </pane>
         <pane size="20" max-size="50">
-          <span>5</span>
+          <div class="output">
+            {{ state.results }}
+          </div>
         </pane>
       </splitpanes>
     </div>
@@ -496,6 +512,12 @@ function startCompile(ip, port, project_uuid) {
 </template>
 
 <style scoped>
+.output {
+  width: 100;
+  height: 100%;
+  background-color: #383838;
+}
+
 .changed {
   font-style: italic;
 }

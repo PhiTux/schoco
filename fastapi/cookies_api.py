@@ -27,14 +27,11 @@ class ThreadSaveList():
     def __init__(self):
         self._list = list()
         self._lock = Lock()
-        #self._size = settings.MAX_CONTAINERS
 
     def append(self, value):
         with self._lock:
-            # if len(self._list) < self._size:
             self._list.append(value)
             return True
-            # return False
 
     def get(self, index):
         with self._lock:
@@ -55,8 +52,8 @@ newContainers = Queue(maxsize=settings.MAX_CONTAINERS)
 runningContainers = ThreadSaveList()
 
 
-def writeFiles(files: List[str], project_uuid: str):
-    dir = os.path.join(HOME, str(project_uuid))
+def writeFiles(files: List[str], uuid: str):
+    dir = os.path.join(HOME, str(uuid))
 
     # check if dir is already existing -> delete content
     if os.path.exists(dir):
@@ -77,6 +74,18 @@ def writeFiles(files: List[str], project_uuid: str):
         output_file.write_text(f.content)
 
 
+def save_compilation_result(container_uuid: str, project_uuid: str):
+    sourcepath = os.path.join(HOME, str(container_uuid))
+    sourcefiles = os.listdir(sourcepath)
+    destinationpath = os.path.join(HOME, str(project_uuid))
+    Path(destinationpath).mkdir(exist_ok=True, parents=True)
+
+    for file in sourcefiles:
+        if file.endswith('.class'):
+            shutil.move(os.path.join(sourcepath, file),
+                        os.path.join(destinationpath, file))
+
+
 def createNewContainer():
     """Creates (and runs!) new container and returns the id, uuid, ip and port."""
     new_uuid = uuid.uuid4()
@@ -93,7 +102,7 @@ def createNewContainer():
     # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
     # -> user-defined bridge
 
-    print("next created")
+    print("new container created")
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
     ip = apiclient.inspect_container(new_container.name)[
@@ -101,7 +110,7 @@ def createNewContainer():
     port = apiclient.inspect_container(new_container.name)[
         'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
 
-    return {'id': new_container.id, 'uuid': new_uuid, 'ip': ip, 'port': port}
+    return {'id': new_container.id, 'uuid': str(new_uuid), 'ip': ip, 'port': port}
 
 
 def refillNewContainersQueue():
@@ -125,11 +134,7 @@ def fillNewContainersQueue():
             else:
                 c.remove(force=True)
 
-    print("create next")
-
     refillNewContainersQueue()
-
-    print("finished")
 
 
 def prepareCompile(files: List[str]):
@@ -161,21 +166,41 @@ def startCompile(ip: str, port: int):
     post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
     c.setopt(c.POSTFIELDS, json.dumps(post_data))
     c.setopt(c.WRITEDATA, buffer)
-    c.setopt(pycurl.VERBOSE, 1)
     c.perform()
     c.close()
 
     return json.loads(buffer.getvalue().decode('utf-8'))
 
-    # create container via Docker API
+
+def kill_n_create(container_uuid: str):
+    """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
+
+    # remove containerInfo from runningContainers
+    for i in range(runningContainers.length()):
+        c = runningContainers.get(i)
+        if c['uuid'] == container_uuid:
+            runningContainers.remove(i)
+            break
+
+    # remove container-dir
+    dir = os.path.join(HOME, container_uuid)
+    print(dir)
+    shutil.rmtree(dir)
+
+    # kill and (hopefully automatically) remove container
     client = docker.from_env()
-    container = client.containers.get("cookies")
-    log = container.exec_run(
-        "sh -c 'bash /app/cookies.sh \"javac /app/tmp/Main.java\" 10 10; exit'", stdin=True, stderr=True, stdout=True)
-    print(log)
+    try:
+        c = client.containers.get(f"cookies-{container_uuid}")
+    except (docker.errors.NotFound, docker.errors.APIError) as e:
+        return
 
-    # return URLs
+    if c.status == 'running':
+        c.kill()
+    else:
+        c.remove(force=True)
 
+    # refill newContainers
+    refillNewContainersQueue()
 
 # TODO Disable Networking on Container after start execution
 # or use following command to enable Security Manager -> disable Networking, file access, ...:
