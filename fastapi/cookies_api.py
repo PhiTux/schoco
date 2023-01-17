@@ -3,6 +3,8 @@ import datetime
 from io import BytesIO
 import json
 import queue
+import time
+import traceback
 from typing import List
 from pathlib import Path
 import os
@@ -34,12 +36,27 @@ class ThreadSaveList():
             return True
 
     def get(self, index):
+        """Return item without removal."""
         with self._lock:
             return self._list[index]
 
     def remove(self, index):
         with self._lock:
             self._list.pop(index)
+
+    def remove_by_uuid(self, container_uuid):
+        with self._lock:
+            for i in range(len(self._list)):
+                if self._list[i]['uuid'] == container_uuid:
+                    self._list.pop(i)
+                    break
+
+    def get_and_remove_by_uuid(self, container_uuid):
+        with self._lock:
+            for i in range(len(self._list)):
+                if self._list[i]['uuid'] == container_uuid:
+                    c = self._list.pop(i)
+                    return c
 
     def length(self):
         with self._lock:
@@ -102,7 +119,7 @@ def createNewContainer():
     # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
     # -> user-defined bridge
 
-    print("new container created")
+    print("new container created: " + str(new_uuid))
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
     ip = apiclient.inspect_container(new_container.name)[
@@ -138,8 +155,7 @@ def fillNewContainersQueue():
 
 
 def prepareCompile(files: List[str]):
-    # get next container out of queue
-    # only get container, if running containers is < MAX_CONTAINERS
+    # get next container out of queue - return if no new one is available after 3 seconds.
 
     # grab and prepare new container and place it inside runningContainers
     try:
@@ -148,6 +164,7 @@ def prepareCompile(files: List[str]):
         return {'success': False, 'message': 'No worker ready for compilation within 3 seconds 😥 Please retry!'}
 
     runningContainers.append(c)
+    print("prepared: " + c['uuid'] + " with port: " + str(c['port']))
 
     # write files to filesystem
     writeFiles(files, c['uuid'])
@@ -158,15 +175,29 @@ def prepareCompile(files: List[str]):
 
 
 def startCompile(ip: str, port: int):
+    print("start compile at port: " + str(port))
 
     # pycurl to cookies-java-server "/compile"
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, f"http://localhost:{port}/compile")
     post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
-    c.setopt(c.POSTFIELDS, json.dumps(post_data))
-    c.setopt(c.WRITEDATA, buffer)
-    c.perform()
+
+    # Why the 7? 🤷‍♂️ Probability and trial and error...
+    tries = 7
+    while tries > 0:
+        try:
+            c.setopt(c.POSTFIELDS, json.dumps(post_data))
+            c.setopt(c.WRITEDATA, buffer)
+            c.perform()
+            break
+        except BaseException as e:
+            print("connection error: " + str(port))
+            tries -= 1
+            if (tries == 0):
+                c.close()
+                return {'status': 'connect_error'}
+            time.sleep(0.2)
     c.close()
 
     return json.loads(buffer.getvalue().decode('utf-8'))
@@ -175,16 +206,13 @@ def startCompile(ip: str, port: int):
 def kill_n_create(container_uuid: str):
     """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
 
+    print("kill " + container_uuid)
+
     # remove containerInfo from runningContainers
-    for i in range(runningContainers.length()):
-        c = runningContainers.get(i)
-        if c['uuid'] == container_uuid:
-            runningContainers.remove(i)
-            break
+    runningContainers.remove_by_uuid(container_uuid)
 
     # remove container-dir
     dir = os.path.join(HOME, container_uuid)
-    print(dir)
     shutil.rmtree(dir)
 
     # kill and (hopefully automatically) remove container
@@ -192,6 +220,8 @@ def kill_n_create(container_uuid: str):
     try:
         c = client.containers.get(f"cookies-{container_uuid}")
     except (docker.errors.NotFound, docker.errors.APIError) as e:
+        print(e)
+        print(traceback.format_exc())
         return
 
     if c.status == 'running':
@@ -205,3 +235,35 @@ def kill_n_create(container_uuid: str):
 # TODO Disable Networking on Container after start execution
 # or use following command to enable Security Manager -> disable Networking, file access, ...:
 # java -Djava.security.manager=default my.main.Class
+
+
+def prepare_execute(project_uuid: str):
+    # grab and prepare new container and place it inside runningContainers
+    try:
+        c = newContainers.get(timeout=3)
+    except queue.Empty:
+        return {'success': False, 'message': 'No worker ready for compilation within 3 seconds 😥 Please retry!'}
+
+    runningContainers.append(c)
+
+    # copy .class files to container-mount
+    sourcepath = os.path.join(HOME, project_uuid)
+    sourcefiles = os.listdir(sourcepath)
+    destinationpath = os.path.join(HOME, str(c['uuid']))
+    Path(destinationpath).mkdir(exist_ok=True, parents=True)
+
+    filesExist = False
+    for file in sourcefiles:
+        if file.endswith('.class'):
+            filesExist = True
+            shutil.copyfile(os.path.join(sourcepath, file),
+                            os.path.join(destinationpath, file))
+
+    # if no .class files existed, then return container to newContainers-Queue
+    if not filesExist:
+        c = runningContainers.get_and_remove_by_uuid(c['uuid'])
+        newContainers.put(c)
+
+        return {'executable': False}
+
+    return c

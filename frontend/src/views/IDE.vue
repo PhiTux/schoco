@@ -21,6 +21,7 @@ let state = reactive({
   tabsWithChanges: [],
   isSaving: false,
   isCompiling: false,
+  isExecuting: false,
   results: "",
 });
 
@@ -287,12 +288,48 @@ function startCompile(ip, port, container_uuid, project_uuid) {
     (response) => {
       state.isCompiling = false;
       console.log(response.data);
+      if (response.data.status === "connect_error") {
+        state.results =
+          'Interner Verbindungsfehler. ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... Bitte direkt erneut probieren 😊';
+      }
       if (response.data.exitCode == 0) {
         state.results = "Erfolgreich kompiliert 🎉";
       }
     },
     (error) => {
       state.isCompiling = false;
+      console.log(error.response);
+    }
+  );
+}
+
+function execute() {
+  if (state.isExecuting) return;
+
+  state.isExecuting = true;
+
+  CodeService.prepareExecute(route.params.project_uuid).then(
+    (response) => {
+      // only temporary:
+      state.isExecuting = false;
+
+      console.log(response.data);
+
+      if (response.data.executable == false) {
+        state.results =
+          "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
+        return;
+      }
+
+      startExecute(
+        response.data.ip,
+        response.data.port,
+        response.data.uuid,
+        route.params.project_uuid
+      );
+    },
+    (error) => {
+      state.isExecuting = false;
       console.log(error.response);
     }
   );
@@ -438,8 +475,20 @@ function startCompile(ip, port, container_uuid, project_uuid) {
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                 Kompilieren
               </button>
-              <button type="button" class="btn btn-blue">
-                <font-awesome-icon icon="fa-solid fa-circle-play" /> Ausführen
+              <button
+                @click.prevent="execute()"
+                type="button"
+                class="btn btn-blue"
+              >
+                <div
+                  v-if="state.isExecuting"
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                >
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
+                Ausführen
               </button>
               <button type="button" class="btn btn-indigo">
                 <font-awesome-icon icon="fa-solid fa-list-check" /> Testen

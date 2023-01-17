@@ -155,9 +155,22 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
     cookies_api.save_compilation_result(
         startCompile.container_uuid, startCompile.project_uuid)
 
+    # before return: start background_task to refill new_containers
     background_tasks.add_task(
         cookies_api.kill_n_create, startCompile.container_uuid)
 
     return result
 
-    # before return: start background_task to refill new_containers
+
+@code.post('/prepareExecute', dependencies=[Depends(auth.oauth2_scheme)])
+def prepareExecute(project_uuid: models_and_schemas.ProjectUuid, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+
+    # check if user may execute this project
+    if not project_access_allowed(project_uuid=project_uuid.project_uuid, username=username, db=db):
+        raise HTTPException(
+            status_code=405, detail="You're not allowed to execute this project")
+
+    # prepares container by copying .class files into container-mount
+    # returns {'executable': false} if no files are found
+    c = cookies_api.prepare_execute(project_uuid.project_uuid)
+    return c
