@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path
 import auth
 import database
 import models_and_schemas
@@ -44,7 +44,10 @@ def createNewHelloWorld(projectName: models_and_schemas.ProjectName, db: Session
     return project_uuid
 
 
-def project_access_allowed(project_uuid: str, username: str, db: Session):
+def project_access_allowed(project_uuid: str, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+
+    print(project_uuid)
+
     # teacher is allowed to open
     user = crud.get_user_by_username(db=db, username=username)
     if user.role == "teacher":
@@ -55,7 +58,9 @@ def project_access_allowed(project_uuid: str, username: str, db: Session):
         db=db, project_uuid=project_uuid)
     if project.owner.username == username:
         return True
-    return False
+
+    raise HTTPException(
+        status_code=405, detail="You're not allowed to open this project")
 
 
 results = []
@@ -79,37 +84,25 @@ def recursively_download_all_files(project_uuid: str, path: str):
     return (results)
 
 
-@code.post('/loadAllFiles', dependencies=[Depends(auth.oauth2_scheme)])
-def loadAllFiles(project_uuid: models_and_schemas.ProjectUuid, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
-    project_uuid = project_uuid.project_uuid
+@code.get('/loadAllFiles/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def loadAllFiles(project_uuid: str = Path()):
     global results
     results = []
-
-    # check if user may open this project
-    if not project_access_allowed(project_uuid=project_uuid, username=username, db=db):
-        raise HTTPException(
-            status_code=405, detail="You're not allowed to open this project")
 
     res = recursively_download_all_files(project_uuid=project_uuid, path="/")
 
     return res
 
 
-@code.post('/getProjectName', dependencies=[Depends(auth.oauth2_scheme)])
-def getProjectName(project_uuid: models_and_schemas.ProjectUuid, db: Session = Depends(database.get_db)):
+@ code.get('/getProjectName/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
+def getProjectName(project_uuid: str = Path(), db: Session = Depends(database.get_db)):
     project = crud.get_project_by_project_uuid(
-        db=db, project_uuid=project_uuid.project_uuid)
+        db=db, project_uuid=project_uuid)
     return project.name
 
 
-@code.post('/saveFileChanges', dependencies=[Depends(auth.oauth2_scheme)])
-def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, username=Depends(auth.get_username_by_token), db: Session = Depends(database.get_db)):
-    project_uuid = fileChanges.project_uuid
-
-    # check if user may edit this project
-    if not project_access_allowed(project_uuid=project_uuid, username=username, db=db):
-        raise HTTPException(
-            status_code=405, detail="You're not allowed to open this project")
+@ code.post('/saveFileChanges/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uuid: str = Path()):
 
     success = []
     for f in fileChanges.changes:
@@ -121,19 +114,14 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, username=De
     return success
 
 
-@code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
+@ code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
 def getMyProjects(db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
     projects = crud.get_projects_by_username(db=db, username=username)
     return {'projects': projects}
 
 
-@code.post('/prepareCompile', dependencies=[Depends(auth.oauth2_scheme)])
-def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
-
-    # check if user may compile this project
-    if not project_access_allowed(project_uuid=prepareCompile.project_uuid, username=username, db=db):
-        raise HTTPException(
-            status_code=405, detail="You're not allowed to compile this project")
+@ code.post('/prepareCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, project_uuid: str = Path()):
 
     # write files to container-mount and return WS-URL
     c = cookies_api.prepareCompile(prepareCompile.files)
@@ -141,19 +129,14 @@ def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, db: Sessio
     return c
 
 
-@code.post('/startCompile', dependencies=[Depends(auth.oauth2_scheme)])
-def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
-
-    # check if user may compile this project
-    if not project_access_allowed(project_uuid=startCompile.project_uuid, username=username, db=db):
-        raise HTTPException(
-            status_code=405, detail="You're not allowed to compile this project")
+@ code.post('/startCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, project_uuid: str = Path()):
 
     result = cookies_api.startCompile(startCompile.ip, startCompile.port)
 
     # save compilation-results (.class-files)
     cookies_api.save_compilation_result(
-        startCompile.container_uuid, startCompile.project_uuid)
+        startCompile.container_uuid, project_uuid)
 
     # before return: start background_task to refill new_containers
     background_tasks.add_task(
@@ -162,15 +145,15 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
     return result
 
 
-@code.post('/prepareExecute', dependencies=[Depends(auth.oauth2_scheme)])
-def prepareExecute(project_uuid: models_and_schemas.ProjectUuid, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
-
-    # check if user may execute this project
-    if not project_access_allowed(project_uuid=project_uuid.project_uuid, username=username, db=db):
-        raise HTTPException(
-            status_code=405, detail="You're not allowed to execute this project")
+@ code.get('/prepareExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def prepareExecute(project_uuid: str = Path()):
 
     # prepares container by copying .class files into container-mount
     # returns {'executable': false} if no files are found
-    c = cookies_api.prepare_execute(project_uuid.project_uuid)
+    c = cookies_api.prepare_execute(project_uuid)
     return c
+
+
+@ code.post('/startExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path()):
+    return

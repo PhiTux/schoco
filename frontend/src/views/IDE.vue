@@ -334,6 +334,19 @@ function execute() {
     }
   );
 }
+
+function startExecute(ip, port, uuid, project_uuid) {
+  CodeService.startExecute(ip, port, uuid, project_uuid).then(
+    (response) => {
+      this.isExecuting = false;
+      console.log(response);
+    },
+    (error) => {
+      this.isExecuting = false;
+      console.log(error.response);
+    }
+  );
+}
 </script>
 
 <template>

@@ -87,10 +87,6 @@ class ProjectName(BaseModel):
     projectName: str
 
 
-class ProjectUuid(BaseModel):
-    project_uuid: str
-
-
 class FileChanges(BaseModel):
     path: str
     content: str
@@ -99,7 +95,6 @@ class FileChanges(BaseModel):
 
 class FileChangesList(BaseModel):
     changes: List[FileChanges]
-    project_uuid: str
 
 
 class File(BaseModel):
@@ -109,11 +104,15 @@ class File(BaseModel):
 
 class prepareCompile(BaseModel):
     files: List[File]
-    project_uuid: str
 
 
 class startCompile(BaseModel):
     ip: str
     port: int
     container_uuid: str
-    project_uuid: str
+
+
+class startExecute(BaseModel):
+    ip: str
+    port: int
+    container_uuid: str

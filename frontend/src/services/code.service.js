@@ -25,15 +25,15 @@ class CodeService {
     }
 
     loadAllFiles(project_uuid) {
-        return axiosAuth.post('loadAllFiles', { 'project_uuid': project_uuid })
+        return axiosAuth.get(`loadAllFiles/${project_uuid}`)
     }
 
     getProjectName(project_uuid) {
-        return axiosAuth.post('getProjectName', { 'project_uuid': project_uuid })
+        return axiosAuth.get(`getProjectName/${project_uuid}`)
     }
 
     saveFileChanges(changes, project_uuid) {
-        return axiosAuth.post('saveFileChanges', { 'changes': changes, 'project_uuid': project_uuid })
+        return axiosAuth.post(`saveFileChanges/${project_uuid}`, { 'changes': changes})
     }
 
     getMyProjects() {
@@ -41,15 +41,19 @@ class CodeService {
     }
 
     prepareCompile(projectFiles, project_uuid) {
-        return axiosAuth.post('prepareCompile', {'files': projectFiles, 'project_uuid': project_uuid})
+        return axiosAuth.post(`prepareCompile/${project_uuid}`, {'files': projectFiles})
     }
 
     startCompile(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post('startCompile', {'ip': ip, 'port': port, 'container_uuid': container_uuid, 'project_uuid': project_uuid})
+        return axiosAuth.post(`startCompile/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
     }
 
     prepareExecute(project_uuid) {
-        return axiosAuth.post('prepareExecute', {'project_uuid': project_uuid})
+        return axiosAuth.get(`prepareExecute/${project_uuid}`)
+    }
+
+    startExecute(ip, port, container_uuid, project_uuid) {
+        return axiosAuth.post(`startExecute/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
     }
 }
 
