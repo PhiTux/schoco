@@ -4,6 +4,8 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -24,12 +26,35 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
-					Scanner s;
+					String s = null;
+					StringBuilder stdoutb = new StringBuilder();
+					StringBuilder stderrb = new StringBuilder();
+					String stdout, stderr;
+
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp /app/tmp/Main.java' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
 						Process process = Runtime.getRuntime().exec(command);
-						s = new Scanner(process.getInputStream()).useDelimiter("\\A");
+						
+
+						BufferedReader stdInput = new BufferedReader(new 
+     						InputStreamReader(process.getInputStream()));
+
+						BufferedReader stdError = new BufferedReader(new 
+     						InputStreamReader(process.getErrorStream()));
 						exitCode = process.waitFor();
+
+						// Read the output from the command
+						while ((s = stdInput.readLine()) != null) {
+							stdoutb.append(s).append("\n");
+						}
+						stdout = stdoutb.toString().replaceAll("\"", "\\\\\"");
+
+						// Read any errors from the attempted command
+						while ((s = stdError.readLine()) != null) {
+							stderrb.append(s).append("\n");
+						}
+						stderr = stderrb.toString().replaceAll("\"", "\\\\\"");
+
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						exchange.sendResponseHeaders(500, -1);// Internal Server Error
@@ -46,9 +71,7 @@ public class Java_api {
 						return;
 					}
 					
-					String output = s.hasNext() ? s.next() : "";
-
-					String responseText = "{\"exitCode\":\"" + exitCode + "\",\"output\":\"" + output + "\"}";
+					String responseText = "{\"exitCode\":\"" + exitCode + "\",\"output\":\"" + stdout + "\",\"error\":\"" + stderr + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());
@@ -69,12 +92,35 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
-					Scanner s;
+					String s = null;
+					StringBuilder stdoutb = new StringBuilder();
+					StringBuilder stderrb = new StringBuilder();
+					String stdout, stderr;
+
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp Main' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
 						Process process = Runtime.getRuntime().exec(command);
-						s = new Scanner(process.getInputStream()).useDelimiter("\\A");
+						
 						exitCode = process.waitFor();
+
+						BufferedReader stdInput = new BufferedReader(new 
+     						InputStreamReader(process.getInputStream(), "UTF-8"));
+
+						BufferedReader stdError = new BufferedReader(new 
+     						InputStreamReader(process.getErrorStream(), "UTF-8"));
+						exitCode = process.waitFor();
+
+						// Read the output from the command
+						while ((s = stdInput.readLine()) != null) {
+							stdoutb.append(s).append("\n");
+						}
+						stdout = stdoutb.toString().replaceAll("\"", "\\\\\"");
+
+						// Read any errors from the attempted command
+						while ((s = stdError.readLine()) != null) {
+							stderrb.append(s).append("\n");
+						}
+						stderr = stderrb.toString().replaceAll("\"", "\\\\\"");
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						exchange.sendResponseHeaders(500, -1);// Internal Server Error
@@ -90,11 +136,9 @@ public class Java_api {
 						os.close();
 						return;
 					}
-					
-					String output = s.hasNext() ? s.next() : "";
 
 					//TODO: Don't return output on following line! (Could be endless...)
-					String responseText = "{\"exitCode\":\"" + exitCode + "\",\"output\":\"" + output + "\"}";
+					String responseText = "{\"exitCode\":\"" + exitCode + "\",\"output\":\"" + stdout + "\",\"error\":\"" + stderr + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());

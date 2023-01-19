@@ -293,7 +293,11 @@ function startCompile(ip, port, container_uuid, project_uuid) {
           'Interner Verbindungsfehler. ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... Bitte direkt erneut probieren 😊';
       }
       if (response.data.exitCode == 0) {
-        state.results = "Erfolgreich kompiliert 🎉";
+        if (response.data.error === "") {
+          state.results = "Erfolgreich kompiliert 🎉";
+        } else {
+          state.results = response.data.error;
+        }
       }
     },
     (error) => {
@@ -565,7 +569,7 @@ function startExecute(ip, port, uuid, project_uuid) {
         </pane>
         <pane size="20" max-size="50">
           <div class="output">
-            {{ state.results }}
+            <pre>{{ state.results }}</pre>
           </div>
         </pane>
       </splitpanes>
@@ -578,6 +582,7 @@ function startExecute(ip, port, uuid, project_uuid) {
   width: 100;
   height: 100%;
   background-color: #383838;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .changed {

@@ -97,8 +97,10 @@ def save_compilation_result(container_uuid: str, project_uuid: str):
     destinationpath = os.path.join(HOME, str(project_uuid))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
 
+    print(sourcepath)
     for file in sourcefiles:
         if file.endswith('.class'):
+            print("-> " + file)
             shutil.move(os.path.join(sourcepath, file),
                         os.path.join(destinationpath, file))
 
@@ -145,6 +147,13 @@ def fillNewContainersQueue():
     containers = client.containers.list(all=True)
     for c in containers:
         if str(c.name).startswith('cookies-'):
+            # remove dir
+
+            dir = os.path.join(HOME, c.name[8:])
+            if os.path.exists(dir):
+                shutil.rmtree(dir)
+
+            # kill container
             if c.status == 'running':
                 c.kill()
                 # gets autoremoved since auto-removing is set to true
@@ -200,7 +209,7 @@ def startCompile(ip: str, port: int):
             time.sleep(0.2)
     c.close()
 
-    return json.loads(buffer.getvalue().decode('utf-8'))
+    return json.loads(buffer.getvalue().decode('utf-8'), strict=False)
 
 
 def kill_n_create(container_uuid: str):
