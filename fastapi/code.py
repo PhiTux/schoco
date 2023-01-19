@@ -156,4 +156,10 @@ def prepareExecute(project_uuid: str = Path()):
 
 @ code.post('/startExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path()):
-    return
+
+    result = cookies_api.start_execute(startExecute.ip, startExecute.port)
+
+    background_tasks.add_task(
+        cookies_api.kill_n_create, startExecute.container_uuid)
+
+    return result

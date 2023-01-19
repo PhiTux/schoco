@@ -275,4 +275,37 @@ def prepare_execute(project_uuid: str):
 
         return {'executable': False}
 
+    print(c['uuid'] + " with port " + c['port'])
+
     return c
+
+
+def start_execute(ip: str, port: int):
+    print("start execute at port: " + str(port))
+
+    # pycurl to cookies-java-server "/compile"
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, f"http://localhost:{port}/execute")
+    post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
+
+    # Why the 7? 🤷‍♂️ Probability and trial and error...
+    tries = 7
+    while tries > 0:
+        try:
+            c.setopt(c.POSTFIELDS, json.dumps(post_data))
+            c.setopt(c.WRITEDATA, buffer)
+            c.perform()
+            break
+        except BaseException as e:
+            print("connection error: " + str(port))
+            tries -= 1
+            if (tries == 0):
+                c.close()
+                return {'status': 'connect_error'}
+            time.sleep(0.2)
+    c.close()
+
+    print(buffer.getvalue().decode('utf-8'))
+
+    return json.loads(buffer.getvalue().decode('utf-8'), strict=False)

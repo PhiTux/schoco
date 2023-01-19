@@ -290,7 +290,7 @@ function startCompile(ip, port, container_uuid, project_uuid) {
       console.log(response.data);
       if (response.data.status === "connect_error") {
         state.results =
-          'Interner Verbindungsfehler. ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... Bitte direkt erneut probieren 😊';
+          'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
       }
       if (response.data.exitCode == 0) {
         if (response.data.error === "") {
