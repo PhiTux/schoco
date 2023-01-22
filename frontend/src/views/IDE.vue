@@ -325,6 +325,8 @@ function execute() {
         return;
       }
 
+      connectWebsocketExecute(response.data.id)
+
       startExecute(
         response.data.ip,
         response.data.port,
@@ -337,6 +339,22 @@ function execute() {
       console.log(error.response);
     }
   );
+}
+
+function connectWebsocketExecute(id) {
+  console.log("Starting connection to WebSocket Server")
+
+  this.connection = new WebSocket(":80/")
+
+  this.connection.onmessage = function (event) {
+    console.log(event);
+  }
+
+  this.connection.onopen = function (event) {
+    console.log(event)
+    console.log("Successfully connected to the echo websocket server...")
+  }
+
 }
 
 function startExecute(ip, port, uuid, project_uuid) {
@@ -357,13 +375,8 @@ function startExecute(ip, port, uuid, project_uuid) {
   <div class="ide">
     <!-- Toasts -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div
-        class="toast align-items-center text-bg-danger border-0"
-        id="toastLoadingProjectError"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div class="toast align-items-center text-bg-danger border-0" id="toastLoadingProjectError" role="alert"
+        aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Laden des Projekts. Bitte zurück oder neu laden.
@@ -371,13 +384,8 @@ function startExecute(ip, port, uuid, project_uuid) {
         </div>
       </div>
 
-      <div
-        class="toast align-items-center text-bg-danger border-0"
-        id="toastProjectAccessError"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div class="toast align-items-center text-bg-danger border-0" id="toastProjectAccessError" role="alert"
+        aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
             Du kannst nur deine eigenen Projekte öffnen!
@@ -389,119 +397,67 @@ function startExecute(ip, port, uuid, project_uuid) {
     <!-- Navbar -->
     <nav class="navbar sticky-top navbar-expand-lg bg-dark navbar-dark">
       <div class="container-fluid">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav">
             <li class="nav-item dropdown mx-3">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 Projekt
               </a>
               <ul class="dropdown-menu">
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
-                    Neue Datei</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
+                    Neue Datei</a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-folder-plus" /> Neuer
-                    Ordner</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-folder-plus" /> Neuer
+                    Ordner</a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
-                    löschen</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
+                    löschen</a>
                 </li>
                 <li>
                   <hr class="dropdown-divider" />
                 </li>
 
                 <li>
-                  <a class="dropdown-item" href="#"
-                    ><font-awesome-icon icon="fa-solid fa-xmark" /> Projekt
-                    schließen</a
-                  >
+                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-xmark" /> Projekt
+                    schließen</a>
                 </li>
               </ul>
             </li>
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button
-                @click.prevent="undo()"
-                type="button"
-                class="btn btn-outline-secondary"
-              >
+              <button @click.prevent="undo()" type="button" class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-left-long" />
               </button>
-              <button
-                @click.prevent="redo()"
-                type="button"
-                class="btn btn-outline-secondary"
-              >
+              <button @click.prevent="redo()" type="button" class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
               </button>
             </div>
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button
-                @click.prevent="saveAll()"
-                type="button"
-                class="btn btn-green"
-                :disabled="state.tabsWithChanges.length == 0"
-              >
-                <div
-                  v-if="state.isSaving"
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                >
+              <button @click.prevent="saveAll()" type="button" class="btn btn-green"
+                :disabled="state.tabsWithChanges.length == 0">
+                <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
                 Speichern
               </button>
-              <button
-                @click.prevent="compile()"
-                type="button"
-                class="btn btn-yellow"
-              >
-                <div
-                  v-if="state.isCompiling"
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                >
+              <button @click.prevent="compile()" type="button" class="btn btn-yellow">
+                <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                 Kompilieren
               </button>
-              <button
-                @click.prevent="execute()"
-                type="button"
-                class="btn btn-blue"
-              >
-                <div
-                  v-if="state.isExecuting"
-                  class="spinner-border spinner-border-sm"
-                  role="status"
-                >
+              <button @click.prevent="execute()" type="button" class="btn btn-blue">
+                <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
@@ -517,20 +473,10 @@ function startExecute(ip, port, uuid, project_uuid) {
     </nav>
 
     <div class="ide-main">
-      <splitpanes
-        class="default-theme"
-        height="100%"
-        horizontal
-        :push-other-panes="false"
-      >
+      <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false">
         <pane>
           <splitpanes :push-other-panes="false">
-            <pane
-              min-size="15"
-              size="20"
-              max-size="30"
-              style="background-color: #383838"
-            >
+            <pane min-size="15" size="20" max-size="30" style="background-color: #383838">
               <div class="projectName">
                 <p class="placeholder-wave" v-if="state.projectName === ''">
                   <span class="placeholder col-12"></span>
@@ -544,26 +490,15 @@ function startExecute(ip, port, uuid, project_uuid) {
             <pane>
               <ul class="nav nav-tabs pt-2">
                 <li class="nav-item" v-for="f in state.openFiles">
-                  <div
-                    class="nav-link tab"
-                    @click.prevent="openFile(f.path)"
-                    :id="'fileTab' + f.tab"
-                    :class="{
-                      active: f.tab == state.activeTab,
-                      changed: state.tabsWithChanges.includes(f.tab),
-                    }"
-                  >
+                  <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
+                    active: f.tab == state.activeTab,
+                    changed: state.tabsWithChanges.includes(f.tab),
+                  }">
                     {{ f.path }}
                   </div>
                 </li>
               </ul>
-              <v-ace-editor
-                id="editor"
-                value=""
-                @init="editorInit"
-                lang="java"
-                theme="monokai"
-              />
+              <v-ace-editor id="editor" value="" @init="editorInit" lang="java" theme="monokai" />
             </pane>
           </splitpanes>
         </pane>
