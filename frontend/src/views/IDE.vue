@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, onMounted } from "vue";
+import { onBeforeMount, reactive, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Toast } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
@@ -10,6 +10,7 @@ import "ace-builds";
 import "ace-builds/src-min-noconflict/mode-java";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/ext-language_tools";
+import { createSimpleExpression } from "@vue/compiler-core";
 
 const route = useRoute();
 
@@ -23,7 +24,16 @@ let state = reactive({
   isCompiling: false,
   isExecuting: false,
   results: "",
+  receivedWS: false,
 });
+
+let results = ref("")
+
+watch(results, () => {
+  let output = document.getElementById('output')
+  output.scrollTop = output.scrollHeight
+})
+
 
 function editorChange() {
   for (let i = 0; i < state.openFiles.length; i++) {
@@ -246,7 +256,8 @@ function compile() {
   if (state.isCompiling) return;
 
   state.isCompiling = true;
-  state.results = "Kompilierung gestartet... 🛠";
+  state.receivedWS = false;
+  results.value = "Kompilierung gestartet... 🛠";
 
   let projectFiles = [];
   for (let i = 0; i < state.files.length; i++) {
@@ -262,12 +273,15 @@ function compile() {
 
       if (response.data.success == false) {
         state.isCompiling = false;
-        state.results =
+        results.value =
           "Der Server war leider gerade überlastet 😥 Bitte erneut versuchen!";
         return;
       }
 
-      // attach WSS??
+      // attach WS(S)
+      console.log("vor websocket");
+      connectWebsocketExecute(response.data.id);
+      console.log("nach websocket");
 
       startCompile(
         response.data.ip,
@@ -289,15 +303,11 @@ function startCompile(ip, port, container_uuid, project_uuid) {
       state.isCompiling = false;
       console.log(response.data);
       if (response.data.status === "connect_error") {
-        state.results =
+        results.value =
           'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
       }
       if (response.data.exitCode == 0) {
-        if (response.data.error === "") {
-          state.results = "Erfolgreich kompiliert 🎉";
-        } else {
-          state.results = response.data.error;
-        }
+        results.value = "Erfolgreich kompiliert 🎉";
       }
     },
     (error) => {
@@ -311,21 +321,19 @@ function execute() {
   if (state.isExecuting) return;
 
   state.isExecuting = true;
+  state.receivedWS = false;
 
   CodeService.prepareExecute(route.params.project_uuid).then(
     (response) => {
-      // only temporary:
-      state.isExecuting = false;
-
-      console.log(response.data);
-
       if (response.data.executable == false) {
-        state.results =
+        results.value =
           "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
         return;
       }
 
-      connectWebsocketExecute(response.data.id)
+      console.log("vor websocket");
+      connectWebsocketExecute(response.data.id);
+      console.log("nach websocket");
 
       startExecute(
         response.data.ip,
@@ -342,29 +350,41 @@ function execute() {
 }
 
 function connectWebsocketExecute(id) {
-  console.log("Starting connection to WebSocket Server")
+  console.log("Starting connection to WebSocket Server");
 
-  this.connection = new WebSocket(":80/")
+  let connection = new WebSocket(
+    `ws://localhost:80/containers/${id}/attach/ws?stream=1`
+  );
 
-  this.connection.onmessage = function (event) {
-    console.log(event);
-  }
+  connection.onmessage = function (event) {
+    if (state.receivedWS == false) {
+      state.receivedWS = true
+      results.value = ""
+    }
 
-  this.connection.onopen = function (event) {
-    console.log(event)
-    console.log("Successfully connected to the echo websocket server...")
-  }
+    new Response(event.data).arrayBuffer().then(buffer => {
+      var dec = new TextDecoder()
+      let msg = dec.decode(buffer)
+      console.log(msg);
+      if (state.isCompiling || state.isExecuting) {
+        results.value += msg
+      }
+    })
+  };
 
+  connection.onopen = function (event) {
+    console.log("Successfully connected to the echo websocket server...");
+  };
 }
 
 function startExecute(ip, port, uuid, project_uuid) {
   CodeService.startExecute(ip, port, uuid, project_uuid).then(
     (response) => {
-      this.isExecuting = false;
+      state.isExecuting = false;
       console.log(response);
     },
     (error) => {
-      this.isExecuting = false;
+      state.isExecuting = false;
       console.log(error.response);
     }
   );
@@ -503,8 +523,8 @@ function startExecute(ip, port, uuid, project_uuid) {
           </splitpanes>
         </pane>
         <pane size="20" max-size="50">
-          <div class="output">
-            <pre>{{ state.results }}</pre>
+          <div class="output" id="output" ref="output">
+            <pre>{{ results }}</pre>
           </div>
         </pane>
       </splitpanes>
@@ -518,6 +538,7 @@ function startExecute(ip, port, uuid, project_uuid) {
   height: 100%;
   background-color: #383838;
   font-family: "Courier New", Courier, monospace;
+  overflow-y: auto;
 }
 
 .changed {

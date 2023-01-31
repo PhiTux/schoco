@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Java_api {
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		Java_api server = new Java_api();
 	}
 	
@@ -33,27 +33,9 @@ public class Java_api {
 
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp /app/tmp/Main.java' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
-						Process process = Runtime.getRuntime().exec(command);
-						
-
-						BufferedReader stdInput = new BufferedReader(new 
-     						InputStreamReader(process.getInputStream()));
-
-						BufferedReader stdError = new BufferedReader(new 
-     						InputStreamReader(process.getErrorStream()));
-						exitCode = process.waitFor();
-
-						// Read the output from the command
-						while ((s = stdInput.readLine()) != null) {
-							stdoutb.append(s).append("\n");
-						}
-						stdout = stdoutb.toString().replaceAll("\"", "\\\\\"");
-
-						// Read any errors from the attempted command
-						while ((s = stdError.readLine()) != null) {
-							stderrb.append(s).append("\n");
-						}
-						stderr = stderrb.toString().replaceAll("\"", "\\\\\"");
+						Process p = new ProcessBuilder().inheritIO().command(command).start();
+						exitCode = p.waitFor();
+						System.out.flush();
 
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -71,7 +53,7 @@ public class Java_api {
 						return;
 					}
 					
-					String responseText = "{\"exitCode\":\"" + exitCode + "\",\"output\":\"" + stdout + "\",\"error\":\"" + stderr + "\"}";
+					String responseText = "{\"exitCode\":\"" + exitCode + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());
@@ -99,28 +81,10 @@ public class Java_api {
 
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp Main' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
-						Process process = Runtime.getRuntime().exec(command);
-						
-						exitCode = process.waitFor();
+						Process p = new ProcessBuilder().inheritIO().command(command).start();
+						exitCode = p.waitFor();
+						System.out.flush();
 
-						BufferedReader stdInput = new BufferedReader(new 
-     						InputStreamReader(process.getInputStream(), "UTF-8"));
-
-						BufferedReader stdError = new BufferedReader(new 
-     						InputStreamReader(process.getErrorStream(), "UTF-8"));
-						exitCode = process.waitFor();
-
-						// Read the output from the command
-						while ((s = stdInput.readLine()) != null) {
-							stdoutb.append(s).append("\n");
-						}
-						stdout = stdoutb.toString().replaceAll("\"", "\\\\\"");
-
-						// Read any errors from the attempted command
-						while ((s = stdError.readLine()) != null) {
-							stderrb.append(s).append("\n");
-						}
-						stderr = stderrb.toString().replaceAll("\"", "\\\\\"");
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 						exchange.sendResponseHeaders(500, -1);// Internal Server Error
@@ -137,8 +101,7 @@ public class Java_api {
 						return;
 					}
 
-					//TODO: Don't return output on following line! (Could be endless...)
-					String responseText = "{\"exitCode\":\"" + exitCode + "\",\"output\":\"" + stdout + "\",\"error\":\"" + stderr + "\"}";
+					String responseText = "{\"exitCode\":\"" + exitCode + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());
