@@ -25,15 +25,17 @@ let state = reactive({
   isExecuting: false,
   results: "",
   receivedWS: false,
+  sendMessage: "",
 });
 
-let results = ref("")
+let results = ref("");
+
+let ws;
 
 watch(results, () => {
-  let output = document.getElementById('output')
-  output.scrollTop = output.scrollHeight
-})
-
+  let output = document.getElementById("output");
+  output.scrollTop = output.scrollHeight;
+});
 
 function editorChange() {
   for (let i = 0; i < state.openFiles.length; i++) {
@@ -291,6 +293,7 @@ function compile() {
       );
     },
     (error) => {
+      ws.close();
       state.isCompiling = false;
       console.log(error.response);
     }
@@ -300,17 +303,19 @@ function compile() {
 function startCompile(ip, port, container_uuid, project_uuid) {
   CodeService.startCompile(ip, port, container_uuid, project_uuid).then(
     (response) => {
+      ws.close();
       state.isCompiling = false;
       console.log(response.data);
       if (response.data.status === "connect_error") {
         results.value =
           'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
       }
-      if (response.data.exitCode == 0) {
+      if (response.data.exitCode == 0 && !state.receivedWS) {
         results.value = "Erfolgreich kompiliert 🎉";
       }
     },
     (error) => {
+      ws.close();
       state.isCompiling = false;
       console.log(error.response);
     }
@@ -344,50 +349,57 @@ function execute() {
     },
     (error) => {
       state.isExecuting = false;
+      ws.close();
       console.log(error.response);
     }
   );
 }
 
 function connectWebsocketExecute(id) {
-  console.log("Starting connection to WebSocket Server");
-
-  let connection = new WebSocket(
+  ws = new WebSocket(
     `ws://localhost:80/containers/${id}/attach/ws?stream=1`
   );
 
-  connection.onmessage = function (event) {
+  ws.onmessage = function (event) {
     if (state.receivedWS == false) {
-      state.receivedWS = true
-      results.value = ""
+      state.receivedWS = true;
+      results.value = "";
     }
 
-    new Response(event.data).arrayBuffer().then(buffer => {
-      var dec = new TextDecoder()
-      let msg = dec.decode(buffer)
-      console.log(msg);
-      if (state.isCompiling || state.isExecuting) {
-        results.value += msg
+    new Response(event.data).arrayBuffer().then((buffer) => {
+      var dec = new TextDecoder();
+      let msg = dec.decode(buffer);
+      if (msg.trim() === state.sendMessage.trim()) {
+        return
       }
-    })
+      if (state.isCompiling || state.isExecuting) {
+        results.value += msg;
+      }
+    });
   };
 
-  connection.onopen = function (event) {
-    console.log("Successfully connected to the echo websocket server...");
+  ws.onopen = function (event) {
+    console.log("Successfully connected to websocket server...");
   };
 }
 
 function startExecute(ip, port, uuid, project_uuid) {
   CodeService.startExecute(ip, port, uuid, project_uuid).then(
     (response) => {
+      ws.close();
       state.isExecuting = false;
       console.log(response);
     },
     (error) => {
+      ws.close();
       state.isExecuting = false;
       console.log(error.response);
     }
   );
+}
+
+function sendMessage() {
+  ws.send(state.sendMessage + "\r");  // sending not possible without trailing \r...
 }
 </script>
 
@@ -523,8 +535,20 @@ function startExecute(ip, port, uuid, project_uuid) {
           </splitpanes>
         </pane>
         <pane size="20" max-size="50">
-          <div class="output" id="output" ref="output">
-            <pre>{{ results }}</pre>
+          <div class="bottom d-flex flex-column">
+            <div class="output p-2 flex-grow-1" id="output">
+              <pre>{{ results }}</pre>
+            </div>
+            <div class="input align-items-center d-flex flex-row">
+              <label for="inputMessage" class="px-2 col-form-label">Eingabe:</label>
+              <!-- <div> -->
+              <input class="rounded flex-fill" @keyup.enter="sendMessage()" type="text" id="inputMessage"
+                v-model="state.sendMessage" placeholder="Eingabe (Entertaste zum Senden)" />
+              <!-- </div> -->
+              <button @click.prevent="sendMessage()" type="button" class="btn btn-light btn-sm mx-2">
+                Senden
+              </button>
+            </div>
           </div>
         </pane>
       </splitpanes>
@@ -533,9 +557,19 @@ function startExecute(ip, port, uuid, project_uuid) {
 </template>
 
 <style scoped>
-.output {
-  width: 100;
+.bottom {
+  width: 100%;
   height: 100%;
+  background-color: #383838;
+}
+
+.input {
+  border-top: 1px solid #ccc;
+}
+
+.output {
+  width: 100%;
+  /* height: 100%; */
   background-color: #383838;
   font-family: "Courier New", Courier, monospace;
   overflow-y: auto;

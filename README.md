@@ -36,7 +36,7 @@ Even a completed task just means, that the specific base-work is done, but that 
 - [x] Worker-Queue (or comparable) for cookies
 - [ ] WIP: Make cookies work (see /cookies)
     - [x] Compilation
-    - [ ] Running/Executing
+    - [x] Running/Executing (Input and output can be send via Websocket ✔)
     - [ ] JUnit-Testing
 - [ ] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [ ] Save amount of compilations, executions,... per project and make them visible
