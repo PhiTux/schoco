@@ -1,8 +1,7 @@
-import asyncio
-import datetime
 from io import BytesIO
 import json
 import queue
+import subprocess
 import time
 import traceback
 from typing import List
@@ -16,7 +15,11 @@ import uuid
 from multiprocessing import Queue, Manager
 from threading import Lock, Thread
 from config import settings
+from fastapi import WebSocket, BackgroundTasks, HTTPException
+from asyncio import create_task, wait, gather
+import websockets
 import pycurl
+import socket
 
 HOME = "/home/schoco"
 
@@ -117,16 +120,16 @@ def createNewContainer():
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=1024, hard=1536)
     new_container = client.containers.run(
-        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdout=True, stderr=True, stop_signal="SIGKILL", ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{HOME}/{new_uuid}:/app/tmp"])
+        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{HOME}/{new_uuid}:/app/tmp"])
     # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
     # -> user-defined bridge
 
     print("new container created: " + str(new_uuid))
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
-    ip = apiclient.inspect_container(new_container.name)[
+    ip = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Networks']['schoco']['IPAddress']
-    port = apiclient.inspect_container(new_container.name)[
+    port = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
 
     return {'id': new_container.id, 'uuid': str(new_uuid), 'ip': ip, 'port': port}
@@ -278,6 +281,105 @@ def prepare_execute(project_uuid: str):
     print(c['uuid'] + " with port " + c['port'])
 
     return c
+
+
+async def forward(client: WebSocket, container: websockets.WebSocketClientProtocol):
+    while True:
+        data = await client.receive_bytes()
+        print("Client sent:", data)
+        await container.send(data)
+
+
+async def reverse(client: WebSocket, container: websockets.WebSocketClientProtocol):
+    while True:
+        data = await container.recv()
+        await client.send_text(data)
+        print("Container sent:", data)
+
+
+async def websocket_endpoint(websocket: WebSocket, id: str, background_tasks: BackgroundTasks):
+    # NUR FÜR TESTS
+    # client = docker.APIClient(base_url='unix://var/run/docker.sock')
+
+    await websocket.accept()
+
+    client = docker.from_env()
+    try:
+        container = client.containers.get(id)
+    except:
+        return
+
+    # out = container.attach(stream=True, stdout=True, stderr=True)
+
+    # print("out", out)
+
+    await websocket.send_text("hallo")
+
+    async def receive_and_send():
+        print("a")
+        for line in container.logs(stream=True, follow=False):
+            print("line:", line)
+            await websocket.send_text(line)
+        print("b")
+
+    # background_tasks.add_task(receive_and_send)
+    receive_task = create_task(receive_and_send())
+    await wait([receive_task])
+
+
+async def attach_container(websocket: WebSocket, id: str):
+    # connect with incoming WS
+
+    # find Container
+    """client = docker.from_env()
+    try:
+        container = client.containers.get(id)
+    except:
+        return"""
+
+    apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
+    cws = apiclient.attach_socket(id,
+                                  params={
+                                      "stdin": True,
+                                      "stdout": True,
+                                      "stream": True,
+                                  }, ws=True
+                                  )
+
+    # output_socket._sock.setblocking(False)
+    """print(output_socket.read())
+    for line in output_socket:
+        print(line.decode())
+
+    print(container.name)
+    s = container.attach_socket(
+        params={"stream": True, "stdin": True, "stdout": True, "stderr": True})"""
+    # s = container.attach_socket(
+    #    params={'stdin': 1, 'stdout': 1, 'stderr': 1, 'stream': 1})
+
+    print(cws)
+
+    async def receive_data():
+        while True:
+            data = await websocket.receive_text()
+            cws.write(data.encode())
+            cws.flush()
+
+    async def send_data():
+        while True:
+            logs_data = cws.read().decode()
+            if len(logs_data) > 0:
+                print("send_data:", logs_data)
+                await websocket.send_text(logs_data)
+
+    receive_task = create_task(receive_data())
+    send_task = create_task(send_data())
+    await wait([receive_task, send_task])
+
+    """ async with websockets.connect(s):
+        fwd_task = asyncio.create_task(forward(websocket, s))
+        rev_task = asyncio.create_task(reverse(websocket, s))
+        await asyncio.gather(fwd_task, rev_task) """
 
 
 def start_execute(ip: str, port: int):

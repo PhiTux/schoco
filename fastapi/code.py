@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path
+import time
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path, WebSocket
 import auth
 import database
 import models_and_schemas
@@ -154,8 +155,17 @@ def prepareExecute(project_uuid: str = Path()):
     return c
 
 
+@code.websocket('/attachContainer/{id}')
+async def websocket_attach(websocket: WebSocket, background_tasks: BackgroundTasks, id: str = Path()):
+    # await cookies_api.attach_container(websocket, id)
+    await cookies_api.websocket_endpoint(websocket, id, background_tasks)
+    # background_tasks.add_task(await cookies_api.websocket_endpoint, websocket, id)
+
+
 @ code.post('/startExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path()):
+
+    print("start exec")
 
     result = cookies_api.start_execute(startExecute.ip, startExecute.port)
 
