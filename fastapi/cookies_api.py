@@ -1,5 +1,6 @@
 from io import BytesIO
 import json
+import multiprocessing
 import queue
 import subprocess
 import time
@@ -21,7 +22,8 @@ import websockets
 import pycurl
 import socket
 
-HOME = "/home/schoco"
+#HOME = "/home/schoco"
+HOME = "data"
 
 COMPILETIME = 10
 
@@ -66,7 +68,10 @@ class ThreadSaveList():
             return len(self._list)
 
 
-newContainers = Queue(maxsize=settings.MAX_CONTAINERS)
+m = multiprocessing.Manager()
+newContainers = m.Queue(maxsize=settings.MAX_CONTAINERS)
+
+#newContainers = Queue(maxsize=settings.MAX_CONTAINERS)
 """Holds the infos of the new (running) cookies-containers, that are WAITING for usage."""
 
 runningContainers = ThreadSaveList()
