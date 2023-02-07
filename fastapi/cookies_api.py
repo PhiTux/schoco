@@ -21,7 +21,6 @@ import websockets
 import pycurl
 import socket
 
-HOME = "/home/schoco"
 
 COMPILETIME = 10
 
@@ -73,7 +72,7 @@ runningContainers = ThreadSaveList()
 
 
 def writeFiles(files: List[str], uuid: str):
-    dir = os.path.join(HOME, str(uuid))
+    dir = os.path.join(settings.FULL_DATA_PATH, str(uuid))
 
     # check if dir is already existing -> delete content
     if os.path.exists(dir):
@@ -95,9 +94,9 @@ def writeFiles(files: List[str], uuid: str):
 
 
 def save_compilation_result(container_uuid: str, project_uuid: str):
-    sourcepath = os.path.join(HOME, str(container_uuid))
+    sourcepath = os.path.join(settings.FULL_DATA_PATH, str(container_uuid))
     sourcefiles = os.listdir(sourcepath)
-    destinationpath = os.path.join(HOME, str(project_uuid))
+    destinationpath = os.path.join(settings.FULL_DATA_PATH, str(project_uuid))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
 
     print(sourcepath)
@@ -114,13 +113,13 @@ def createNewContainer():
     new_name = f"cookies-{new_uuid}"
 
     # create directory for this uuid
-    uuid_dir = Path(os.path.join(HOME, str(new_uuid)))
+    uuid_dir = Path(os.path.join(settings.FULL_DATA_PATH, str(new_uuid)))
     uuid_dir.mkdir(exist_ok=True, parents=True)
 
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=1024, hard=1536)
     new_container = client.containers.run(
-        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{HOME}/{new_uuid}:/app/tmp"])
+        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{uuid_dir}:/app/tmp"])
     # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
     # -> user-defined bridge
 
@@ -152,7 +151,7 @@ def fillNewContainersQueue():
         if str(c.name).startswith('cookies-'):
             # remove dir
 
-            dir = os.path.join(HOME, c.name[8:])
+            dir = os.path.join(settings.FULL_DATA_PATH, c.name[8:])
             if os.path.exists(dir):
                 shutil.rmtree(dir)
 
@@ -224,7 +223,7 @@ def kill_n_create(container_uuid: str):
     runningContainers.remove_by_uuid(container_uuid)
 
     # remove container-dir
-    dir = os.path.join(HOME, container_uuid)
+    dir = os.path.join(settings.FULL_DATA_PATH, container_uuid)
     shutil.rmtree(dir)
 
     # kill and (hopefully automatically) remove container
@@ -259,9 +258,9 @@ def prepare_execute(project_uuid: str):
     runningContainers.append(c)
 
     # copy .class files to container-mount
-    sourcepath = os.path.join(HOME, project_uuid)
+    sourcepath = os.path.join(settings.FULL_DATA_PATH, project_uuid)
     sourcefiles = os.listdir(sourcepath)
-    destinationpath = os.path.join(HOME, str(c['uuid']))
+    destinationpath = os.path.join(settings.FULL_DATA_PATH, str(c['uuid']))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
 
     filesExist = False

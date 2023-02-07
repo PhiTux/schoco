@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     MAX_CONTAINERS: int = 8
     PRODUCTION: bool = True
     JWT_EXP_DAYS: int = 15
+    FULL_DATA_PATH: str = "/data"
 
 
 settings = Settings()

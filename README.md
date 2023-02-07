@@ -73,7 +73,7 @@ On every start: `npm run dev`
 
 Initial Installation (Python 3.10 and pip required): `pip install -r requirements.txt`
 
-On every start: `export SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:schoco --log-level debug --reload`
+On every start: `export FULL_DATA_PATH=/full/path/to/data_folder MAX_CONTAINERS=2 SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:schoco --log-level debug --reload`
 
 If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHOST_PORT` with `GITEA_HOST=https://git.mydomain.tld`
 
