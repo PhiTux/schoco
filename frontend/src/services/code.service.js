@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { Axios } from 'axios'
 import { useAuthStore } from '../stores/auth.store';
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -20,16 +20,20 @@ axiosAuth.interceptors.request.use((config) => {
 })
 
 class CodeService {
-    createNewHelloWorld(helloWorldName) {
-        return axiosAuth.post('createNewHelloWorld', { 'projectName': helloWorldName })
+    createNewHelloWorld(helloWorldName, helloWorldDescription) {
+        return axiosAuth.post('createNewHelloWorld', { 'projectName': helloWorldName, 'projectDescription': helloWorldDescription })
     }
 
     loadAllFiles(project_uuid) {
         return axiosAuth.get(`loadAllFiles/${project_uuid}`)
     }
 
-    getProjectName(project_uuid) {
-        return axiosAuth.get(`getProjectName/${project_uuid}`)
+    getProjectInfo(project_uuid) {
+        return axiosAuth.get(`getProjectInfo/${project_uuid}`)
+    }
+
+    updateDescription(project_uuid, description) {
+        return axiosAuth.post(`updateDescription/${project_uuid}`, {'description': description})
     }
 
     saveFileChanges(changes, project_uuid) {

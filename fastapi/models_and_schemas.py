@@ -53,6 +53,7 @@ class Project(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     uuid: str = Field(unique=True)
     name: str
+    description: str
     owner_id: int = Field(foreign_key="user.id")
     owner: "User" = Relationship(back_populates="projects")
 
@@ -83,8 +84,13 @@ class UserById(BaseModel):
     user_id: int
 
 
-class ProjectName(BaseModel):
+class newProject(BaseModel):
     projectName: str
+    projectDescription: str
+
+
+class updateDescription(BaseModel):
+    description: str
 
 
 class FileChanges(BaseModel):

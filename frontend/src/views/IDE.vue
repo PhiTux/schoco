@@ -16,6 +16,10 @@ const route = useRoute();
 
 let state = reactive({
   projectName: "",
+  projectDescription: "",
+  newProjectDescription: "",
+  isSavingDescription: false,
+  editingDescription: false,
   files: [],
   openFiles: [],
   activeTab: 0,
@@ -103,9 +107,13 @@ onBeforeMount(() => {
     }
   );
 
-  CodeService.getProjectName(route.params.project_uuid).then(
+  CodeService.getProjectInfo(route.params.project_uuid).then(
     (response) => {
-      if (response.status == 200) state.projectName = response.data;
+      if (response.status == 200) {
+        console.log(response.data)
+        state.projectName = response.data.name;
+        state.projectDescription = response.data.description;
+      }
     },
     (error) => {
       console.log(error);
@@ -401,6 +409,47 @@ function startExecute(ip, port, uuid, project_uuid) {
 function sendMessage() {
   ws.send(state.sendMessage + "\r");  // sending not possible without trailing \r...
 }
+
+function editDescription() {
+  state.newProjectDescription = state.projectDescription
+  state.editingDescription = true
+}
+
+function abortDescription() {
+  state.editingDescription = false;
+}
+
+function saveDescription() {
+  if (state.isSavingDescription) return;
+  state.isSavingDescription = true
+
+  CodeService.updateDescription(route.params.project_uuid, state.newProjectDescription).then(
+    (response) => {
+      if (response.data) {
+        state.projectDescription = state.newProjectDescription;
+        state.isSavingDescription = false;
+        state.editingDescription = false;
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastUpdateDescriptionError")
+        );
+        toast.show();
+        state.isSavingDescription = false;
+        state.editingDescription = false;
+      }
+    },
+    (error) => {
+      const toast = new Toast(
+        document.getElementById("toastUpdateDescriptionError")
+      );
+      toast.show();
+      state.isSavingDescription = false;
+      state.editingDescription = false;
+      console.log(error.response)
+    }
+  );
+}
+
 </script>
 
 <template>
@@ -412,6 +461,15 @@ function sendMessage() {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Laden des Projekts. Bitte zurück oder neu laden.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateDescriptionError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Speichern der Projektbeschreibung!
           </div>
         </div>
       </div>
@@ -508,16 +566,56 @@ function sendMessage() {
       <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false">
         <pane>
           <splitpanes :push-other-panes="false">
-            <pane min-size="15" size="20" max-size="30" style="background-color: #383838">
-              <div class="projectName">
-                <p class="placeholder-wave" v-if="state.projectName === ''">
-                  <span class="placeholder col-12"></span>
-                </p>
-                <p v-else class="d-flex justify-content-center m-auto">
-                  {{ state.projectName }}
-                </p>
-              </div>
-              <IDEFileTree :files="state.files" @openFile="openFile" />
+            <pane min-size="15" size="20" max-size="30">
+              <splitpanes class="default-theme" horizontal :push-other-panes="false">
+                <pane style="background-color: #383838">
+                  <div class="projectName">
+                    <p class="placeholder-wave" v-if="state.projectName === ''">
+                      <span class="placeholder col-12"></span>
+                    </p>
+                    <p v-else class="d-flex justify-content-center m-auto">
+                      {{ state.projectName }}
+                    </p>
+                  </div>
+
+
+                  <IDEFileTree :files="state.files" @openFile="openFile" />
+                </pane>
+                <pane min-size="10" size="30" max-size="50" style="background-color: #383838">
+                  <div v-if="!state.editingDescription" class="position-relative description">
+                    <span>
+                      {{ state.projectDescription }}
+                    </span>
+                    <div class="position-absolute bottom-0 end-0">
+                      <a @click.prevent="editDescription()" class="btn btn-overlay btn-edit">
+                        <div>
+                          <font-awesome-icon icon="fa-pencil" />
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                  <div v-if="state.editingDescription" class="position-relative edit-description">
+                    <textarea class="textarea-description" v-model="state.newProjectDescription" />
+                    <div class="position-absolute bottom-0 end-0">
+                      <a @click.prevent="abortDescription()" class="btn btn-overlay btn-abort">
+                        <div>
+                          <font-awesome-icon icon="fa-xmark" fixed-width />
+                        </div>
+                      </a>
+                      <a @click.prevent="saveDescription()" class="btn btn-overlay btn-edit">
+                        <div>
+                          <div v-if="state.isSavingDescription" class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                          </div>
+                          <font-awesome-icon v-else icon="fa-check" fixed-width />
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+
+                </pane>
+
+              </splitpanes>
             </pane>
             <pane>
               <ul class="nav nav-tabs pt-2">
@@ -532,6 +630,7 @@ function sendMessage() {
               </ul>
               <v-ace-editor id="editor" value="" @init="editorInit" lang="java" theme="monokai" />
             </pane>
+
           </splitpanes>
         </pane>
         <pane size="20" max-size="50">
@@ -557,6 +656,36 @@ function sendMessage() {
 </template>
 
 <style scoped>
+.edit-description {
+  height: 100%;
+}
+
+.textarea-description {
+  height: 100%;
+  width: 100%;
+}
+
+.btn-abort {
+  background-color: lightcoral !important;
+  color: black !important;
+}
+
+.btn-edit {
+  background-color: lightgreen !important;
+  color: black !important;
+}
+
+.btn-overlay:hover {
+  box-shadow: 0 0 10px 7px #555;
+}
+
+.description {
+  white-space: pre-line;
+  overflow-y: auto;
+  display: block;
+  height: 100%;
+}
+
 .bottom {
   width: 100%;
   height: 100%;

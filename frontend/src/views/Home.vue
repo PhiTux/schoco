@@ -31,12 +31,9 @@ onBeforeMount(() => {
         <div class="card-body">
           <h5 class="card-title">{{ p.name }}</h5>
           <p class="card-text">
-            With supporting text below as a natural lead-in to additional
-            content.
+            {{ p.description }}
           </p>
-          <a :href="'#/ide/' + p.uuid" class="btn btn-primary"
-            >Projekt öffnen</a
-          >
+          <a :href="'#/ide/' + p.uuid" class="btn btn-primary">Projekt öffnen</a>
         </div>
       </div>
     </div>

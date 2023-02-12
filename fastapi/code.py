@@ -14,12 +14,12 @@ code = APIRouter()
 
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
-def createNewHelloWorld(projectName: models_and_schemas.ProjectName, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
 
     project_uuid = str(uuid.uuid4())
     user = crud.get_user_by_username(db=db, username=username)
     project = models_and_schemas.Project(
-        name=projectName.projectName, uuid=project_uuid, owner_id=user.id)
+        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id)
 
     # create git repo
     if not git.create_repo(project_uuid):
@@ -47,8 +47,6 @@ def createNewHelloWorld(projectName: models_and_schemas.ProjectName, db: Session
 
 def project_access_allowed(project_uuid: str, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
 
-    print(project_uuid)
-
     # teacher is allowed to open
     user = crud.get_user_by_username(db=db, username=username)
     if user.role == "teacher":
@@ -61,7 +59,7 @@ def project_access_allowed(project_uuid: str, db: Session = Depends(database.get
         return True
 
     raise HTTPException(
-        status_code=405, detail="You're not allowed to open this project")
+        status_code=405, detail="You're not allowed to open or edit this project")
 
 
 results = []
@@ -95,11 +93,18 @@ def loadAllFiles(project_uuid: str = Path()):
     return res
 
 
-@ code.get('/getProjectName/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
+@code.post('/updateDescription/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), db: Session = Depends(database.get_db)):
+    result = crud.updateDescription(
+        db=db, project_uuid=project_uuid, description=updateDescription.description)
+    return result
+
+
+@ code.get('/getProjectInfo/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
 def getProjectName(project_uuid: str = Path(), db: Session = Depends(database.get_db)):
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
-    return project.name
+    return {"name": project.name, "description": project.description}
 
 
 @ code.post('/saveFileChanges/{project_uuid}', dependencies=[Depends(project_access_allowed)])
