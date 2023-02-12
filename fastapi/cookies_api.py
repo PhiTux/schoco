@@ -1,27 +1,18 @@
 from io import BytesIO
 import json
-import multiprocessing
 import queue
-import subprocess
 import time
 import traceback
 from typing import List
 from pathlib import Path
 import os
 import shutil
-from urllib.parse import urlencode
 import docker
-from math import ceil
 import uuid
-from multiprocessing import Queue, Manager
-from threading import Lock, Thread
+from multiprocessing import Manager
+from threading import Lock
 from config import settings
-from fastapi import WebSocket, BackgroundTasks, HTTPException
-from asyncio import create_task, wait, gather
-import websockets
-import websocket
 import pycurl
-import socket
 
 
 COMPILETIME = 10
@@ -67,10 +58,8 @@ class ThreadSaveList():
             return len(self._list)
 
 
-m = multiprocessing.Manager()
+m = Manager()
 newContainers = m.Queue(maxsize=settings.MAX_CONTAINERS)
-
-# newContainers = Queue(maxsize=settings.MAX_CONTAINERS)
 """Holds the infos of the new (running) cookies-containers, that are WAITING for usage."""
 
 runningContainers = ThreadSaveList()
@@ -287,120 +276,10 @@ def prepare_execute(project_uuid: str):
     return c
 
 
-async def forward(client: WebSocket, container: websockets.WebSocketClientProtocol):
-    while True:
-        data = await client.receive_bytes()
-        print("Client sent:", data)
-        await container.send(data)
-
-
-async def reverse(client: WebSocket, container: websockets.WebSocketClientProtocol):
-    while True:
-        data = await container.recv()
-        await client.send_text(data)
-        print("Container sent:", data)
-
-
-async def websocket_endpoint(ws_client: WebSocket, id: str, background_tasks: BackgroundTasks):
-    # NUR FÜR TESTS
-    # client = docker.APIClient(base_url='unix://var/run/docker.sock')
-
-    await ws_client.accept()
-
-    client = docker.from_env()
-    try:
-        container = client.containers.get(id)
-    except:
-        return
-
-    # out = container.attach(stream=True, stdout=True, stderr=True)
-
-    # print("out", out)
-
-    await ws_client.send_text("hallo")
-
-    async def receive_and_send():
-        print("a")
-        for line in container.logs(stream=True, follow=False):
-            print("line:", line)
-            await ws_client.send_text(line)
-        print("b")
-
-    # background_tasks.add_task(receive_and_send)
-    receive_task = create_task(receive_and_send())
-    await wait([receive_task])
-
-
-async def attach_container(ws_client: WebSocket, id: str):
-    # connect with incoming WS
-    await ws_client.accept()
-
-    #my_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    # my_socket.connect("/var/run/docker.sock")
-
-    # ws_docker = websocket.WebSocket()
-    # ws_docker = websocket.create_connection(
-    #    "ws://localhost/", socket=my_socket, sockopt=((socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1),))
-
-    # f"ws+unix:///var/run/docker.sock/containers/{id}/attach/ws?stream=1")
-
-    # find Container
-    """client = docker.from_env()
-    try:
-        container = client.containers.get(id)
-    except:
-        return"""
-
-    apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
-    ws_docker = apiclient.attach_socket(id,
-                                        params={
-                                            "stdin": True,
-                                            "stdout": True,
-                                            "stream": True,
-                                        }  # , ws=True
-                                        )
-
-    # output_socket._sock.setblocking(False)
-    """print(output_socket.read())
-    for line in output_socket:
-        print(line.decode())
-
-    print(container.name)
-    s = container.attach_socket(
-        params={"stream": True, "stdin": True, "stdout": True, "stderr": True})"""
-    # s = container.attach_socket(
-    #    params={'stdin': 1, 'stdout': 1, 'stderr': 1, 'stream': 1})
-
-    # print(cws)
-
-    async def receive_data():
-        print("receive_data")
-        while True:
-            data = await ws_client.receive_text()
-            ws_docker.send_text(data.encode())
-            ws_docker.flush()
-
-    async def send_data():
-        print("send_data")
-        while True:
-            data = await ws_docker._sock.recvmsg(16384)
-            print("send_data:", data)
-            await ws_client.send_text(data)
-
-    receive_task = create_task(receive_data())
-    send_task = create_task(send_data())
-    await wait([receive_task, send_task])
-
-    """ async with websockets.connect(s):
-        fwd_task = asyncio.create_task(forward(websocket, s))
-        rev_task = asyncio.create_task(reverse(websocket, s))
-        await asyncio.gather(fwd_task, rev_task) """
-
-
 def start_execute(ip: str, port: int):
     print("start execute at port: " + str(port))
 
-    # pycurl to cookies-java-server "/compile"
+    # pycurl to cookies-java-server "/execute"
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, f"http://localhost:{port}/execute")
