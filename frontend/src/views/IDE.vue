@@ -357,7 +357,8 @@ function execute() {
 
 function connectWebsocketExecute(id) {
   ws = new WebSocket(
-    `ws://localhost:80/containers/${id}/attach/ws?stream=1`
+    //`ws://localhost:80/containers/${id}/attach/ws?stream=1`
+    `ws://localhost:8000/attachContainer/${id}`
   );
 
   ws.onmessage = function (event) {

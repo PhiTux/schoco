@@ -157,8 +157,8 @@ def prepareExecute(project_uuid: str = Path()):
 
 @code.websocket('/attachContainer/{id}')
 async def websocket_attach(websocket: WebSocket, background_tasks: BackgroundTasks, id: str = Path()):
-    # await cookies_api.attach_container(websocket, id)
-    await cookies_api.websocket_endpoint(websocket, id, background_tasks)
+    await cookies_api.attach_container(websocket, id)
+    # await cookies_api.websocket_endpoint(websocket, id, background_tasks)
     # background_tasks.add_task(await cookies_api.websocket_endpoint, websocket, id)
 
 
