@@ -24,7 +24,6 @@ onBeforeMount(() => {
       Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
     </a>
     <h1>Meine Projekte</h1>
-    justify-content-center
     <div class="d-flex align-content-start flex-wrap">
       <div class="card text-bg-dark m-2" v-for="p in state.myProjects">
         <div class="card-header">HA bis ... / eigenes Projekt</div>
@@ -41,6 +40,10 @@ onBeforeMount(() => {
 </template>
 
 <style scoped>
+.card-text {
+  white-space: pre-line;
+}
+
 .card {
   width: 48%;
   transition: ease 0.3s;

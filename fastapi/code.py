@@ -27,6 +27,8 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
 
     # load the template files into the git repo
     for file in os.listdir("./java_helloWorld"):
+        if file.endswith(".class"):
+            continue
         file_content = open(file=f"./java_helloWorld/{file}", mode="rb").read()
         if not git.add_file(project_uuid=project_uuid,
                             file_name=file, file_content=file_content):
@@ -163,11 +165,27 @@ def prepareExecute(project_uuid: str = Path()):
 @ code.post('/startExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path()):
 
-    print("start exec")
-
     result = cookies_api.start_execute(startExecute.ip, startExecute.port)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startExecute.container_uuid)
+
+    return result
+
+
+@code.get('/prepareTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def prepareTest(project_uuid: str = Path()):
+    # we now use "prepare_execute", since it is (at least until now) the same code
+    c = cookies_api.prepare_execute(project_uuid)
+    return c
+
+
+@code.post('/startTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def startTest(startTest: models_and_schemas.startTest, background_tasks: BackgroundTasks, project_uuid: str = Path()):
+
+    result = cookies_api.start_test(startTest.ip, startTest.port)
+
+    background_tasks.add_task(
+        cookies_api.kill_n_create, startTest.container_uuid)
 
     return result

@@ -32,7 +32,7 @@ public class Java_api {
 					String stdout, stderr;
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp /app/tmp/Main.java' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp/:/usr/share/java/junit.jar /app/tmp/*.java' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
 						Process p = new ProcessBuilder().inheritIO().command(command).start();
 						exitCode = p.waitFor();
 						System.out.flush();
@@ -80,7 +80,7 @@ public class Java_api {
 					String stdout, stderr;
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp Main' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp Schoco' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
 						Process p = new ProcessBuilder().inheritIO().command(command).start();
 						exitCode = p.waitFor();
 						System.out.flush();
@@ -102,6 +102,65 @@ public class Java_api {
 					}
 
 					String responseText = "{\"exitCode\":\"" + exitCode + "\"}";
+					exchange.sendResponseHeaders(200, responseText.getBytes().length);
+					OutputStream os = exchange.getResponseBody();
+					os.write(responseText.getBytes());
+					os.close();
+				} else {
+					exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
+				}
+				exchange.close();
+			}
+		});
+
+		server.createContext("/test", new HttpHandler() {
+
+			@Override
+			public void handle(HttpExchange exchange) throws IOException {
+				if ("POST".equals(exchange.getRequestMethod())) {
+
+					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
+					
+					int exitCode = 0;
+					//String s = null;
+					//StringBuilder stdoutb = new StringBuilder();
+					//StringBuilder stderrb = new StringBuilder();
+					String stdout;//, stderr;
+
+					try {
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp:/usr/share/java/junit.jar:/app/hamcrest.jar org.junit.runner.JUnitCore Tests' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
+						Process p = new ProcessBuilder().inheritIO().command(command).start();
+
+						BufferedReader reader = 
+										new BufferedReader(new InputStreamReader(p.getInputStream()));
+						StringBuilder builder = new StringBuilder();
+						String line = null;
+						while ( (line = reader.readLine()) != null) {
+							builder.append(line);
+							builder.append(System.getProperty("line.separator"));
+						}
+						stdout = builder.toString();
+
+						exitCode = p.waitFor();
+						System.out.flush();
+
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						exchange.sendResponseHeaders(500, -1);// Internal Server Error
+						OutputStream os = exchange.getResponseBody();
+						os.write("InterruptedException occured".getBytes());
+						os.close();
+						return;
+					} catch (Exception e) {
+						e.printStackTrace();
+						exchange.sendResponseHeaders(501, -1);
+						OutputStream os = exchange.getResponseBody();
+						os.write("Exception occured".getBytes());
+						os.close();
+						return;
+					}
+
+					String responseText = "{\"exitCode\":\"" + exitCode + "\", \"stdout\":\"" + stdout + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());

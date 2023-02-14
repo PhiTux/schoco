@@ -27,6 +27,7 @@ let state = reactive({
   isSaving: false,
   isCompiling: false,
   isExecuting: false,
+  isTesting: false,
   results: "",
   receivedWS: false,
   sendMessage: "",
@@ -263,7 +264,7 @@ function saveAll() {
 }
 
 function compile() {
-  if (state.isCompiling) return;
+  if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
 
   state.isCompiling = true;
   state.receivedWS = false;
@@ -289,9 +290,7 @@ function compile() {
       }
 
       // attach WS(S)
-      console.log("vor websocket");
-      connectWebsocketExecute(response.data.id);
-      console.log("nach websocket");
+      connectWebsocket(response.data.id);
 
       startCompile(
         response.data.ip,
@@ -331,7 +330,7 @@ function startCompile(ip, port, container_uuid, project_uuid) {
 }
 
 function execute() {
-  if (state.isExecuting) return;
+  if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
 
   state.isExecuting = true;
   state.receivedWS = false;
@@ -341,12 +340,11 @@ function execute() {
       if (response.data.executable == false) {
         results.value =
           "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
+        state.isExecuting = false;
         return;
       }
 
-      console.log("vor websocket");
-      connectWebsocketExecute(response.data.id);
-      console.log("nach websocket");
+      connectWebsocket(response.data.id);
 
       startExecute(
         response.data.ip,
@@ -363,12 +361,14 @@ function execute() {
   );
 }
 
-function connectWebsocketExecute(id) {
+function connectWebsocket(id) {
   ws = new WebSocket(
-    `ws://localhost:80/containers/${id}/attach/ws?stream=1`
+    `ws://localhost:80/containers/${id}/attach/ws?stream=1&stdin=1&stdout=1&stderr=1`
   );
 
   ws.onmessage = function (event) {
+    console.log(event)
+
     if (state.receivedWS == false) {
       state.receivedWS = true;
       results.value = "";
@@ -378,9 +378,10 @@ function connectWebsocketExecute(id) {
       var dec = new TextDecoder();
       let msg = dec.decode(buffer);
       if (msg.trim() === state.sendMessage.trim()) {
+        state.sendMessage = ""
         return
       }
-      if (state.isCompiling || state.isExecuting) {
+      if (state.isCompiling || state.isExecuting || state.isTesting) {
         results.value += msg;
       }
     });
@@ -405,6 +406,55 @@ function startExecute(ip, port, uuid, project_uuid) {
     }
   );
 }
+
+function test() {
+  if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
+
+  state.isTesting = true;
+  state.receivedWS = false;
+
+  CodeService.prepareTest(route.params.project_uuid).then(
+    (response) => {
+      if (response.data.executable == false) {
+        results.value =
+          "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
+        state.isTesting = false;
+        return;
+      }
+
+      connectWebsocket(response.data.id);
+
+      startTest(
+        response.data.ip,
+        response.data.port,
+        response.data.uuid,
+        route.params.project_uuid
+      );
+    },
+    (error) => {
+      state.isTesting = false;
+      ws.close();
+      console.log(error.response);
+    }
+  );
+}
+
+
+function startTest(ip, port, uuid, project_uuid) {
+  CodeService.startTest(ip, port, uuid, project_uuid).then(
+    (response) => {
+      ws.close();
+      state.isTesting = false;
+      console.log(response);
+    },
+    (error) => {
+      ws.close();
+      state.isTesting = false;
+      console.log(error.response);
+    }
+  );
+}
+
 
 function sendMessage() {
   ws.send(state.sendMessage + "\r");  // sending not possible without trailing \r...
@@ -553,8 +603,11 @@ function saveDescription() {
                 <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
                 Ausführen
               </button>
-              <button type="button" class="btn btn-indigo">
-                <font-awesome-icon icon="fa-solid fa-list-check" /> Testen
+              <button @click.prevent="test()" type="button" class="btn btn-indigo">
+                <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid fa-list-check" /> Testen
               </button>
             </div>
           </ul>
@@ -577,11 +630,10 @@ function saveDescription() {
                       {{ state.projectName }}
                     </p>
                   </div>
-
-
                   <IDEFileTree :files="state.files" @openFile="openFile" />
                 </pane>
-                <pane min-size="10" size="30" max-size="50" style="background-color: #383838">
+                <!-- Description -->
+                <pane min-size="10" size="50" max-size="60" style="background-color: #383838">
                   <div v-if="!state.editingDescription" class="position-relative description">
                     <span>
                       {{ state.projectDescription }}

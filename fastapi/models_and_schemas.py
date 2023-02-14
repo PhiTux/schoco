@@ -122,3 +122,9 @@ class startExecute(BaseModel):
     ip: str
     port: int
     container_uuid: str
+
+
+class startTest(BaseModel):
+    ip: str
+    port: int
+    container_uuid: str

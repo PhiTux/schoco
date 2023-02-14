@@ -1,11 +1,11 @@
-public class Main {
+public class Schoco {
 
-	public Main() {
+	public Schoco() {
 		System.out.println("Hello World");
 	}
 
 	public static void main(String[] args) {
-		Main helloWorld = new Main(); 
+		Schoco testObjekt = new Schoco(); 
 	}
 
 	/**

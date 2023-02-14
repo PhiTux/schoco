@@ -94,6 +94,7 @@ def save_compilation_result(container_uuid: str, project_uuid: str):
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
 
     print(sourcepath)
+    print(sourcefiles)
     for file in sourcefiles:
         if file.endswith('.class'):
             print("-> " + file)
@@ -161,8 +162,7 @@ def fillNewContainersQueue():
 
 def prepareCompile(files: List[str]):
     # get next container out of queue - return if no new one is available after 3 seconds.
-
-    # grab and prepare new container and place it inside runningContainers
+    # prepare the container and place it inside runningContainers
     try:
         c = newContainers.get(timeout=3)
     except queue.Empty:
@@ -173,8 +173,6 @@ def prepareCompile(files: List[str]):
 
     # write files to filesystem
     writeFiles(files, c['uuid'])
-
-    # create websocket-attach-URL??
 
     return c
 
@@ -247,7 +245,7 @@ def prepare_execute(project_uuid: str):
     try:
         c = newContainers.get(timeout=3)
     except queue.Empty:
-        return {'success': False, 'message': 'No worker ready for compilation within 3 seconds 😥 Please retry!'}
+        return {'success': False, 'message': 'No worker ready for execution within 3 seconds 😥 Please retry!'}
 
     runningContainers.append(c)
 
@@ -283,6 +281,37 @@ def start_execute(ip: str, port: int):
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, f"http://localhost:{port}/execute")
+    post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
+
+    # Why the 7? 🤷‍♂️ Probability and trial and error...
+    tries = 7
+    while tries > 0:
+        try:
+            c.setopt(c.POSTFIELDS, json.dumps(post_data))
+            c.setopt(c.WRITEDATA, buffer)
+            c.perform()
+            break
+        except BaseException as e:
+            print("connection error: " + str(port))
+            tries -= 1
+            if (tries == 0):
+                c.close()
+                return {'status': 'connect_error'}
+            time.sleep(0.2)
+    c.close()
+
+    print(buffer.getvalue().decode('utf-8'))
+
+    return json.loads(buffer.getvalue().decode('utf-8'), strict=False)
+
+
+def start_test(ip: str, port: int):
+    print("start test at port: " + str(port))
+
+    # pycurl to cookies-java-server "/test"
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, f"http://localhost:{port}/test")
     post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...

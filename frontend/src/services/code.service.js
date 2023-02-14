@@ -1,4 +1,4 @@
-import axios, { Axios } from 'axios'
+import axios from 'axios'
 import { useAuthStore } from '../stores/auth.store';
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -58,6 +58,14 @@ class CodeService {
 
     startExecute(ip, port, container_uuid, project_uuid) {
         return axiosAuth.post(`startExecute/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
+    }
+
+    prepareTest(project_uuid) {
+        return axiosAuth.get(`prepareTest/${project_uuid}`)
+    }
+
+    startTest(ip, port, container_uuid, project_uuid) {
+        return axiosAuth.post(`startTest/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
     }
 }
 

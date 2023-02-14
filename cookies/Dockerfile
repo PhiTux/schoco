@@ -1,6 +1,7 @@
 From alpine:3.17
 
 COPY cookies.sh /app/cookies.sh
+COPY hamcrest-all-1.3.jar /app/hamcrest.jar
 COPY api/*.class /
 
 RUN apk add --no-cache openjdk8 junit libc6-compat bash \
