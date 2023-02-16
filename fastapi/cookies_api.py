@@ -331,6 +331,7 @@ def start_test(ip: str, port: int):
             time.sleep(0.2)
     c.close()
 
-    print(buffer.getvalue().decode('utf-8'))
+    results = json.loads(buffer.getvalue().decode('utf-8'), strict=False)
+    print(results)
 
     return json.loads(buffer.getvalue().decode('utf-8'), strict=False)

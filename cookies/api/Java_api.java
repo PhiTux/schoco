@@ -8,7 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
-import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Java_api {
 	public static void main(String[] args) throws IOException, InterruptedException {
@@ -26,10 +26,6 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
-					String s = null;
-					StringBuilder stdoutb = new StringBuilder();
-					StringBuilder stderrb = new StringBuilder();
-					String stdout, stderr;
 
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp/:/usr/share/java/junit.jar /app/tmp/*.java' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
@@ -74,10 +70,6 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
-					String s = null;
-					StringBuilder stdoutb = new StringBuilder();
-					StringBuilder stderrb = new StringBuilder();
-					String stdout, stderr;
 
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp Schoco' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
@@ -122,23 +114,25 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
-					//String s = null;
-					//StringBuilder stdoutb = new StringBuilder();
-					//StringBuilder stderrb = new StringBuilder();
-					String stdout;//, stderr;
+					String stdout;
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp:/usr/share/java/junit.jar:/app/hamcrest.jar org.junit.runner.JUnitCore Tests' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
-						Process p = new ProcessBuilder().inheritIO().command(command).start();
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp:/usr/share/java/junit.jar:/app/hamcrest.jar org.junit.runner.JUnitCore Tests' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + " && echo '\nschoco JUnit finished'; exit" };
+						Process p = new ProcessBuilder().command(command).start();
 
 						BufferedReader reader = 
 										new BufferedReader(new InputStreamReader(p.getInputStream()));
 						StringBuilder builder = new StringBuilder();
 						String line = null;
-						while ( (line = reader.readLine()) != null) {
+						
+						while ((line = reader.readLine()) != null) {
+							if (line.equals("schoco JUnit finished")) break;
+							System.out.println(line);
+							System.out.flush();
 							builder.append(line);
 							builder.append(System.getProperty("line.separator"));
 						}
+
 						stdout = builder.toString();
 
 						exitCode = p.waitFor();
