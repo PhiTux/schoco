@@ -33,14 +33,55 @@ let state = reactive({
   sendMessage: "",
 });
 
+/* let msgQueue = reactive({
+  data: [],
+  next: true
+}) */
+
 let results = ref("");
 
 let ws;
+
+window.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 's') {
+    e.preventDefault()
+    saveAll()
+  }
+})
 
 watch(results, () => {
   let output = document.getElementById("output");
   output.scrollTop = output.scrollHeight;
 });
+
+// Test to receive WS-Messages in Order
+/* watch(msgQueue, () => {
+  console.log(msgQueue.next, msgQueue.data.length)
+
+  if (msgQueue.next && msgQueue.data.length > 0) {
+    msgQueue.next = false;
+
+    data = msgQueue.data.shift()
+    data.text().then(msg => {
+      if (state.receivedWS == false) {
+        state.receivedWS = true;
+        results.value = "";
+      }
+
+      if (msg.trim() === state.sendMessage.trim()) {
+        state.sendMessage = ""
+        return
+      }
+      if (state.isCompiling || state.isExecuting || state.isTesting) {
+        results.value += msg;
+      }
+
+      msgQueue.next = true
+    })
+
+
+  }
+}) */
 
 function editorChange() {
   for (let i = 0; i < state.openFiles.length; i++) {
@@ -85,6 +126,7 @@ onBeforeMount(() => {
       if (response.status == 200) {
         state.files = response.data;
       }
+      openFile("Schoco.java");
     },
     (error) => {
       if (
@@ -208,7 +250,8 @@ function updateTabsWithChanges() {
 }
 
 function saveAll() {
-  if (state.isSaving) return;
+  if (state.isSaving || state.tabsWithChanges.length == 0) return;
+  console.log(state.tabsWithChanges.length)
 
   state.isSaving = true;
 
@@ -367,16 +410,16 @@ function connectWebsocket(id) {
   );
 
   ws.onmessage = function (event) {
+    //msgQueue.data.push(event)
+
     console.log(event)
 
-    if (state.receivedWS == false) {
-      state.receivedWS = true;
-      results.value = "";
-    }
+    event.data.text().then(msg => {
+      if (state.receivedWS == false) {
+        state.receivedWS = true;
+        results.value = "";
+      }
 
-    new Response(event.data).arrayBuffer().then((buffer) => {
-      var dec = new TextDecoder();
-      let msg = dec.decode(buffer);
       if (msg.trim() === state.sendMessage.trim()) {
         state.sendMessage = ""
         return
@@ -384,7 +427,7 @@ function connectWebsocket(id) {
       if (state.isCompiling || state.isExecuting || state.isTesting) {
         results.value += msg;
       }
-    });
+    })
   };
 
   ws.onopen = function (event) {
@@ -397,7 +440,6 @@ function startExecute(ip, port, uuid, project_uuid) {
     (response) => {
       ws.close();
       state.isExecuting = false;
-      console.log(response);
     },
     (error) => {
       ws.close();
@@ -445,7 +487,6 @@ function startTest(ip, port, uuid, project_uuid) {
     (response) => {
       ws.close();
       state.isTesting = false;
-      console.log(response);
     },
     (error) => {
       ws.close();
@@ -544,8 +585,7 @@ function saveDescription() {
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav">
             <li class="nav-item dropdown mx-3">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Projekt
               </a>
               <ul class="dropdown-menu">
@@ -704,7 +744,7 @@ function saveDescription() {
         </pane>
       </splitpanes>
     </div>
-  </div>
+</div>
 </template>
 
 <style scoped>

@@ -332,6 +332,26 @@ def start_test(ip: str, port: int):
     c.close()
 
     results = json.loads(buffer.getvalue().decode('utf-8'), strict=False)
-    print(results)
 
-    return json.loads(buffer.getvalue().decode('utf-8'), strict=False)
+    # parse results
+    lines = results['stdout'].strip().splitlines()
+    lastLine = lines[-1]
+    if lastLine.startswith('OK'):
+        passed_tests = int(lastLine.split('(')[1].split(')')[0].split()[0])
+        results['passed_tests'] = passed_tests
+        results['failed_tests'] = 0
+        print(passed_tests)
+    elif lastLine.startswith('Tests run'):
+        failed_tests = int(lastLine.split(',')[1].split(':')[1].strip())
+        passed_tests = int(lastLine.split(',')[0].split(':')[
+            1].strip()) - failed_tests
+        results['passed_tests'] = passed_tests
+        results['failed_tests'] = failed_tests
+        print(passed_tests, failed_tests)
+    else:
+        results['passed_tests'] = 0
+        results['failed_tests'] = 0
+
+    # TODO: Save results in DB
+
+    return results
