@@ -1,4 +1,4 @@
-From alpine:3.17
+FROM alpine:3.17
 
 COPY cookies.sh /app/cookies.sh
 COPY hamcrest-all-1.3.jar /app/hamcrest.jar
@@ -9,7 +9,7 @@ RUN apk add --no-cache openjdk8 junit libc6-compat bash \
     #&& useradd -r -s /bin/false -g cookies cookies \
     #&& chown 1234:1234 /app/cookies.sh 
     && chmod +x /app/cookies.sh
-    #&& adduser -H schoco
+#&& adduser -H schoco
 
 #USER schoco
 

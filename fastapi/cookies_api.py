@@ -112,7 +112,7 @@ def createNewContainer():
     uuid_dir.mkdir(exist_ok=True, parents=True)
 
     client = docker.from_env()
-    nproc_limit = docker.types.Ulimit(name="nproc", soft=1024, hard=1536)
+    nproc_limit = docker.types.Ulimit(name="nproc", soft=3700, hard=5000)
     new_container = client.containers.run(
         'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=os.getuid(), volumes=[f"{uuid_dir}:/app/tmp"])
     # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
