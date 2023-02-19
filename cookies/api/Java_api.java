@@ -118,7 +118,7 @@ public class Java_api {
 
 					try {
 						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp:/usr/share/java/junit.jar:/app/hamcrest.jar org.junit.runner.JUnitCore Tests' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + " && echo '\nschoco JUnit finished'; exit" };
-						Process p = new ProcessBuilder().command(command).start();
+						Process p = new ProcessBuilder().redirectErrorStream(true).command(command).start();
 
 						BufferedReader reader = 
 										new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -127,8 +127,8 @@ public class Java_api {
 						
 						while ((line = reader.readLine()) != null) {
 							if (line.equals("schoco JUnit finished")) break;
-							System.out.println(line);
-							System.out.flush();
+							//System.out.println(line);
+							//System.out.flush();
 							builder.append(line);
 							builder.append(System.getProperty("line.separator"));
 						}

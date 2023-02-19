@@ -11,6 +11,7 @@ import "ace-builds/src-min-noconflict/mode-java";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import { createSimpleExpression } from "@vue/compiler-core";
+import { end } from "@popperjs/core";
 
 const route = useRoute();
 
@@ -33,10 +34,6 @@ let state = reactive({
   sendMessage: "",
 });
 
-/* let msgQueue = reactive({
-  data: [],
-  next: true
-}) */
 
 let results = ref("");
 
@@ -54,34 +51,6 @@ watch(results, () => {
   output.scrollTop = output.scrollHeight;
 });
 
-// Test to receive WS-Messages in Order
-/* watch(msgQueue, () => {
-  console.log(msgQueue.next, msgQueue.data.length)
-
-  if (msgQueue.next && msgQueue.data.length > 0) {
-    msgQueue.next = false;
-
-    data = msgQueue.data.shift()
-    data.text().then(msg => {
-      if (state.receivedWS == false) {
-        state.receivedWS = true;
-        results.value = "";
-      }
-
-      if (msg.trim() === state.sendMessage.trim()) {
-        state.sendMessage = ""
-        return
-      }
-      if (state.isCompiling || state.isExecuting || state.isTesting) {
-        results.value += msg;
-      }
-
-      msgQueue.next = true
-    })
-
-
-  }
-}) */
 
 function editorChange() {
   for (let i = 0; i < state.openFiles.length; i++) {
@@ -343,7 +312,6 @@ function compile() {
       );
     },
     (error) => {
-      ws.close();
       state.isCompiling = false;
       console.log(error.response);
     }
@@ -353,7 +321,6 @@ function compile() {
 function startCompile(ip, port, container_uuid, project_uuid) {
   CodeService.startCompile(ip, port, container_uuid, project_uuid).then(
     (response) => {
-      ws.close();
       state.isCompiling = false;
       console.log(response.data);
       if (response.data.status === "connect_error") {
@@ -365,7 +332,6 @@ function startCompile(ip, port, container_uuid, project_uuid) {
       }
     },
     (error) => {
-      ws.close();
       state.isCompiling = false;
       console.log(error.response);
     }
@@ -398,36 +364,34 @@ function execute() {
     },
     (error) => {
       state.isExecuting = false;
-      ws.close();
       console.log(error.response);
     }
   );
 }
 
+
+
 function connectWebsocket(id) {
   ws = new WebSocket(
     `ws://localhost:80/containers/${id}/attach/ws?stream=1&stdin=1&stdout=1&stderr=1`
   );
+  ws.binaryType = 'arraybuffer';
 
   ws.onmessage = function (event) {
-    //msgQueue.data.push(event)
+    let dec = new TextDecoder();
+    let msg = dec.decode(event.data);
 
-    console.log(event)
+    if (state.receivedWS == false) {
+      state.receivedWS = true;
+      results.value = "";
+    }
 
-    event.data.text().then(msg => {
-      if (state.receivedWS == false) {
-        state.receivedWS = true;
-        results.value = "";
-      }
+    if (msg !== "\r\n" && msg.trim() === state.sendMessage.trim()) {
+      state.sendMessage = ""
+      return
+    }
 
-      if (msg.trim() === state.sendMessage.trim()) {
-        state.sendMessage = ""
-        return
-      }
-      if (state.isCompiling || state.isExecuting || state.isTesting) {
-        results.value += msg;
-      }
-    })
+    results.value += msg;
   };
 
   ws.onopen = function (event) {
@@ -438,11 +402,10 @@ function connectWebsocket(id) {
 function startExecute(ip, port, uuid, project_uuid) {
   CodeService.startExecute(ip, port, uuid, project_uuid).then(
     (response) => {
-      ws.close();
+      console.log("stopped executing")
       state.isExecuting = false;
     },
     (error) => {
-      ws.close();
       state.isExecuting = false;
       console.log(error.response);
     }
@@ -455,6 +418,8 @@ function test() {
   state.isTesting = true;
   state.receivedWS = false;
 
+  results.value = "Programm wird getestet 📝➡️✅ bitte warten..."
+
   CodeService.prepareTest(route.params.project_uuid).then(
     (response) => {
       if (response.data.executable == false) {
@@ -463,8 +428,6 @@ function test() {
         state.isTesting = false;
         return;
       }
-
-      connectWebsocket(response.data.id);
 
       startTest(
         response.data.ip,
@@ -475,7 +438,6 @@ function test() {
     },
     (error) => {
       state.isTesting = false;
-      ws.close();
       console.log(error.response);
     }
   );
@@ -485,11 +447,26 @@ function test() {
 function startTest(ip, port, uuid, project_uuid) {
   CodeService.startTest(ip, port, uuid, project_uuid).then(
     (response) => {
-      ws.close();
       state.isTesting = false;
+
+      results.value = ""
+
+      if (response.data.failed_tests == 0) {
+        results.value += "Alle Tests bestanden 🎉🤩\n\nDu kannst nun höchstens noch versuchen, deinen Quellcode zu \"verschönern\" ;-)"
+      } else if (response.data.passed_tests == 0) {
+        results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die untere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
+      }
+      else {
+        let percent = (response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100
+        results.value += `Du hast ${percent}% der Tests bestanden. Vielleicht hilft dir die untere Ausgabe, um die restlichen Tests auch noch zu bestehen 🤗`
+      }
+
+      results.value += "\n\n==================\n\n"
+
+      results.value += response.data.stdout
     },
     (error) => {
-      ws.close();
+      results.value = "💥🙈 es gab wohl einen Fehler beim Testen deines Programms. Probiere es erneut!\nStelle zunächst sicher, dass dein Programm ausgeführt werden kann.\nWenn das Problem bestehen bleibt solltest du dich an deine Lehrerin \\ deinen Lehrer wenden."
       state.isTesting = false;
       console.log(error.response);
     }
@@ -744,7 +721,7 @@ function saveDescription() {
         </pane>
       </splitpanes>
     </div>
-</div>
+  </div>
 </template>
 
 <style scoped>
