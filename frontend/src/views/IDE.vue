@@ -1,11 +1,14 @@
 <script setup>
 import { onBeforeMount, reactive, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Toast } from "bootstrap";
+import { Modal, Toast } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
+import { useAuthStore } from "../stores/auth.store";
 import CodeService from "../services/code.service";
+import UserService from "../services/user.service"
 import IDEFileTree from "../components/IDEFileTree.vue";
+import CourseBadge from "../components/CourseBadge.vue"
 import "ace-builds";
 import "ace-builds/src-min-noconflict/mode-java";
 import "ace-builds/src-min-noconflict/theme-monokai";
@@ -13,6 +16,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import { createSimpleExpression } from "@vue/compiler-core";
 import { end } from "@popperjs/core";
 
+const authStore = useAuthStore();
 const route = useRoute();
 
 let state = reactive({
@@ -32,8 +36,12 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
+  datetimeNow: new Date(),
+  datetime6Days: new Date()
 });
 
+let allCourses = ref([])
+let selectedCourse = ref({})
 
 let results = ref("");
 
@@ -129,6 +137,18 @@ onBeforeMount(() => {
     },
     (error) => {
       console.log(error);
+    }
+  );
+
+  UserService.getAllCourses().then(
+    (response) => {
+      allCourses.value = response.data;
+    },
+    (error) => {
+      if (error.response.status == 403) {
+        const user = useAuthStore();
+        user.logout();
+      } else console.log(error);
     }
   );
 });
@@ -518,6 +538,21 @@ function saveDescription() {
   );
 }
 
+function createHomework() {
+  console.log("createHomework")
+}
+
+function selectCourse(course) {
+  selectedCourse.value = course
+}
+
+function prepareHomeworkModal() {
+  state.datetimeNow = new Date().toISOString()
+
+  let now = new Date()
+  let tmp = now.setDate(now.getDate() + 6);
+  state.datetime6Days = new Date(tmp).toISOString()
+}
 </script>
 
 <template>
@@ -551,6 +586,60 @@ function saveDescription() {
         </div>
       </div>
     </div>
+
+    <!-- Modals -->
+    <div class="modal fade" id="createHomeworkModal" tabindex="-1" aria-labelledby="createHomeworkModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content dark-text">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Hausaufgabe erstellen</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <span>⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig abgeschlossen sein, <b>bevor</b>
+              Sie daraus eine Hausaufgabe erstellen. Nach diesem Schritt sollten Änderungen vermieden werden, da die
+              Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.</span>
+            <hr>
+            <div class="mb-3 row">
+              <label for="coursename" class="col-sm-4 col-form-label">Kurs wählen:</label>
+              <div class="col-sm-8 d-flex align-items-center">
+                <CourseBadge v-if="selectedCourse" :color="selectedCourse.color" :font-dark="selectedCourse.fontDark"
+                  :name="selectedCourse.name" />
+                <a class="btn-round btn" data-bs-toggle="dropdown">
+                  <font-awesome-layers class="fa-lg" style="display: block !important;">
+                    <font-awesome-icon icon="fa-circle" style="color: var(--bs-secondary)" />
+                    <div style="color: var(--bs-light)">
+                      <font-awesome-icon icon="fa-plus" transform="shrink-6" />
+                    </div>
+                  </font-awesome-layers>
+                </a>
+                <ul class="dropdown-menu">
+                  <li v-for="c in allCourses">
+                    <a class="dropdown-item btn" @click.prevent="selectCourse(c)">
+                      <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="deadline" class="col-sm-4 col-form-label">Abgabefrist:</label>
+              <input @click.prevent="calculateDatetime()" type="datetime-local" id="meeting-time" name="meeting-time"
+                v-value="state.datetimeNow" min="2018-06-07T00:00" max="2018-06-14T00:00">
+            </div>
+            <div class="mb-3 row">
+              <label for="deadline" class="col-sm-4 col-form-label">Rechenzeit (HILFE ANZEIGEN):</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Navbar -->
     <nav class="navbar sticky-top navbar-expand-lg bg-dark navbar-dark">
@@ -627,6 +716,10 @@ function saveDescription() {
                 <font-awesome-icon v-else icon="fa-solid fa-list-check" /> Testen
               </button>
             </div>
+            <button v-if="authStore.isTeacher()" @click.prevent="prepareHomeworkModal()" type="button"
+              data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
+              <font-awesome-icon icon="fa-solid fa-share-nodes" /> Hausaufgabe erstellen
+            </button>
           </ul>
         </div>
       </div>
@@ -725,6 +818,15 @@ function saveDescription() {
 </template>
 
 <style scoped>
+.btn-round {
+  padding: 0;
+  border: 0px;
+}
+
+.dark-text {
+  color: var(--bs-dark);
+}
+
 .edit-description {
   height: 100%;
 }

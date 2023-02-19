@@ -7,12 +7,12 @@ import "bootstrap"
 import { VAceEditor } from 'vue3-ace-editor';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil, faShareNodes } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil)
+library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil, faShareNodes)
 
 const pinia = createPinia()
-pinia.use(({store}) => {
+pinia.use(({ store }) => {
     store.$router = markRaw(router)
 })
 

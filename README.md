@@ -34,10 +34,10 @@ Even a completed task just means, that the specific base-work is done, but that 
 - [x] Open my own Projects in the IDE
 - [x] Interaction with Gitea on localhost or different Host (HTTPS): (Loading all files and save changes)
 - [x] Worker-Queue (or comparable) for cookies
-- [ ] WIP: Make cookies work (see /cookies)
+- [x] Make cookies work (see [/cookies](/cookies))
     - [x] Compilation
     - [x] Running/Executing (Input and output can be send via Websocket ✔)
-    - [ ] JUnit-Testing
+    - [x] JUnit-Testing
 - [ ] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [ ] Save amount of compilations, executions,... per project and make them visible
 - [ ] Mark projects as templates (when being a teacher)
