@@ -5,15 +5,18 @@ import App from './App.vue'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
 import { VAceEditor } from 'vue3-ace-editor';
+//import VueDatePicker from '@vuepic/vue-datepicker';
+//import '@vuepic/vue-datepicker/dist/main.css'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'
-import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil, faShareNodes } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil, faShareNodes, faCircleQuestion } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil, faShareNodes)
+library.add(faUser, faUsers, faKey, faRightFromBracket, faHammer, faPlay, faEyeSlash, faEye, faLock, faSignature, faUserPlus, faCheck, faCircle, faPlus, faXmark, faTrash, faFileCirclePlus, faFolderPlus, faFloppyDisk, faArrowLeftLong, faArrowRotateRight, faGear, faCirclePlay, faListCheck, faFolderOpen, faFile, faPencil, faShareNodes, faCircleQuestion)
 
 const pinia = createPinia()
 pinia.use(({ store }) => {
     store.$router = markRaw(router)
 })
 
+//component('VueDatePicker', VueDatePicker)
 createApp(App).use(pinia).use(router).component('v-ace-editor', VAceEditor).component('font-awesome-icon', FontAwesomeIcon).component('font-awesome-layers', FontAwesomeLayers).mount('#app')

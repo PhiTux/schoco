@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeMount, reactive, onMounted, watch, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Modal, Toast } from "bootstrap";
+import { Modal, Toast, Popover } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { useAuthStore } from "../stores/auth.store";
@@ -15,6 +15,9 @@ import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import { createSimpleExpression } from "@vue/compiler-core";
 import { end } from "@popperjs/core";
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css'
+import { de, enUS } from 'date-fns/locale';
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -36,8 +39,7 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
-  datetimeNow: new Date(),
-  datetime6Days: new Date()
+  deadlineDate: new Date()
 });
 
 let allCourses = ref([])
@@ -547,12 +549,24 @@ function selectCourse(course) {
 }
 
 function prepareHomeworkModal() {
-  state.datetimeNow = new Date().toISOString()
+  state.deadlineDate = new Date()
 
-  let now = new Date()
-  let tmp = now.setDate(now.getDate() + 6);
-  state.datetime6Days = new Date(tmp).toISOString()
+  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
 }
+
+const format = (date) => {
+  const weekday = Intl.DateTimeFormat("de-DE", { weekday: "long" }).format(date)
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const hour = date.getHours();
+  const minute = date.getMinutes();
+
+  // if german:
+  return `${weekday} ${day}.${month}.${year}, ${hour}:${minute}`;
+}
+
 </script>
 
 <template>
@@ -590,7 +604,7 @@ function prepareHomeworkModal() {
     <!-- Modals -->
     <div class="modal fade" id="createHomeworkModal" tabindex="-1" aria-labelledby="createHomeworkModalLabel"
       aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content dark-text">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Hausaufgabe erstellen</h1>
@@ -625,16 +639,24 @@ function prepareHomeworkModal() {
             </div>
             <div class="mb-3 row">
               <label for="deadline" class="col-sm-4 col-form-label">Abgabefrist:</label>
-              <input @click.prevent="calculateDatetime()" type="datetime-local" id="meeting-time" name="meeting-time"
-                v-value="state.datetimeNow" min="2018-06-07T00:00" max="2018-06-14T00:00">
+              <div class="col-sm-8">
+                <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
+                <VueDatePicker v-model="state.deadlineDate" placeholder="Start Typing ..." text-input auto-apply
+                  :min-date="new Date()" prevent-min-max-navigation locale="de" format="E dd.MM.yyyy, HH:mm" />
+                UTC-Zeit: <em>{{ state.deadlineDate.toISOString() }}</em>
+              </div>
             </div>
             <div class="mb-3 row">
-              <label for="deadline" class="col-sm-4 col-form-label">Rechenzeit (HILFE ANZEIGEN):</label>
+              <label for="deadline" class="col-sm-4 col-form-label">Rechenzeit:
+                <a class="btn-round btn" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Rechenzeit"
+                  data-bs-content="Lege fest, wie viele <b>Sekunden</b> Rechenzeit auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.">
+                  <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
+                </a></label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-primary">Hausaufgabe erstellen</button>
           </div>
         </div>
       </div>
