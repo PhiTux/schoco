@@ -39,12 +39,17 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
-  deadlineDate: new Date()
 });
 
-let allCourses = ref([])
-let selectedCourse = ref({})
+let homework = reactive({
+  deadlineDate: new Date(),
+  selectedCourse: "",
+  computationTime: ""
+})
 
+let allCourses = ref([])
+
+/** Stores the output displayed in the bottom pane. */
 let results = ref("");
 
 let ws;
@@ -150,7 +155,7 @@ onBeforeMount(() => {
       if (error.response.status == 403) {
         const user = useAuthStore();
         user.logout();
-      } else console.log(error);
+      } else console.log(error.response);
     }
   );
 });
@@ -545,26 +550,25 @@ function createHomework() {
 }
 
 function selectCourse(course) {
-  selectedCourse.value = course
+  homework.selectedCourse = course
 }
 
 function prepareHomeworkModal() {
-  state.deadlineDate = new Date()
+  homework.selectedCourse = ""
+  homework.deadlineDate = new Date()
+  homework.computationTime = 10
 
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
   const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
 }
 
-const format = (date) => {
-  const weekday = Intl.DateTimeFormat("de-DE", { weekday: "long" }).format(date)
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-  const hour = date.getHours();
-  const minute = date.getMinutes();
-
-  // if german:
-  return `${weekday} ${day}.${month}.${year}, ${hour}:${minute}`;
+function computationTimeUpdate($event) {
+  console.log(Number($event.data))
+  console.log(Number($event.data) == $event.data)
+  if ($event.data == null || Number($event.data) == $event.data) {
+    $event.target.value;
+    console.log("hu")
+  }
 }
 
 </script>
@@ -616,10 +620,13 @@ const format = (date) => {
               Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.</span>
             <hr>
             <div class="mb-3 row">
-              <label for="coursename" class="col-sm-4 col-form-label">Kurs wählen:</label>
+              <label for="coursename" class="col-sm-4 col-form-label">
+                <font-awesome-icon v-if="homework.selectedCourse" icon="fa-square-check"
+                  style="color: var(--bs-success)" />
+                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Kurs wählen:</label>
               <div class="col-sm-8 d-flex align-items-center">
-                <CourseBadge v-if="selectedCourse" :color="selectedCourse.color" :font-dark="selectedCourse.fontDark"
-                  :name="selectedCourse.name" />
+                <CourseBadge v-if="homework.selectedCourse" :color="homework.selectedCourse.color"
+                  :font-dark="homework.selectedCourse.fontDark" :name="homework.selectedCourse.name" />
                 <a class="btn-round btn" data-bs-toggle="dropdown">
                   <font-awesome-layers class="fa-lg" style="display: block !important;">
                     <font-awesome-icon icon="fa-circle" style="color: var(--bs-secondary)" />
@@ -638,20 +645,33 @@ const format = (date) => {
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="deadline" class="col-sm-4 col-form-label">Abgabefrist:</label>
+              <label for="deadline" class="col-sm-4 col-form-label">
+                <font-awesome-icon v-if="homework.deadlineDate > new Date()" icon="fa-square-check"
+                  style="color: var(--bs-success)" />
+                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Abgabefrist:</label>
               <div class="col-sm-8">
                 <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
-                <VueDatePicker v-model="state.deadlineDate" placeholder="Start Typing ..." text-input auto-apply
+                <VueDatePicker v-model="homework.deadlineDate" placeholder="Start Typing ..." text-input auto-apply
                   :min-date="new Date()" prevent-min-max-navigation locale="de" format="E dd.MM.yyyy, HH:mm" />
-                UTC-Zeit: <em>{{ state.deadlineDate.toISOString() }}</em>
+                UTC-Zeit: <em>{{ homework.deadlineDate.toISOString() }}</em>
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="deadline" class="col-sm-4 col-form-label">Rechenzeit:
-                <a class="btn-round btn" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" title="Rechenzeit"
-                  data-bs-content="Lege fest, wie viele <b>Sekunden</b> Rechenzeit auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.">
+              <label for="deadline" class="col-sm-4 col-form-label">
+                <font-awesome-icon
+                  v-if="homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime))"
+                  icon="fa-square-check" style="color: var(--bs-success)" />
+                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Rechenzeit:
+                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover" title="Rechenzeit"
+                  data-bs-content="Lege fest, wie viele <b>Sekunden</b> Rechenzeit (bzw. genauer: Laufzeit) auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.">
                   <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
                 </a></label>
+              <div class="col-sm-8">
+                <input :value="homework.computationTime" @input="event => homework.computationTime = event.target.value"
+                  type="number" min="3" step="1" placeholder="Mindestens 3, Standard 10" />
+                <br>
+                {{ homework.computationTime }} Sekunden
+              </div>
             </div>
           </div>
           <div class="modal-footer">
