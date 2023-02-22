@@ -159,3 +159,9 @@ class startTest(BaseModel):
     ip: str
     port: int
     container_uuid: str
+
+
+class homework(BaseModel):
+    course: Course
+    deadline_date: str
+    computation_time: int

@@ -33,11 +33,11 @@ class CodeService {
     }
 
     updateDescription(project_uuid, description) {
-        return axiosAuth.post(`updateDescription/${project_uuid}`, {'description': description})
+        return axiosAuth.post(`updateDescription/${project_uuid}`, { 'description': description })
     }
 
     saveFileChanges(changes, project_uuid) {
-        return axiosAuth.post(`saveFileChanges/${project_uuid}`, { 'changes': changes})
+        return axiosAuth.post(`saveFileChanges/${project_uuid}`, { 'changes': changes })
     }
 
     getMyProjects() {
@@ -45,11 +45,11 @@ class CodeService {
     }
 
     prepareCompile(projectFiles, project_uuid) {
-        return axiosAuth.post(`prepareCompile/${project_uuid}`, {'files': projectFiles})
+        return axiosAuth.post(`prepareCompile/${project_uuid}`, { 'files': projectFiles })
     }
 
     startCompile(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post(`startCompile/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
+        return axiosAuth.post(`startCompile/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
     prepareExecute(project_uuid) {
@@ -57,7 +57,7 @@ class CodeService {
     }
 
     startExecute(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post(`startExecute/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
+        return axiosAuth.post(`startExecute/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
     prepareTest(project_uuid) {
@@ -65,7 +65,11 @@ class CodeService {
     }
 
     startTest(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post(`startTest/${project_uuid}`, {'ip': ip, 'port': port, 'container_uuid': container_uuid})
+        return axiosAuth.post(`startTest/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
+    }
+
+    createHomework(orig_project_uuid, course, deadlineDate, computationTime) {
+        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'course': course, 'deadline_date': deadlineDate, 'computation_time': computationTime })
     }
 }
 

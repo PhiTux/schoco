@@ -64,6 +64,24 @@ def project_access_allowed(project_uuid: str, db: Session = Depends(database.get
         status_code=405, detail="You're not allowed to open or edit this project")
 
 
+def project_access_allowed_teacher_only(project_uuid: str, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+
+    # user must be teacher
+    user = crud.get_user_by_username(db=db, username=username)
+    if user.role != "teacher":
+        raise HTTPException(
+            status_code=405, detail="You're not allowed to open or edit this project")
+
+    # user must be owner
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+    if project.owner.username == username:
+        return True
+
+    raise HTTPException(
+        status_code=405, detail="You're not allowed to open or edit this project")
+
+
 results = []
 
 
@@ -189,3 +207,19 @@ def startTest(startTest: models_and_schemas.startTest, background_tasks: Backgro
         cookies_api.kill_n_create, startTest.container_uuid)
 
     return result
+
+
+@code.post('/createHomework/{project_uuid}', dependencies=[Depends(project_access_allowed_teacher_only)])
+def createHomework(homework: models_and_schemas.homework, project_uuid: str = Path()):
+
+    orig_project_uuid = project_uuid
+    template_project_uuid = str(uuid.uuid4())
+
+    # copy original project to create template for the homework
+    if not git.forkProject(
+            orig_project_uuid=orig_project_uuid, template_project_uuid=template_project_uuid):
+        return False
+
+    # TODO Continue this function...
+
+    return True

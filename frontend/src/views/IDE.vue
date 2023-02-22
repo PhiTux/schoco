@@ -547,11 +547,19 @@ function saveDescription() {
 
 function createHomework() {
   console.log("createHomework")
+
+  CodeService.createHomework(route.params.project_uuid, homework.selectedCourse, homework.deadlineDate.toISOString(), homework.computationTime).then(
+    (response) => {
+      console.log(response.data)
+    }, (error) => {
+      const toast = new Toast(
+        document.getElementById("toastHomeworkCreationError")
+      );
+      toast.show();
+      console.log(error.response)
+    })
 }
 
-function selectCourse(course) {
-  homework.selectedCourse = course
-}
 
 function prepareHomeworkModal() {
   homework.selectedCourse = {}
@@ -560,15 +568,6 @@ function prepareHomeworkModal() {
 
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
   const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
-}
-
-function computationTimeUpdate($event) {
-  console.log(Number($event.data))
-  console.log(Number($event.data) == $event.data)
-  if ($event.data == null || Number($event.data) == $event.data) {
-    $event.target.value;
-    console.log("hu")
-  }
 }
 
 </script>
@@ -600,6 +599,15 @@ function computationTimeUpdate($event) {
         <div class="d-flex">
           <div class="toast-body">
             Du kannst nur deine eigenen Projekte öffnen!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastHomeworkCreationError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Erstellen der Hausaufgabe!
           </div>
         </div>
       </div>
@@ -637,7 +645,7 @@ function computationTimeUpdate($event) {
                 </a>
                 <ul class="dropdown-menu">
                   <li v-for="c in allCourses">
-                    <a class="dropdown-item btn" @click.prevent="selectCourse(c)">
+                    <a class="dropdown-item btn" @click.prevent="homework.selectedCourse = c">
                       <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
                     </a>
                   </li>
@@ -680,7 +688,7 @@ function computationTimeUpdate($event) {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
-            <button type="button" class="btn btn-primary"
+            <button type="button" class="btn btn-primary" @click.prevent="createHomework()"
               :disabled="Object.keys(homework.selectedCourse).length === 0 || homework.deadlineDate <= new Date() || !(homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime)))">Hausaufgabe
               erstellen</button>
           </div>
