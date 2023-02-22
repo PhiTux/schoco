@@ -554,7 +554,7 @@ function selectCourse(course) {
 }
 
 function prepareHomeworkModal() {
-  homework.selectedCourse = ""
+  homework.selectedCourse = {}
   homework.deadlineDate = new Date()
   homework.computationTime = 10
 
@@ -621,7 +621,7 @@ function computationTimeUpdate($event) {
             <hr>
             <div class="mb-3 row">
               <label for="coursename" class="col-sm-4 col-form-label">
-                <font-awesome-icon v-if="homework.selectedCourse" icon="fa-square-check"
+                <font-awesome-icon v-if="Object.keys(homework.selectedCourse).length !== 0" icon="fa-square-check"
                   style="color: var(--bs-success)" />
                 <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Kurs wählen:</label>
               <div class="col-sm-8 d-flex align-items-center">
@@ -653,7 +653,11 @@ function computationTimeUpdate($event) {
                 <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
                 <VueDatePicker v-model="homework.deadlineDate" placeholder="Start Typing ..." text-input auto-apply
                   :min-date="new Date()" prevent-min-max-navigation locale="de" format="E dd.MM.yyyy, HH:mm" />
-                UTC-Zeit: <em>{{ homework.deadlineDate.toISOString() }}</em>
+                UTC: <em>{{ homework.deadlineDate.toISOString() }}</em><br>
+                Bearbeitungszeit: <em v-if="homework.deadlineDate > new Date()"><b>{{ Math.floor((homework.deadlineDate -
+                  new
+                    Date()) / (1000 * 3600 * 24)) }} Tage,
+                    {{ Math.floor((homework.deadlineDate - new Date()) / (1000 * 3600) % 24) }} Stunden</b></em>
               </div>
             </div>
             <div class="mb-3 row">
@@ -676,7 +680,9 @@ function computationTimeUpdate($event) {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
-            <button type="button" class="btn btn-primary">Hausaufgabe erstellen</button>
+            <button type="button" class="btn btn-primary"
+              :disabled="Object.keys(homework.selectedCourse).length === 0 || homework.deadlineDate <= new Date() || !(homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime)))">Hausaufgabe
+              erstellen</button>
           </div>
         </div>
       </div>
