@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from config import settings
 
 
-users = APIRouter()
+users = APIRouter(prefix="/api")
 
 
 @users.post('/registerTeacher')

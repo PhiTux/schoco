@@ -1,0 +1,30 @@
+version: "3"
+
+networks:
+  schoco:
+    external: false
+
+services:
+  server:
+    image: phitux/schoco:0.0.1
+    container_name: schoco
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - FULL_DATA_PATH=/home/marco/git/schoco/fastapi/data
+      - PRODUCTION=False
+      - MAX_CONTAINERS=4
+      - SECRET_KEY=secret
+      - TEACHER_KEY=teacherkey
+      - GITEA_USERNAME=schoco
+      - GITEA_PASSWORD=schoco1234
+      - GITEA_PORT=3000
+      #- GITEA_HOST=https://git.mydomain.tld
+    restart: always
+    networks:
+      - schoco
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "80:8000"

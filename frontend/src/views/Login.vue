@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, computed } from "vue";
-import { useAuthStore } from "../stores/auth.store";
-import UserService from "../services/user.service";
+import { useAuthStore } from "../stores/auth.store.js";
+import UserService from "../services/user.service.js";
 
 const state = reactive({
   loginUsername: "",
@@ -21,7 +21,7 @@ const state = reactive({
 });
 
 async function login() {
-  if (!this.loginValid) {
+  if (!loginValid) {
     state.loginIncomplete = true;
     return;
   }
@@ -38,9 +38,9 @@ async function login() {
 
 async function registerTeacher() {
   if (
-    !this.registerValid ||
-    !this.registerPasswordsEqual ||
-    this.registerPasswordTooShort
+    !registerValid ||
+    !registerPasswordsEqual ||
+    registerPasswordTooShort
   ) {
     state.registerIncomplete = true;
     return;
@@ -116,9 +116,7 @@ let registerPasswordTooShort = computed(() => {
 
 <template>
   <div class="center-fix d-flex flex-column">
-    <div
-      class="container-fluid flex-fill align-items-center d-flex justify-content-center"
-    >
+    <div class="container-fluid flex-fill align-items-center d-flex justify-content-center">
       <div class="w-100 row text-center align-items-center">
         <div class="col-6">
           <div class="container-lg">
@@ -130,89 +128,47 @@ let registerPasswordTooShort = computed(() => {
           <div class="accordion" id="loginAccordion">
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingOne">
-                <button
-                  class="accordion-button"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne"
-                  aria-expanded="true"
-                  aria-controls="collapseOne"
-                >
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                  aria-expanded="true" aria-controls="collapseOne">
                   Login
                 </button>
               </h2>
-              <div
-                id="collapseOne"
-                class="accordion-collapse collapse show"
-                aria-labelledby="headingOne"
-                data-bs-parent="#loginAccordion"
-              >
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                data-bs-parent="#loginAccordion">
                 <div class="accordion-body">
                   <form @submit.prevent="login()">
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1">
-                        <font-awesome-icon icon="fa-solid fa-user"
-                      /></span>
+                        <font-awesome-icon icon="fa-solid fa-user" /></span>
                       <div class="form-floating">
-                        <input
-                          type="text"
-                          id="floatingInputLogin"
-                          class="form-control"
-                          v-model="state.loginUsername"
-                          placeholder="Username"
-                        />
+                        <input type="text" id="floatingInputLogin" class="form-control" v-model="state.loginUsername"
+                          placeholder="Username" />
                         <label for="floatingInputLogin">Username</label>
                       </div>
                     </div>
 
                     <div class="input-group mb-3">
-                      <span class="input-group-text" id="basic-addon1"
-                        ><font-awesome-icon icon="fa-solid fa-key"
-                      /></span>
+                      <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
                       <div class="form-floating">
-                        <input
-                          :type="[
-                            state.showLoginPassword ? 'text' : 'password',
-                          ]"
-                          id="floatingPasswordLogin"
-                          class="form-control"
-                          v-model="state.loginPassword"
-                          placeholder="Password"
-                        />
+                        <input :type="[
+                          state.showLoginPassword ? 'text' : 'password',
+                        ]" id="floatingPasswordLogin" class="form-control" v-model="state.loginPassword"
+                          placeholder="Password" />
                         <label for="floatingPasswordLogin">Password</label>
                       </div>
                       <span class="input-group-text" id="basic-addon1">
-                        <a
-                          class="greyButton"
-                          @mousedown="showLoginPassword()"
-                          @mouseup="hideLoginPassword()"
-                          @mouseleave="hideLoginPassword()"
-                          ><font-awesome-icon
-                            v-if="!state.showLoginPassword"
-                            icon="fa-solid fa-eye-slash" /><font-awesome-icon
-                            v-else
-                            icon="fa-solid fa-eye" /></a
-                      ></span>
+                        <a class="greyButton" @mousedown="showLoginPassword()" @mouseup="hideLoginPassword()"
+                          @mouseleave="hideLoginPassword()"><font-awesome-icon v-if="!state.showLoginPassword"
+                            icon="fa-solid fa-eye-slash" /><font-awesome-icon v-else icon="fa-solid fa-eye" /></a></span>
                     </div>
-                    <div
-                      v-if="state.loginIncomplete"
-                      class="alert alert-danger"
-                      role="alert"
-                    >
+                    <div v-if="state.loginIncomplete" class="alert alert-danger" role="alert">
                       Eingabe unvollständig
                     </div>
-                    <div
-                      v-if="state.showLoginError"
-                      class="alert alert-danger"
-                      role="alert"
-                    >
+                    <div v-if="state.showLoginError" class="alert alert-danger" role="alert">
                       Falscher Benutzername oder Passwort
                     </div>
 
-                    <button
-                      class="btn btn-primary"
-                      :class="{ disabled: !loginValid }"
-                    >
+                    <button class="btn btn-primary" :class="{ disabled: !loginValid }">
                       Login
                     </button>
                   </form>
@@ -221,40 +177,22 @@ let registerPasswordTooShort = computed(() => {
             </div>
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingTwo">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo"
-                  aria-expanded="false"
-                  aria-controls="collapseTwo"
-                >
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                   Registrierung nur für Lehrkräfte
                 </button>
               </h2>
-              <div
-                id="collapseTwo"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingTwo"
-                data-bs-parent="#loginAccordion"
-              >
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                data-bs-parent="#loginAccordion">
                 <div class="accordion-body">
                   <form @submit.prevent="registerTeacher()">
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1">
-                        <font-awesome-icon icon="fa-solid fa-lock"
-                      /></span>
+                        <font-awesome-icon icon="fa-solid fa-lock" /></span>
                       <div class="form-floating">
-                        <input
-                          type="password"
-                          id="floatingInputTeacherKey"
-                          class="form-control"
-                          v-model="state.registerTeacherKey"
-                          placeholder="Lehrer-Passwort"
-                        />
-                        <label for="floatingInputTeacherKey"
-                          >Lehrer-Passwort</label
-                        >
+                        <input type="password" id="floatingInputTeacherKey" class="form-control"
+                          v-model="state.registerTeacherKey" placeholder="Lehrer-Passwort" />
+                        <label for="floatingInputTeacherKey">Lehrer-Passwort</label>
                       </div>
                     </div>
 
@@ -262,36 +200,20 @@ let registerPasswordTooShort = computed(() => {
 
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1">
-                        <font-awesome-icon icon="fa-solid fa-signature"
-                      /></span>
+                        <font-awesome-icon icon="fa-solid fa-signature" /></span>
                       <div class="form-floating">
-                        <input
-                          :disabled="state.registerTeacherKey == ''"
-                          type="text"
-                          id="floatingInputRegisterName"
-                          class="form-control"
-                          v-model="state.registerName"
-                          placeholder="Vor- und Nachname"
-                        />
-                        <label for="floatingInputRegisterName"
-                          >Vor- und Nachname</label
-                        >
+                        <input :disabled="state.registerTeacherKey == ''" type="text" id="floatingInputRegisterName"
+                          class="form-control" v-model="state.registerName" placeholder="Vor- und Nachname" />
+                        <label for="floatingInputRegisterName">Vor- und Nachname</label>
                       </div>
                     </div>
 
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1">
-                        <font-awesome-icon icon="fa-solid fa-user"
-                      /></span>
+                        <font-awesome-icon icon="fa-solid fa-user" /></span>
                       <div class="form-floating">
-                        <input
-                          :disabled="state.registerTeacherKey == ''"
-                          type="text"
-                          id="floatingInputRegister"
-                          class="form-control"
-                          v-model="state.registerUsername"
-                          placeholder="Username"
-                        />
+                        <input :disabled="state.registerTeacherKey == ''" type="text" id="floatingInputRegister"
+                          class="form-control" v-model="state.registerUsername" placeholder="Username" />
                         <label for="floatingInputRegister">Username</label>
                       </div>
                     </div>
@@ -299,111 +221,54 @@ let registerPasswordTooShort = computed(() => {
                     <hr />
 
                     <div class="input-group mb-3">
-                      <span class="input-group-text" id="basic-addon1"
-                        ><font-awesome-icon icon="fa-solid fa-key"
-                      /></span>
+                      <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
                       <div class="form-floating">
-                        <input
-                          :disabled="state.registerTeacherKey == ''"
-                          :type="[
-                            state.showRegisterPassword1 ? 'text' : 'password',
-                          ]"
-                          id="floatingPassword1Register"
-                          class="form-control"
-                          v-model="state.registerPassword1"
-                          placeholder="Password"
-                        />
+                        <input :disabled="state.registerTeacherKey == ''" :type="[
+                          state.showRegisterPassword1 ? 'text' : 'password',
+                        ]" id="floatingPassword1Register" class="form-control" v-model="state.registerPassword1"
+                          placeholder="Password" />
                         <label for="floatingPassword1Register">Passwort</label>
                       </div>
                       <span class="input-group-text" id="basic-addon1">
-                        <a
-                          class="greyButton"
-                          @mousedown="showRegisterPassword1()"
-                          @mouseup="hideRegisterPassword1()"
-                          @mouseleave="hideRegisterPassword1()"
-                          ><font-awesome-icon
-                            v-if="!state.showRegisterPassword1"
-                            icon="fa-solid fa-eye-slash" /><font-awesome-icon
-                            v-else
-                            icon="fa-solid fa-eye" /></a
-                      ></span>
+                        <a class="greyButton" @mousedown="showRegisterPassword1()" @mouseup="hideRegisterPassword1()"
+                          @mouseleave="hideRegisterPassword1()"><font-awesome-icon v-if="!state.showRegisterPassword1"
+                            icon="fa-solid fa-eye-slash" /><font-awesome-icon v-else icon="fa-solid fa-eye" /></a></span>
                     </div>
 
                     <div class="input-group mb-3">
-                      <span class="input-group-text" id="basic-addon1"
-                        ><font-awesome-icon icon="fa-solid fa-key"
-                      /></span>
+                      <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
                       <div class="form-floating">
-                        <input
-                          :disabled="state.registerTeacherKey == ''"
-                          :type="[
-                            state.showRegisterPassword2 ? 'text' : 'password',
-                          ]"
-                          id="floatingPassword2Register"
-                          class="form-control"
-                          v-model="state.registerPassword2"
-                          placeholder="Password"
-                        />
-                        <label for="floatingPassword2Register"
-                          >Passwort wiederholen</label
-                        >
+                        <input :disabled="state.registerTeacherKey == ''" :type="[
+                          state.showRegisterPassword2 ? 'text' : 'password',
+                        ]" id="floatingPassword2Register" class="form-control" v-model="state.registerPassword2"
+                          placeholder="Password" />
+                        <label for="floatingPassword2Register">Passwort wiederholen</label>
                       </div>
                       <span class="input-group-text" id="basic-addon1">
-                        <a
-                          class="greyButton"
-                          @mousedown="showRegisterPassword2()"
-                          @mouseup="hideRegisterPassword2()"
-                          @mouseleave="hideRegisterPassword2()"
-                          ><font-awesome-icon
-                            v-if="!state.showRegisterPassword2"
-                            icon="fa-solid fa-eye-slash" /><font-awesome-icon
-                            v-else
-                            icon="fa-solid fa-eye" /></a
-                      ></span>
+                        <a class="greyButton" @mousedown="showRegisterPassword2()" @mouseup="hideRegisterPassword2()"
+                          @mouseleave="hideRegisterPassword2()"><font-awesome-icon v-if="!state.showRegisterPassword2"
+                            icon="fa-solid fa-eye-slash" /><font-awesome-icon v-else icon="fa-solid fa-eye" /></a></span>
                     </div>
-                    <div
-                      v-if="state.registerIncomplete"
-                      class="alert alert-danger"
-                      role="alert"
-                    >
+                    <div v-if="state.registerIncomplete" class="alert alert-danger" role="alert">
                       Eingabe unvollständig
                     </div>
-                    <div
-                      v-if="!registerPasswordsEqual"
-                      class="alert alert-danger"
-                      role="alert"
-                    >
+                    <div v-if="!registerPasswordsEqual" class="alert alert-danger" role="alert">
                       Passwörter nicht identisch
                     </div>
-                    <div
-                      v-if="registerPasswordTooShort"
-                      class="alert alert-danger"
-                      role="alert"
-                    >
+                    <div v-if="registerPasswordTooShort" class="alert alert-danger" role="alert">
                       Passwort muss mindestens 8 Zeichen enthalten!
                     </div>
-                    <div
-                      v-if="state.showRegistrationSuccess"
-                      class="alert alert-success"
-                      role="alert"
-                    >
+                    <div v-if="state.showRegistrationSuccess" class="alert alert-success" role="alert">
                       Account erfolgreich erstellt. Bitte einloggen.
                     </div>
-                    <div
-                      v-if="state.showRegistrationError"
-                      class="alert alert-danger"
-                      role="alert"
-                    >
+                    <div v-if="state.showRegistrationError" class="alert alert-danger" role="alert">
                       Account konnte nicht erstellt werden. Möglicherweise
                       stimmt das Lehrer-Passwort nicht.
                     </div>
 
-                    <button
-                      class="btn btn-primary"
-                      :class="{
-                        disabled: !registerValid || registerPasswordTooShort,
-                      }"
-                    >
+                    <button class="btn btn-primary" :class="{
+                      disabled: !registerValid || registerPasswordTooShort,
+                    }">
                       Registrieren
                     </button>
                   </form>

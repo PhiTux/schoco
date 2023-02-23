@@ -10,7 +10,8 @@ import os
 import git
 from sqlmodel import Session
 
-code = APIRouter()
+code = APIRouter(prefix="/api")
+# code.include_router()
 
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])

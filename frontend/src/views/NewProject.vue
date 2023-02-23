@@ -2,7 +2,7 @@
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { Toast } from "bootstrap";
-import CodeService from "../services/code.service";
+import CodeService from "../services/code.service.js";
 
 const router = useRouter();
 

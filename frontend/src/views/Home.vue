@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeMount, reactive } from "vue";
-import CodeService from "../services/code.service";
+import CodeService from "../services/code.service.js";
 
 let state = reactive({
   myProjects: [],

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useAuthStore } from '../stores/auth.store';
+import { useAuthStore } from '../stores/auth.store.js';
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -11,7 +11,7 @@ axiosAuth.interceptors.request.use((config) => {
     if (authStore.user) {
         const token = authStore.user.access_token
         if (token) {
-            config.headers['Authorization'] = `Bearer ${token}` 
+            config.headers['Authorization'] = `Bearer ${token}`
         }
         return config
     }
@@ -31,11 +31,11 @@ class UserService {
     }
 
     registerPupils(newPupils) {
-        return axiosAuth.post('registerPupils', {'newPupils': newPupils})
+        return axiosAuth.post('registerPupils', { 'newPupils': newPupils })
     }
 
     setNewPassword(username, password) {
-        return axiosAuth.post('setNewPassword', {'username': username, 'password': password})
+        return axiosAuth.post('setNewPassword', { 'username': username, 'password': password })
     }
 
     getAllUsers() {
@@ -47,19 +47,19 @@ class UserService {
     }
 
     addNewCourse(courseName, courseColor, courseFontDark) {
-        return axiosAuth.post('addNewCourse', {'name': courseName, 'color': courseColor, 'fontDark': courseFontDark})
+        return axiosAuth.post('addNewCourse', { 'name': courseName, 'color': courseColor, 'fontDark': courseFontDark })
     }
 
     addCourseToUser(user_id, coursename) {
-        return axiosAuth.post('addCourseToUser', {'user_id': user_id, 'coursename': coursename})
+        return axiosAuth.post('addCourseToUser', { 'user_id': user_id, 'coursename': coursename })
     }
 
     removeCourseFromUser(user_id, course_id) {
-        return axiosAuth.post('removeCourseFromUser', {'user_id': user_id, 'course_id': course_id})
+        return axiosAuth.post('removeCourseFromUser', { 'user_id': user_id, 'course_id': course_id })
     }
 
     deleteUser(user_id) {
-        return axiosAuth.post('deleteUser', {'user_id': user_id})
+        return axiosAuth.post('deleteUser', { 'user_id': user_id })
     }
 }
 

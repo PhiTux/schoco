@@ -1,23 +1,20 @@
 <script setup>
-import { onBeforeMount, reactive, onMounted, watch, ref } from "vue";
+import { onBeforeMount, reactive, watch, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Modal, Toast, Popover } from "bootstrap";
+import { Toast, Popover } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
-import { useAuthStore } from "../stores/auth.store";
-import CodeService from "../services/code.service";
-import UserService from "../services/user.service"
+import { useAuthStore } from "../stores/auth.store.js";
+import CodeService from "../services/code.service.js";
+import UserService from "../services/user.service.js"
 import IDEFileTree from "../components/IDEFileTree.vue";
 import CourseBadge from "../components/CourseBadge.vue"
 import "ace-builds";
 import "ace-builds/src-min-noconflict/mode-java";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/ext-language_tools";
-import { createSimpleExpression } from "@vue/compiler-core";
-import { end } from "@popperjs/core";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
-import { de, enUS } from 'date-fns/locale';
 
 const authStore = useAuthStore();
 const route = useRoute();
