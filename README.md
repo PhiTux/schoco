@@ -73,12 +73,15 @@ On every start: `npm run dev`
 
 Initial Installation (Python 3.10 and pip required): `pip install -r requirements.txt`
 
-On every start: `export FULL_DATA_PATH=/full/path/to/data_folder MAX_CONTAINERS=2 SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:schoco --log-level debug --reload`
+On every start: `export FULL_DATA_PATH=/full/path/to/data_folder MAX_CONTAINERS=2 SECRET_KEY=secret TEACHER_KEY=teacherkey GITEA_LOCALHOST_PORT=3000 GITEA_USERNAME=schoco GITEA_PASSWORD=schoco1234 && python -m uvicorn main:app --log-level debug --reload`
 
 If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHOST_PORT` with `GITEA_HOST=https://git.mydomain.tld`
 
 ## 4) Backend ('Cookies' for compilation/execution)
 **This chapter is currently WIP and may receive large changes!**
+
+Database: Seems like I need to "upgrade" to a big DB like MariaDB, since SQLite cannot handle concurrent transactions (especially concurrent SELECT followed by UPDATE), but there will be multiple python workers...
+
 
 Probably only necessary in production:  
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`

@@ -1,7 +1,6 @@
-import time
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path, WebSocket
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path
 import auth
-import database
+import database_config
 import models_and_schemas
 import crud
 import cookies_api
@@ -11,11 +10,10 @@ import git
 from sqlmodel import Session
 
 code = APIRouter(prefix="/api")
-# code.include_router()
 
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
-def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
 
     project_uuid = str(uuid.uuid4())
     user = crud.get_user_by_username(db=db, username=username)
@@ -48,7 +46,7 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
     return project_uuid
 
 
-def project_access_allowed(project_uuid: str, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+def project_access_allowed(project_uuid: str, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
 
     # teacher is allowed to open
     user = crud.get_user_by_username(db=db, username=username)
@@ -65,7 +63,7 @@ def project_access_allowed(project_uuid: str, db: Session = Depends(database.get
         status_code=405, detail="You're not allowed to open or edit this project")
 
 
-def project_access_allowed_teacher_only(project_uuid: str, db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+def project_access_allowed_teacher_only(project_uuid: str, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
 
     # user must be teacher
     user = crud.get_user_by_username(db=db, username=username)
@@ -95,8 +93,9 @@ def recursively_download_all_files(project_uuid: str, path: str):
     # download all files
     for c in root:
         if not c['isDir']:
+            print(c)
             results.append({'path': c['path'], 'content': git.download_file_by_url(
-                url=c['download_url']), 'sha': c['sha']})
+                url=git.replace_base_url(c['download_url'])), 'sha': c['sha']})
         else:
             recursively_download_all_files(
                 project_uuid=project_uuid, path=f"/{c['path']}/")
@@ -104,7 +103,7 @@ def recursively_download_all_files(project_uuid: str, path: str):
     return (results)
 
 
-@code.get('/loadAllFiles/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+@ code.get('/loadAllFiles/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def loadAllFiles(project_uuid: str = Path()):
     global results
     results = []
@@ -114,15 +113,15 @@ def loadAllFiles(project_uuid: str = Path()):
     return res
 
 
-@code.post('/updateDescription/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), db: Session = Depends(database.get_db)):
+@ code.post('/updateDescription/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
     result = crud.updateDescription(
         db=db, project_uuid=project_uuid, description=updateDescription.description)
     return result
 
 
 @ code.get('/getProjectInfo/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
-def getProjectName(project_uuid: str = Path(), db: Session = Depends(database.get_db)):
+def getProjectName(project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
     return {"name": project.name, "description": project.description}
@@ -142,7 +141,7 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uui
 
 
 @ code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
-def getMyProjects(db: Session = Depends(database.get_db), username=Depends(auth.get_username_by_token)):
+def getMyProjects(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     projects = crud.get_projects_by_username(db=db, username=username)
     return {'projects': projects}
 
@@ -159,7 +158,8 @@ def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, project_uu
 @ code.post('/startCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, project_uuid: str = Path()):
 
-    result = cookies_api.startCompile(startCompile.ip, startCompile.port)
+    result = cookies_api.startCompile(
+        startCompile.container_uuid, startCompile.ip, startCompile.port)
 
     # save compilation-results (.class-files)
     cookies_api.save_compilation_result(
@@ -184,7 +184,8 @@ def prepareExecute(project_uuid: str = Path()):
 @ code.post('/startExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path()):
 
-    result = cookies_api.start_execute(startExecute.ip, startExecute.port)
+    result = cookies_api.start_execute(
+        startExecute.container_uuid, startExecute.ip, startExecute.port)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startExecute.container_uuid)
@@ -192,17 +193,18 @@ def startExecute(startExecute: models_and_schemas.startExecute, background_tasks
     return result
 
 
-@code.get('/prepareTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+@ code.get('/prepareTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def prepareTest(project_uuid: str = Path()):
     # we now use "prepare_execute", since it is (at least until now) the same code
     c = cookies_api.prepare_execute(project_uuid)
     return c
 
 
-@code.post('/startTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
+@ code.post('/startTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def startTest(startTest: models_and_schemas.startTest, background_tasks: BackgroundTasks, project_uuid: str = Path()):
 
-    result = cookies_api.start_test(startTest.ip, startTest.port)
+    result = cookies_api.start_test(
+        startTest.container_uuid, startTest.ip, startTest.port)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startTest.container_uuid)
@@ -210,7 +212,7 @@ def startTest(startTest: models_and_schemas.startTest, background_tasks: Backgro
     return result
 
 
-@code.post('/createHomework/{project_uuid}', dependencies=[Depends(project_access_allowed_teacher_only)])
+@ code.post('/createHomework/{project_uuid}', dependencies=[Depends(project_access_allowed_teacher_only)])
 def createHomework(homework: models_and_schemas.homework, project_uuid: str = Path()):
 
     orig_project_uuid = project_uuid

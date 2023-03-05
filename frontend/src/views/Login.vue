@@ -4,13 +4,6 @@ import { useAuthStore } from "../stores/auth.store.js";
 import UserService from "../services/user.service.js";
 
 const state = reactive({
-  loginUsername: "",
-  loginPassword: "",
-  registerTeacherKey: "",
-  registerName: "",
-  registerUsername: "",
-  registerPassword1: "",
-  registerPassword2: "",
   showLoginPassword: false,
   showRegisterPassword1: false,
   showRegisterPassword2: false,
@@ -20,15 +13,28 @@ const state = reactive({
   showRegistrationSuccess: false,
 });
 
-async function login() {
+const login = reactive({
+  username: "",
+  password: "",
+})
+
+const register = reactive({
+  teacherKey: "",
+  name: "",
+  username: "",
+  password1: "",
+  password2: "",
+})
+
+async function loginUser() {
   if (!loginValid) {
     state.loginIncomplete = true;
     return;
   }
   const authStore = useAuthStore();
   const result = await authStore.login(
-    state.loginUsername,
-    state.loginPassword
+    login.username,
+    login.password
   );
   if (result && result.response.status == 401) {
     state.loginIncomplete = false;
@@ -36,20 +42,20 @@ async function login() {
   }
 }
 
-async function registerTeacher() {
+function registerTeacher() {
   if (
-    !registerValid ||
-    !registerPasswordsEqual ||
-    registerPasswordTooShort
+    !registerValid.value ||
+    !registerPasswordsEqual.value ||
+    registerPasswordTooShort.value
   ) {
     state.registerIncomplete = true;
     return;
   }
   UserService.registerTeacher(
-    state.registerTeacherKey,
-    state.registerName,
-    state.registerUsername,
-    state.registerPassword1
+    register.teacherKey,
+    register.name,
+    register.username,
+    register.password1
   ).then(
     (response) => {
       state.showRegistrationSuccess = true;
@@ -86,30 +92,30 @@ function hideRegisterPassword2() {
   state.showRegisterPassword2 = false;
 }
 
-let registerValid = computed(() => {
+const registerValid = computed(() => {
   let tmp =
-    state.registerTeacherKey != "" &&
-    state.registerName != "" &&
-    state.registerUsername != "" &&
-    state.registerPassword1 != "" &&
-    state.registerPassword2 != "";
+    register.teacherKey !== "" &&
+    register.name !== "" &&
+    register.username !== "" &&
+    register.password1 !== "" &&
+    register.password2 !== "";
   if (tmp) state.registerIncomplete = false;
   return tmp;
 });
 
-let loginValid = computed(() => {
-  var tmp = state.loginUsername != "" && state.loginPassword != "";
+const loginValid = computed(() => {
+  var tmp = login.username != "" && login.password != "";
   if (tmp) state.loginIncomplete = false;
   return tmp;
 });
 
-let registerPasswordsEqual = computed(() => {
-  return state.registerPassword1 === state.registerPassword2;
+const registerPasswordsEqual = computed(() => {
+  return register.password1 === register.password2;
 });
 
-let registerPasswordTooShort = computed(() => {
+const registerPasswordTooShort = computed(() => {
   return (
-    state.registerPassword1.length > 0 && state.registerPassword1.length < 8
+    register.password1.length > 0 && register.password1.length < 8
   );
 });
 </script>
@@ -136,12 +142,12 @@ let registerPasswordTooShort = computed(() => {
               <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
                 data-bs-parent="#loginAccordion">
                 <div class="accordion-body">
-                  <form @submit.prevent="login()">
+                  <form @submit.prevent="loginUser()">
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1">
                         <font-awesome-icon icon="fa-solid fa-user" /></span>
                       <div class="form-floating">
-                        <input type="text" id="floatingInputLogin" class="form-control" v-model="state.loginUsername"
+                        <input type="text" id="floatingInputLogin" class="form-control" v-model="login.username"
                           placeholder="Username" />
                         <label for="floatingInputLogin">Username</label>
                       </div>
@@ -152,7 +158,7 @@ let registerPasswordTooShort = computed(() => {
                       <div class="form-floating">
                         <input :type="[
                           state.showLoginPassword ? 'text' : 'password',
-                        ]" id="floatingPasswordLogin" class="form-control" v-model="state.loginPassword"
+                        ]" id="floatingPasswordLogin" class="form-control" v-model="login.password"
                           placeholder="Password" />
                         <label for="floatingPasswordLogin">Password</label>
                       </div>
@@ -191,7 +197,7 @@ let registerPasswordTooShort = computed(() => {
                         <font-awesome-icon icon="fa-solid fa-lock" /></span>
                       <div class="form-floating">
                         <input type="password" id="floatingInputTeacherKey" class="form-control"
-                          v-model="state.registerTeacherKey" placeholder="Lehrer-Passwort" />
+                          v-model="register.teacherKey" placeholder="Lehrer-Passwort" />
                         <label for="floatingInputTeacherKey">Lehrer-Passwort</label>
                       </div>
                     </div>
@@ -202,8 +208,8 @@ let registerPasswordTooShort = computed(() => {
                       <span class="input-group-text" id="basic-addon1">
                         <font-awesome-icon icon="fa-solid fa-signature" /></span>
                       <div class="form-floating">
-                        <input :disabled="state.registerTeacherKey == ''" type="text" id="floatingInputRegisterName"
-                          class="form-control" v-model="state.registerName" placeholder="Vor- und Nachname" />
+                        <input :disabled="register.teacherKey == ''" type="text" id="floatingInputRegisterName"
+                          class="form-control" v-model="register.name" placeholder="Vor- und Nachname" />
                         <label for="floatingInputRegisterName">Vor- und Nachname</label>
                       </div>
                     </div>
@@ -212,8 +218,8 @@ let registerPasswordTooShort = computed(() => {
                       <span class="input-group-text" id="basic-addon1">
                         <font-awesome-icon icon="fa-solid fa-user" /></span>
                       <div class="form-floating">
-                        <input :disabled="state.registerTeacherKey == ''" type="text" id="floatingInputRegister"
-                          class="form-control" v-model="state.registerUsername" placeholder="Username" />
+                        <input :disabled="register.teacherKey == ''" type="text" id="floatingInputRegister"
+                          class="form-control" v-model="register.username" placeholder="Username" />
                         <label for="floatingInputRegister">Username</label>
                       </div>
                     </div>
@@ -223,9 +229,9 @@ let registerPasswordTooShort = computed(() => {
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
                       <div class="form-floating">
-                        <input :disabled="state.registerTeacherKey == ''" :type="[
+                        <input :disabled="register.teacherKey == ''" :type="[
                           state.showRegisterPassword1 ? 'text' : 'password',
-                        ]" id="floatingPassword1Register" class="form-control" v-model="state.registerPassword1"
+                        ]" id="floatingPassword1Register" class="form-control" v-model="register.password1"
                           placeholder="Password" />
                         <label for="floatingPassword1Register">Passwort</label>
                       </div>
@@ -238,9 +244,9 @@ let registerPasswordTooShort = computed(() => {
                     <div class="input-group mb-3">
                       <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
                       <div class="form-floating">
-                        <input :disabled="state.registerTeacherKey == ''" :type="[
+                        <input :disabled="register.teacherKey == ''" :type="[
                           state.showRegisterPassword2 ? 'text' : 'password',
-                        ]" id="floatingPassword2Register" class="form-control" v-model="state.registerPassword2"
+                        ]" id="floatingPassword2Register" class="form-control" v-model="register.password2"
                           placeholder="Password" />
                         <label for="floatingPassword2Register">Passwort wiederholen</label>
                       </div>

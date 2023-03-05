@@ -21,11 +21,15 @@ def api_base_url():
     else:
         full_host = f"http://localhost:{settings.GITEA_LOCALHOST_PORT}"
 
-    return f"{full_host}/api/v1"
+    return full_host
 
 
 def api_full_url(path: str):
-    return f"{api_base_url()}{path}"
+    return f"{api_base_url()}/api/v1{path}"
+
+
+def replace_base_url(url: str):
+    return f"{api_base_url()}/{url.split('/', 3)[3]}"
 
 
 def create_repo(project_uuid: str):

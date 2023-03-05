@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Form, HTTPException, Body, Request
 import auth
-import database
+import database_config
 import models_and_schemas
 import crud
 from sqlmodel import Session
@@ -12,7 +12,7 @@ users = APIRouter(prefix="/api")
 
 
 @users.post('/registerTeacher')
-def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database.get_db)):
+def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database_config.get_db)):
     if teacherkey != settings.TEACHER_KEY:
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
     if len(password) < 8:
@@ -24,7 +24,7 @@ def register_user(teacherkey: str = Form(), username: str = Form(), full_name: s
 
 
 @users.post('/registerPupils', dependencies=[Depends(auth.check_teacher)])
-def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depends(database.get_db)):
+def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depends(database_config.get_db)):
     username_errors = []
     accounts_created = 0
     accounts_received = 0
@@ -48,7 +48,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
 
 
 @users.post('/setNewPassword', dependencies=[Depends(auth.check_teacher)])
-async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Session = Depends(database.get_db)):
+async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Session = Depends(database_config.get_db)):
     if not crud.change_password_by_username(setPassword.username, setPassword.password, db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")
@@ -56,7 +56,7 @@ async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Sessio
 
 
 @users.post('/addNewCourse', dependencies=[Depends(auth.check_teacher)])
-async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depends(database.get_db)):
+async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depends(database_config.get_db)):
     success = crud.create_course(db=db, course=newCourse)
     if not success:
         raise HTTPException(
@@ -66,7 +66,7 @@ async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depen
 
 
 @users.post('/addCourseToUser', dependencies=[Depends(auth.check_teacher)])
-def addCourseToUser(addUserCourseLink: models_and_schemas.AddUserCourseLink, db: Session = Depends(database.get_db)):
+def addCourseToUser(addUserCourseLink: models_and_schemas.AddUserCourseLink, db: Session = Depends(database_config.get_db)):
     course = crud.get_course_by_coursename(
         db=db, coursename=addUserCourseLink.coursename)
     courseUserLink = models_and_schemas.UserCourseLink(
@@ -79,7 +79,7 @@ def addCourseToUser(addUserCourseLink: models_and_schemas.AddUserCourseLink, db:
 
 
 @users.post('/removeCourseFromUser', dependencies=[Depends(auth.check_teacher)])
-def removeCourseFromUser(userCourseLink: models_and_schemas.UserCourseLink, db: Session = Depends(database.get_db)):
+def removeCourseFromUser(userCourseLink: models_and_schemas.UserCourseLink, db: Session = Depends(database_config.get_db)):
     link = crud.get_user_course_link(db=db, link=userCourseLink)
     if not crud.remove_UserCourseLink(db=db, link=link):
         raise HTTPException(
@@ -89,7 +89,7 @@ def removeCourseFromUser(userCourseLink: models_and_schemas.UserCourseLink, db: 
 
 
 @users.post('/deleteUser', dependencies=[Depends(auth.check_teacher)])
-def delete_user(userById: models_and_schemas.UserById, db: Session = Depends(database.get_db)):
+def delete_user(userById: models_and_schemas.UserById, db: Session = Depends(database_config.get_db)):
     db_user = db.get(models_and_schemas.User, userById.user_id)
     if not crud.remove_user(db=db, user=db_user):
         return {'success': False}
@@ -97,7 +97,7 @@ def delete_user(userById: models_and_schemas.UserById, db: Session = Depends(dat
 
 
 @users.post('/login')
-def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+def login(db: Session = Depends(database_config.get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     db_user = crud.get_user_by_username(db=db, username=form_data.username)
     if not db_user:
         raise HTTPException(status_code=401, detail="Bad username or password")
@@ -108,7 +108,7 @@ def login(db: Session = Depends(database.get_db), form_data: OAuth2PasswordReque
 
 
 @users.get('/getAllUsers', dependencies=[Depends(auth.check_teacher)])
-def get_users(db: Session = Depends(database.get_db)):
+def get_users(db: Session = Depends(database_config.get_db)):
     db_user = crud.get_all_users(db=db)
     coursesList = []
     for u in db_user:
@@ -117,16 +117,16 @@ def get_users(db: Session = Depends(database.get_db)):
 
 
 @users.get('/getAllCourses', dependencies=[Depends(auth.check_teacher)])
-def get_courses(db: Session = Depends(database.get_db)):
+def get_courses(db: Session = Depends(database_config.get_db)):
     courses = crud.get_all_courses(db=db)
     return courses
 
 
 @users.post('/loggedin', dependencies=[Depends(auth.oauth2_scheme)])
-def get_secured(db: Session = Depends(database.get_db)):
+def get_secured(db: Session = Depends(database_config.get_db)):
     return "secured"
 
 
 @ users.post('/teacher', dependencies=[Depends(auth.check_teacher)])
-def get_teacher(db: Session = Depends(database.get_db)):
+def get_teacher(db: Session = Depends(database_config.get_db)):
     return "teachers only"

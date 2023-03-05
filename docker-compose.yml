@@ -2,29 +2,53 @@ version: "3"
 
 networks:
   schoco:
-    external: false
+    external: true
 
 services:
-  server:
-    image: phitux/schoco:0.0.1
-    container_name: schoco
+  schoco-backend:
+    image: phitux/schoco-backend:0.0.1
+    container_name: schoco-backend
+    user: "1000:1000"
+    group_add:
+      - "999"
     environment:
-      - USER_UID=1000
-      - USER_GID=1000
-      - FULL_DATA_PATH=/home/marco/git/schoco/fastapi/data
-      - PRODUCTION=False
+      - FULL_DATA_PATH=/home/mk/git/schoco/data
       - MAX_CONTAINERS=4
       - SECRET_KEY=secret
       - TEACHER_KEY=teacherkey
       - GITEA_USERNAME=schoco
       - GITEA_PASSWORD=schoco1234
-      - GITEA_PORT=3000
-      #- GITEA_HOST=https://git.mydomain.tld
-    restart: always
+      - GITEA_HOST=http://schoco-gitea:3000
+    #restart: always
     networks:
       - schoco
     volumes:
       - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
+
+  schoco-nginx:
+    image: phitux/schoco-nginx:0.0.1
+    container_name: schoco-nginx
+    group_add:
+      - "999"
+    networks:
+      - schoco
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "80:8000"
+      - "80:8080"
+
+  schoco-gitea:
+    image: gitea/gitea:1.17.3
+    container_name: schoco-gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__security__INSTALL_LOCK=true
+    restart: always
+    networks:
+      - schoco
+    volumes:
+      - ./gitea/data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
