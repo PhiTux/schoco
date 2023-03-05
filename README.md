@@ -80,14 +80,5 @@ If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHO
 ## 4) Backend ('Cookies' for compilation/execution)
 **This chapter is currently WIP and may receive large changes!**
 
-Database: Seems like I need to "upgrade" to a big DB like MariaDB, since SQLite cannot handle concurrent transactions (especially concurrent SELECT followed by UPDATE), but there will be multiple python workers...
-
-
-Probably only necessary in production:  
+Probably not necessary - not even in production:  
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
-
-
-*Following part should <ins>**NOT**</ins> be necessary, when using nginx to reverse-proxy incoming WS to docker.sock!*
-- Make Docker-API public available to enable to attach WSS to running container.  
-See: https://docs.docker.com/config/daemon/remote-access/  
-**IMPORTANT: Only allow URL /containers/{id}/attach to pass through the webserver!**
