@@ -84,21 +84,18 @@ Probably not necessary - not even in production:
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
 
 
-# Run "final" docker-containers
+# Build and run schoco locally
 
-## 1) Build backend
-Go to /fastapi and run `docker build`
+1. Build fastapi image: `cd fastapi && docker build -t phitux/schoco-backend:latest .`
+2. Compile the cookies API: `cd cookies/api && javac Java_api.java`
+3. Build cookies worker image: `cd cookies && docker build -t phitux/cookies`
+4. Build frontend image: `docker build . -t phitux/schoco-nginx:latest`
+5. Create docker network for schoco: `docker network create schoco` 
+6. Set the `DOCKER_GROUP_ID` env variable: `export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)`
+7. Make sure you have a `data/` directory in the repo root. This is where the sqlite db is stored.
+8. Start schoco with `docker-compose up -d`
+9. Schoco is available under [http://localhost](http://localhost)
 
-## 2) Build cookies (worker-image)
-Go to /cookies and run `docker build`
+> **On the first startup** you will need to add the gitea user using the following command
+> `docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
 
-## 3) Build frontend with nginx-config
-Go to "/" and run `docker build`
-
-## 4) Start `docker compose`
-- Adapt the docker-compose.yml in "/" to your created image-names!
-- Adapt the docker-group-id in the yml.
-
-Go to "/" and run `docker compose up -d`  
-On initial startup you will need to run the following command after starting the containers:
-`docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
