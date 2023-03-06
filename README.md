@@ -77,7 +77,12 @@ On every start: `export FULL_DATA_PATH=/full/path/to/data_folder MAX_CONTAINERS=
 
 If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHOST_PORT` with `GITEA_HOST=https://git.mydomain.tld`
 
-## 4) Backend ('Cookies' for compilation/execution)
+## 4) Backend (nginx)
+For Websocket-communication, there must always be running nginx (even during development).  
+> `docker run -d -p 80:8080 -v /var/run/docker.sock:/var/run/docker.sock -v /path/to/repo/nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf --name nginx --group-add $(getent group docker | cut -d: -f3) nginxinc/nginx-unprivileged:1.23-alpine`
+
+
+## 5) Backend ('Cookies' for compilation/execution)
 **This chapter is currently WIP and may receive large changes!**
 
 Probably not necessary - not even in production:  
