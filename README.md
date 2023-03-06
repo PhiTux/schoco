@@ -82,3 +82,23 @@ If your gitea-instance is NOT running on localhost, then exchange `GITEA_LOCALHO
 
 Probably not necessary - not even in production:  
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
+
+
+# Run "final" docker-containers
+
+## 1) Build backend
+Go to /fastapi and run `docker build`
+
+## 2) Build cookies (worker-image)
+Go to /cookies and run `docker build`
+
+## 3) Build frontend with nginx-config
+Go to "/" and run `docker build`
+
+## 4) Start `docker compose`
+- Adapt the docker-compose.yml in "/" to your created image-names!
+- Adapt the docker-group-id in the yml.
+
+Go to "/" and run `docker compose up -d`  
+On initial startup you will need to run the following command after starting the containers:
+`docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`

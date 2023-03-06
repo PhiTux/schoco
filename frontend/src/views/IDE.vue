@@ -396,8 +396,16 @@ function execute() {
 
 
 function connectWebsocket(id) {
+  // assume that URL==localhost means, that websocket-nginx works on port 80
+  if (window.location.hostname === 'localhost' || window.location.hostname === "127.0.0.1") {
+    var host = window.location.hostname + ':80'
+  } else {
+    var host = window.location.host
+  }
+  let protocol = window.location.protocol === "http:" ? "ws:" : "wss:"
+
   ws = new WebSocket(
-    `ws://localhost:80/containers/${id}/attach/ws?stream=1&stdin=1&stdout=1&stderr=1`
+    `${protocol}//${host}/containers/${id}/attach/ws?stream=1&stdin=1&stdout=1&stderr=1`
   );
   ws.binaryType = 'arraybuffer';
 
