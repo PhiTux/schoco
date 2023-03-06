@@ -6,11 +6,11 @@ networks:
 
 services:
   schoco-backend:
-    image: phitux/schoco-backend:0.0.1
+    image: phitux/schoco-backend:latest-dev
     container_name: schoco-backend
     user: "1000:1000"
     group_add:
-      - "999" # adapt this to your group-id of docker!
+      - ${DOCKER_GROUP_ID} 
     environment:
       - FULL_DATA_PATH=/home/mk/git/schoco/data
       - MAX_CONTAINERS=4
@@ -27,10 +27,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   schoco-nginx:
-    image: phitux/schoco-nginx:0.0.1
+    image: phitux/schoco-nginx:latest-dev
     container_name: schoco-nginx
     group_add:
-      - "999" # adapt this to your group-id of docker!
+      - ${DOCKER_GROUP_ID}
     networks:
       - schoco
     volumes:
