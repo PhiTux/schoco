@@ -68,8 +68,8 @@ class CodeService {
         return axiosAuth.post(`startTest/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
-    createHomework(orig_project_uuid, course, deadlineDate, computationTime) {
-        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'course': course, 'deadline_date': deadlineDate, 'computation_time': computationTime })
+    createHomework(orig_project_uuid, course_id, deadlineDate, computationTime) {
+        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'course_id': course_id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
     }
 }
 

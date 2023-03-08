@@ -131,7 +131,6 @@ def download_file_by_url(url: str):
 
 def update_file(project_uuid: str, path: str, content: str, sha: str):
     c = pycurl.Curl()
-    c.setopt(c.VERBOSE, True)
     c.setopt(c.URL, api_full_url(
         f"/repos/{settings.GITEA_USERNAME}/{project_uuid}/contents/{path}"))
     c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
@@ -158,7 +157,7 @@ def update_file(project_uuid: str, path: str, content: str, sha: str):
 def forkProject(orig_project_uuid: str, template_project_uuid: str):
 
     c = pycurl.Curl()
-    c.setopt(c.VERBOSE, True)
+    #c.setopt(c.VERBOSE, True)
     c.setopt(c.URL, api_full_url(
         f"/repos/{settings.GITEA_USERNAME}/{orig_project_uuid}/forks"))
     c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
@@ -176,3 +175,25 @@ def forkProject(orig_project_uuid: str, template_project_uuid: str):
         return False
 
     return True
+
+
+def get_recent_commit_by_project_uuid(project_uuid: str):
+    c = pycurl.Curl()
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{settings.GITEA_USERNAME}/{project_uuid}/commits"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
+    # c.setopt(pycurl.HTTPHEADER, [
+    #         'Accept: application/json', 'Content-Type: application/json'])
+    buffer = BytesIO()
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    if not (res_code >= 200 and res_code < 300):
+        return 0
+
+    res = buffer.getvalue().decode('utf8')
+    res = json.loads(res)
+
+    return res[0]['sha']

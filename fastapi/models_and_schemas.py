@@ -35,6 +35,8 @@ class User(BaseUser, table=True):
 
     projects: List["Project"] = Relationship(back_populates="owner")
 
+    homeworks: List["EditingHomework"] = Relationship(back_populates="pupil")
+
 
 class UserSchema(BaseUser):
     password: str
@@ -59,37 +61,42 @@ class Project(SQLModel, table=True):
     owner_id: int = Field(foreign_key="user.id")
 
     owner: "User" = Relationship(back_populates="projects")
-    # homework: "Homework" = Relationship()
+    #homework: "Homework" = Relationship()
 
 
 class Homework(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, unique=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     course_id: int = Field(
-        default=None, foreign_key="course.id", primary_key=True)
-    project_id: int = Field(
-        default=None, foreign_key="project.id", primary_key=True)
+        default=None, foreign_key="course.id", unique=True)
+    template_project_id: int = Field(
+        default=None, foreign_key="project.id", unique=True)
+    original_project_id: int = Field(
+        default=None, foreign_key="project.id")
     deadline: datetime
     computation_time: int
     oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")
-    orig_project: "Project" = Relationship()
+    #original_project: "Project" = Relationship()
 
 
 class EditingHomework(SQLModel, table=True):
-    project_id: int = Field(
-        default=None, foreign_key="project.id", primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
+    uuid: str = Field(unique=True)
     homework_id: int = Field(
-        default=None, foreign_key="homework.id", primary_key=True)
+        default=None, foreign_key="homework.id")
+    owner_id: int = Field(
+        default=None, foreign_key="user.id")
     best_submission: Optional[str]
     latest_submission: Optional[str]
-    submission_result: Optional[str]
-    number_of_compilations: Optional[int]
-    number_of_runs: Optional[int]
-    number_of_tests: Optional[int]
+    number_of_compilations: Optional[int] = 0
+    number_of_runs: Optional[int] = 0
+    number_of_tests: Optional[int] = 0
 
+    pupil: "User" = Relationship(back_populates="homeworks")
 
 # other models
+
 
 class newPupil(BaseModel):
     fullname: str
@@ -161,7 +168,7 @@ class startTest(BaseModel):
     container_uuid: str
 
 
-class homework(BaseModel):
-    course: Course
+class create_homework(BaseModel):
+    course_id: int
     deadline_date: str
     computation_time: int

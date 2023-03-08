@@ -137,12 +137,23 @@ def get_projects_by_username(db: Session, username: str):
     return projects
 
 
-def updateDescription(db: Session, project_uuid: str, description: str):
+def update_description(db: Session, project_uuid: str, description: str):
     try:
         project = db.exec(select(models_and_schemas.Project).where(
             models_and_schemas.Project.uuid == project_uuid)).first()
         project.description = description
         db.add(project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def create_homework(db: Session, homework: models_and_schemas.Homework):
+    try:
+        db.add(homework)
         db.commit()
     except Exception as e:
         print(e)

@@ -553,7 +553,7 @@ function saveDescription() {
 function createHomework() {
   console.log("createHomework")
 
-  CodeService.createHomework(route.params.project_uuid, homework.selectedCourse, homework.deadlineDate.toISOString(), homework.computationTime).then(
+  CodeService.createHomework(route.params.project_uuid, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime).then(
     (response) => {
       console.log(response.data)
     }, (error) => {
@@ -629,7 +629,7 @@ function prepareHomeworkModal() {
           </div>
           <div class="modal-body">
             <span>⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig abgeschlossen sein, <b>bevor</b>
-              Sie daraus eine Hausaufgabe erstellen. Nach diesem Schritt sollten Änderungen vermieden werden, da die
+              du daraus eine Hausaufgabe erstellst. Nach diesem Schritt sollten Änderungen vermieden werden, da die
               Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.</span>
             <hr>
             <div class="mb-3 row">

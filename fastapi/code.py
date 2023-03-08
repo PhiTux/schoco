@@ -115,7 +115,7 @@ def loadAllFiles(project_uuid: str = Path()):
 
 @ code.post('/updateDescription/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
-    result = crud.updateDescription(
+    result = crud.update_description(
         db=db, project_uuid=project_uuid, description=updateDescription.description)
     return result
 
@@ -213,16 +213,50 @@ def startTest(startTest: models_and_schemas.startTest, background_tasks: Backgro
 
 
 @ code.post('/createHomework/{project_uuid}', dependencies=[Depends(project_access_allowed_teacher_only)])
-def createHomework(homework: models_and_schemas.homework, project_uuid: str = Path()):
+def createHomework(create_homework: models_and_schemas.create_homework, project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
 
     orig_project_uuid = project_uuid
     template_project_uuid = str(uuid.uuid4())
 
-    # copy original project to create template for the homework
+    # copy original gitea project to create template for the homework
     if not git.forkProject(
             orig_project_uuid=orig_project_uuid, template_project_uuid=template_project_uuid):
         return False
 
-    # TODO Continue this function...
+    print("template", template_project_uuid)
+
+    # copy project-entry in database
+    project = crud.get_project_by_project_uuid(db, orig_project_uuid)
+    if project == None:
+        git.remove_repo(project_uuid=template_project_uuid)
+        return False
+
+    original_project_id = project.id
+
+    #project.uuid = template_project_uuid
+    new_project = models_and_schemas.Project(
+        uuid=template_project_uuid, name=project.name, description=project.description, owner_id=project.owner_id)
+    if not crud.create_project(db=db, project=new_project):
+        # delete git repo
+        git.remove_repo(project_uuid=template_project_uuid)
+        return False
+
+    # prepare to create DB-entry
+    p = crud.get_project_by_project_uuid(db, template_project_uuid)
+    template_project_id = p.id
+
+    # get most recent commit-sha
+    commit = git.get_recent_commit_by_project_uuid(template_project_uuid)
+    if commit == 0:
+        git.remove_repo(project_uuid=template_project_uuid)
+        return False
+
+    homework = models_and_schemas.Homework(course_id=create_homework.course_id, template_project_id=template_project_id,
+                                           original_project_id=original_project_id, deadline=create_homework.deadline_date, computation_time=create_homework.computation_time, oldest_commit_allowed=commit)
+    print(homework)
+    if not crud.create_homework(db,
+                                homework=homework):
+        git.remove_repo(project_uuid=template_project_uuid)
+        return False
 
     return True
