@@ -160,3 +160,13 @@ def create_homework(db: Session, homework: models_and_schemas.Homework):
         db.rollback()
         return False
     return True
+
+
+def get_homework_by_user(db: Session, username: str):
+    """return all homework, that was created (!) by given username"""
+    # get my project_ids
+    project_ids = db.exec(select(models_and_schemas.Project.id).join(
+        models_and_schemas.User).where(models_and_schemas.User.username == username)).all()
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.original_project_id.in_(project_ids))).all()
+    return homework

@@ -44,6 +44,10 @@ class CodeService {
         return axiosAuth.get('getMyProjects')
     }
 
+    getHomework() {
+        return axiosAuth.get('getHomework')
+    }
+
     prepareCompile(projectFiles, project_uuid) {
         return axiosAuth.post(`prepareCompile/${project_uuid}`, { 'files': projectFiles })
     }

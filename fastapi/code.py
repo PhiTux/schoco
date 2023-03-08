@@ -146,6 +146,20 @@ def getMyProjects(db: Session = Depends(database_config.get_db), username=Depend
     return {'projects': projects}
 
 
+@ code .get('/getHomework', dependencies=[Depends(auth.oauth2_scheme)])
+def getHomework(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    # if user is teacher
+    user = crud.get_user_by_username(db=db, username=username)
+    if user.role == "teacher":
+        # load all homeworks with template-project having me as user/owner
+        return crud.get_homework_by_user(db=db, username=username)
+
+    # otherwise user is pupil:
+    # load all homework, where the course equals my course
+    courses = crud.get_courses_by_username(db=db, username=username)
+    return crud.get_homework_by_courses(courses)
+
+
 @ code.post('/prepareCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])
 def prepareCompile(prepareCompile: models_and_schemas.prepareCompile, project_uuid: str = Path()):
 
