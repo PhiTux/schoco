@@ -152,12 +152,21 @@ def getHomework(db: Session = Depends(database_config.get_db), username=Depends(
     user = crud.get_user_by_username(db=db, username=username)
     if user.role == "teacher":
         # load all homeworks with template-project having me as user/owner
-        return crud.get_homework_by_user(db=db, username=username)
+        return crud.get_homework_by_username(db=db, username=username)
 
     # otherwise user is pupil:
     # load all homework, where the course equals my course
     courses = crud.get_courses_by_username(db=db, username=username)
-    return crud.get_homework_by_courses(courses)
+    new_homework = crud.get_homework_by_courses(db=db, courses=courses)
+
+    # then load the project's description/data for the new_homework
+    homework_ids = [h.template_project_id for h in new_homework]
+    projects = crud.get_projects_by_ids(db, homework_ids)
+
+    editing_homework = crud.get_editing_homework_by_username(
+        db=db, username=username)
+
+    return {"new": new_homework, "projects": projects, "editing": editing_homework}
 
 
 @ code.post('/prepareCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])

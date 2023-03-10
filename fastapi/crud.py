@@ -129,6 +129,17 @@ def get_project_by_project_uuid(db: Session, project_uuid: str):
     return project
 
 
+def get_project_by_id(db: Session, id: int):
+    project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.id == id)).first()
+    return project
+
+
+def get_projects_by_ids(db: Session, ids: list[int]):
+    return db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.id.in_(ids))).all()
+
+
 def get_projects_by_username(db: Session, username: str):
     owner = db.exec(select(models_and_schemas.User).where(
         models_and_schemas.User.username == username)).first()
@@ -162,7 +173,7 @@ def create_homework(db: Session, homework: models_and_schemas.Homework):
     return True
 
 
-def get_homework_by_user(db: Session, username: str):
+def get_homework_by_username(db: Session, username: str):
     """return all homework, that was created (!) by given username"""
     # get my project_ids
     project_ids = db.exec(select(models_and_schemas.Project.id).join(
@@ -170,3 +181,25 @@ def get_homework_by_user(db: Session, username: str):
     homework = db.exec(select(models_and_schemas.Homework).where(
         models_and_schemas.Homework.original_project_id.in_(project_ids))).all()
     return homework
+
+
+def get_courses_by_username(db: Session, username: str):
+    user = db.exec(select(models_and_schemas.User).where(
+        models_and_schemas.User.username == username)).first()
+    return user.courses
+
+
+def get_homework_by_courses(db: Session, courses: list[models_and_schemas.Course]):
+    courses_ids = []
+    for c in courses:
+        courses_ids.append(c.id)
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.course_id.in_(courses_ids))).all()
+    return homework
+
+
+def get_editing_homework_by_username(db: Session, username: str):
+    user = get_user_by_username(db, username)
+    editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+        models_and_schemas.EditingHomework.owner == user)).all()
+    return editing_homework

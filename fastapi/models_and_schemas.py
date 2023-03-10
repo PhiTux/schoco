@@ -35,7 +35,7 @@ class User(BaseUser, table=True):
 
     projects: List["Project"] = Relationship(back_populates="owner")
 
-    homeworks: List["EditingHomework"] = Relationship(back_populates="pupil")
+    homeworks: List["EditingHomework"] = Relationship(back_populates="owner")
 
 
 class UserSchema(BaseUser):
@@ -93,7 +93,7 @@ class EditingHomework(SQLModel, table=True):
     number_of_runs: Optional[int] = 0
     number_of_tests: Optional[int] = 0
 
-    pupil: "User" = Relationship(back_populates="homeworks")
+    owner: "User" = Relationship()
 
 # other models
 
