@@ -4,28 +4,41 @@ defineProps({
     description: String,
     deadline: String,
     uuid: String,
+    id: String,
     isTeacher: Boolean,
     isHomework: Boolean,
+    isNew: Boolean,
     pupilsWorking: Number,
     averageSolution: Number,
     Course: String,
+    lastEdited: String,
+    evaluation: Number
 });
+
 </script>
 
 <template>
-    <div class="card text-bg-dark m-2">
-        <div class="card-header">HA bis ... / eigenes Projekt</div>
+    <div class="card text-bg-dark m-2" :class="{ homeworkBorder: isHomework }">
+        <div v-if="isHomework" class="card-header">HA | Abgabe bis {{ deadline }}</div>
         <div class="card-body">
             <h5 class="card-title">{{ name }}</h5>
             <p class="card-text">
                 {{ description }}
             </p>
-            <a :href="'#/ide/' + uuid" class="btn btn-primary">Projekt öffnen</a>
+            <a v-if="isNew && !isTeacher" :href="'#/startHomework/' + uuid" class="btn btn-primary">🌟Hausaufgabe
+                beginnen</a>
+            <a v-if="isTeacher" :href="'#/openHomework/' + id" class="btn btn-primary">Hausaufgabe
+                öffnen</a>
+            <a v-else :href="'#/ide/' + uuid" class="btn btn-primary">Projekt öffnen</a>
         </div>
     </div>
 </template>
 
 <style scoped>
+.homeworkBorder {
+    border-color: yellow;
+}
+
 .card {
     width: 48%;
     transition: ease 0.3s;

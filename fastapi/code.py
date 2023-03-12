@@ -152,7 +152,10 @@ def getHomework(db: Session = Depends(database_config.get_db), username=Depends(
     user = crud.get_user_by_username(db=db, username=username)
     if user.role == "teacher":
         # load all homeworks with template-project having me as user/owner
-        return crud.get_homework_by_username(db=db, username=username)
+        homework = crud.get_homework_by_username(db=db, username=username)
+        homework_ids = [h.template_project_id for h in homework]
+        projects = crud.get_projects_by_ids(db, homework_ids)
+        return {"homework": homework, "projects": projects}
 
     # otherwise user is pupil:
     # load all homework, where the course equals my course
