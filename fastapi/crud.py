@@ -173,7 +173,7 @@ def create_homework(db: Session, homework: models_and_schemas.Homework):
     return True
 
 
-def get_homework_by_username(db: Session, username: str):
+def get_teachers_homework_by_username(db: Session, username: str):
     """return all homework, that was created (!) by given username"""
     # get my project_ids
     project_ids = db.exec(select(models_and_schemas.Project.id).join(

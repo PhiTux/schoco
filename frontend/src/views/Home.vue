@@ -25,7 +25,28 @@ onBeforeMount(() => {
       console.log(error.response);
     }
   );
-  CodeService.getHomework().then(
+
+  if (authStore.isTeacher()) {
+    CodeService.getProjectsAsTeacher().then(
+      (response) => {
+        console.log(response.data)
+      },
+      (error) => {
+        console.log(error.response)
+      }
+    )
+  } else {
+    CodeService.getProjectsAsPupil().then(
+      (response) => {
+        console.log(response.data)
+      },
+      (error) => {
+        console.log(error.response)
+      }
+    )
+  }
+
+  /* CodeService.getHomework().then(
     (response) => {
       if (authStore.isTeacher()) {
         //TODO : separate homework to recent and old homework
@@ -61,7 +82,7 @@ onBeforeMount(() => {
     (error) => {
       console.log(error.response)
     }
-  )
+  ) */
 });
 </script>
 

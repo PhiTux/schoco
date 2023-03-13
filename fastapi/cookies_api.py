@@ -127,7 +127,7 @@ def createNewContainer():
 
     # build and create directory for this uuid
     uuid_dir = Path(os.path.join(settings.FULL_DATA_PATH, str(new_uuid)))
-    """This variable is a parameter for the container and thus must always be a OS-path"""
+    """This variable is a parameter for the container and thus must always be an OS-path"""
 
     create_dir = Path(os.path.join(data_path, str(new_uuid)))
     create_dir.mkdir(exist_ok=True, parents=True)

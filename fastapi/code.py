@@ -139,20 +139,20 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uui
 
     return success
 
-
+# TODO deprecated
 @ code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
 def getMyProjects(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     projects = crud.get_projects_by_username(db=db, username=username)
     return {'projects': projects}
 
-
+# TODO deprecated
 @ code .get('/getHomework', dependencies=[Depends(auth.oauth2_scheme)])
 def getHomework(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     # if user is teacher
     user = crud.get_user_by_username(db=db, username=username)
     if user.role == "teacher":
         # load all homeworks with template-project having me as user/owner
-        homework = crud.get_homework_by_username(db=db, username=username)
+        homework = crud.get_teachers_homework_by_username(db=db, username=username)
         homework_ids = [h.template_project_id for h in homework]
         projects = crud.get_projects_by_ids(db, homework_ids)
         return {"homework": homework, "projects": projects}
@@ -170,6 +170,25 @@ def getHomework(db: Session = Depends(database_config.get_db), username=Depends(
         db=db, username=username)
 
     return {"new": new_homework, "projects": projects, "editing": editing_homework}
+
+
+@code.get('/getProjectsAsTeacher', dependencies=[Depends(auth.check_teacher)])
+def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username = Depends(auth.get_username_by_token)):
+    homework = crud.get_teachers_homework_by_username(db=db, username=username)
+    print(homework)
+
+
+    # own projects:
+    projects = crud.get_projects_by_username(db=db, username=username)
+
+    # Homeworks:
+    # diejenigen homeworks, bei deren template_projects ich der owner bin
+    # davon: - name, description, uuid, deadline, course
+    # später noch: bearbeitet von X/Y Leuten, durchschnitt der Punkte
+
+    # meine privaten projekte mit:
+    # - name, description, uuid
+    # - AUßER diejenigen, die verlinkt sind über eine HW
 
 
 @ code.post('/prepareCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])
