@@ -38,8 +38,8 @@ def get_course_by_coursename(db: Session, coursename: str):
 
 
 def get_course_by_id(db: Session, id: int):
-    course = db.query(models_and_schemas.Course).filter(
-        models_and_schemas.Course.id == id).first()
+    course = db.exec(select(models_and_schemas.Course).where(
+        models_and_schemas.Course.id == id)).first()
     return course
 
 

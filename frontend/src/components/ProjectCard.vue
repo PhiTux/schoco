@@ -19,7 +19,10 @@ defineProps({
 
 <template>
     <div class="card text-bg-dark m-2" :class="{ homeworkBorder: isHomework }">
-        <div v-if="isHomework" class="card-header">HA | Abgabe bis {{ deadline }}</div>
+        <div v-if="isHomework" class="card-header">HA | Abgabe bis <span class="deadline">{{ new
+            Date(deadline).toLocaleString("default", {
+                weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+            }) }}</span></div>
         <div class="card-body">
             <h5 class="card-title">{{ name }}</h5>
             <p class="card-text">
@@ -27,14 +30,18 @@ defineProps({
             </p>
             <a v-if="isNew && !isTeacher" :href="'#/startHomework/' + uuid" class="btn btn-primary">🌟Hausaufgabe
                 beginnen</a>
-            <a v-if="isTeacher" :href="'#/openHomework/' + id" class="btn btn-primary">Hausaufgabe
-                öffnen</a>
+            <a v-if="isTeacher" :href="'#/openHomework/' + id" class="btn btn-primary">Details zeigen</a>
             <a v-else :href="'#/ide/' + uuid" class="btn btn-primary">Projekt öffnen</a>
         </div>
     </div>
 </template>
 
 <style scoped>
+.deadline {
+    text-decoration: underline;
+    text-decoration-color: yellow;
+}
+
 .homeworkBorder {
     border-color: yellow;
 }

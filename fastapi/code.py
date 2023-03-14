@@ -140,19 +140,24 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uui
     return success
 
 # TODO deprecated
+
+
 @ code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
 def getMyProjects(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     projects = crud.get_projects_by_username(db=db, username=username)
     return {'projects': projects}
 
 # TODO deprecated
+
+
 @ code .get('/getHomework', dependencies=[Depends(auth.oauth2_scheme)])
 def getHomework(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     # if user is teacher
     user = crud.get_user_by_username(db=db, username=username)
     if user.role == "teacher":
         # load all homeworks with template-project having me as user/owner
-        homework = crud.get_teachers_homework_by_username(db=db, username=username)
+        homework = crud.get_teachers_homework_by_username(
+            db=db, username=username)
         homework_ids = [h.template_project_id for h in homework]
         projects = crud.get_projects_by_ids(db, homework_ids)
         return {"homework": homework, "projects": projects}
@@ -173,22 +178,36 @@ def getHomework(db: Session = Depends(database_config.get_db), username=Depends(
 
 
 @code.get('/getProjectsAsTeacher', dependencies=[Depends(auth.check_teacher)])
-def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username = Depends(auth.get_username_by_token)):
-    homework = crud.get_teachers_homework_by_username(db=db, username=username)
-    print(homework)
-
+def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    all_homework = crud.get_teachers_homework_by_username(
+        db=db, username=username)
+    print(all_homework)
 
     # own projects:
-    projects = crud.get_projects_by_username(db=db, username=username)
+    all_projects = crud.get_projects_by_username(db=db, username=username)
+    print(all_projects)
 
-    # Homeworks:
-    # diejenigen homeworks, bei deren template_projects ich der owner bin
-    # davon: - name, description, uuid, deadline, course
-    # später noch: bearbeitet von X/Y Leuten, durchschnitt der Punkte
+    homework = []
+    projects = []
 
-    # meine privaten projekte mit:
-    # - name, description, uuid
-    # - AUßER diejenigen, die verlinkt sind über eine HW
+    for p in all_projects:
+        # if project is part of a homework then save it in homeworks...
+        for h in all_homework:
+            is_homework = False
+            if p.id == h.template_project_id:
+                is_homework = True
+                course = crud.get_course_by_id(db=db, id=h.course_id)
+                homework.append({"deadline": h.deadline, "name": p.name, "description": p.description, "id": h.id,
+                                "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark})
+                # TODO append "edited by X/Y pupils" and "average points of solutions"
+                break
+
+        # ...otherwise its a regular project
+        if not is_homework:
+            projects.append(
+                {"name": p.name, "description": p.description, "uuid": p.uuid})
+
+    return {"homework": homework, "projects": projects}
 
 
 @ code.post('/prepareCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])

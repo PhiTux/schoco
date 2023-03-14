@@ -9,13 +9,13 @@ const authStore = useAuthStore();
 let state = reactive({
   myProjects: [],
   new_homework: [],
-  editing_homework: [],
+  //editing_homework: [],
   old_homework: []
 });
 
 
 onBeforeMount(() => {
-  CodeService.getMyProjects().then(
+  /* CodeService.getMyProjects().then(
     (response) => {
       state.myProjects = response.data.projects;
       console.log(state.myProjects)
@@ -24,12 +24,20 @@ onBeforeMount(() => {
     (error) => {
       console.log(error.response);
     }
-  );
+  ); */
 
   if (authStore.isTeacher()) {
     CodeService.getProjectsAsTeacher().then(
       (response) => {
         console.log(response.data)
+        state.myProjects = response.data.projects
+        response.data.homework.forEach(h => {
+          if (new Date(h.deadline) > new Date()) {
+            state.new_homework.push(h)
+          } else {
+            state.old_homework.push(h)
+          }
+        })
       },
       (error) => {
         console.log(error.response)
@@ -39,6 +47,7 @@ onBeforeMount(() => {
     CodeService.getProjectsAsPupil().then(
       (response) => {
         console.log(response.data)
+
       },
       (error) => {
         console.log(error.response)
@@ -105,20 +114,22 @@ onBeforeMount(() => {
     <ProjectCard v-for="p in state.editing_homework" :name="p.name" :description="p.description" :uuid="p.uuid" />
 
     <h1>Frühere Hausaufgaben</h1>
+    <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.old_homework" isHomework isOld isTeacher :name="h.name"
+      :description="h.description" :id="h.id" :deadline="h.deadline" />
 
     <h1>Meine Projekte</h1>
     <div class="d-flex align-content-start flex-wrap">
       <ProjectCard v-for="p in state.myProjects" :name="p.name" :description="p.description" :uuid="p.uuid" />
       <!-- <div class="card text-bg-dark m-2" v-for="p in state.myProjects">
-                                                                                <div class="card-header">HA bis ... / eigenes Projekt</div>
-                                                                                <div class="card-body">
-                                                                                  <h5 class="card-title">{{ p.name }}</h5>
-                                                                                  <p class="card-text">
-                                                                                    {{ p.description }}
-                                                                                  </p>
-                                                                                  <a :href="'#/ide/' + p.uuid" class="btn btn-primary">Projekt öffnen</a>
-                                                                                </div>
-                                                                            </div> -->
+                                                                                                  <div class="card-header">HA bis ... / eigenes Projekt</div>
+                                                                                                  <div class="card-body">
+                                                                                                    <h5 class="card-title">{{ p.name }}</h5>
+                                                                                                    <p class="card-text">
+                                                                                                      {{ p.description }}
+                                                                                                    </p>
+                                                                                                    <a :href="'#/ide/' + p.uuid" class="btn btn-primary">Projekt öffnen</a>
+                                                                                                  </div>
+                                                                                              </div> -->
     </div>
   </div>
 </template>

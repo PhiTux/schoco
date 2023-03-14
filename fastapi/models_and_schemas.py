@@ -67,12 +67,12 @@ class Project(SQLModel, table=True):
 class Homework(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     course_id: int = Field(
-        default=None, foreign_key="course.id", unique=True)
+        default=None, foreign_key="course.id")
     template_project_id: int = Field(
         default=None, foreign_key="project.id", unique=True)
     original_project_id: int = Field(
         default=None, foreign_key="project.id")
-    deadline: datetime
+    deadline: str  # datetime
     computation_time: int
     oldest_commit_allowed: str
 
