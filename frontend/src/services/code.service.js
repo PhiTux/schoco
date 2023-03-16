@@ -40,15 +40,12 @@ class CodeService {
         return axiosAuth.post(`saveFileChanges/${project_uuid}`, { 'changes': changes })
     }
 
-     getMyProjects() {
-        return axiosAuth.get('getMyProjects')
-    }
-
-    /*getHomework() {
-        return axiosAuth.get('getHomework')
-    } */
     getProjectsAsTeacher() {
         return axiosAuth.get('getProjectsAsTeacher')
+    }
+
+    getProjectsAsPupil() {
+        return axiosAuth.get('getProjectsAsPupil')
     }
 
     prepareCompile(projectFiles, project_uuid) {

@@ -183,6 +183,24 @@ def get_teachers_homework_by_username(db: Session, username: str):
     return homework
 
 
+def get_pupils_homework_by_username(db: Session, username: str):
+    """return all homework, which is posted for courses that I attend"""
+    courses = get_courses_by_username(db=db, username=username)
+    course_ids = []
+    for c in courses:
+        course_ids.append(c.id)
+
+    results = []
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.course_id.in_(course_ids))).all()
+    for h in homework:
+        project = get_project_by_id(db=db, id=h.template_project_id)
+        results.append({"deadline": h.deadline, "id": h.id, "oldest_commit_allowed": h.oldest_commit_allowed,
+                       "name": project.name, "description": project.description, "uuid": project.uuid})
+
+    return results
+
+
 def get_courses_by_username(db: Session, username: str):
     user = db.exec(select(models_and_schemas.User).where(
         models_and_schemas.User.username == username)).first()

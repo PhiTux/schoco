@@ -139,53 +139,14 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uui
 
     return success
 
-# TODO deprecated
-
-
-@ code.get('/getMyProjects', dependencies=[Depends(auth.oauth2_scheme)])
-def getMyProjects(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
-    projects = crud.get_projects_by_username(db=db, username=username)
-    return {'projects': projects}
-
-# TODO deprecated
-
-
-@ code .get('/getHomework', dependencies=[Depends(auth.oauth2_scheme)])
-def getHomework(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
-    # if user is teacher
-    user = crud.get_user_by_username(db=db, username=username)
-    if user.role == "teacher":
-        # load all homeworks with template-project having me as user/owner
-        homework = crud.get_teachers_homework_by_username(
-            db=db, username=username)
-        homework_ids = [h.template_project_id for h in homework]
-        projects = crud.get_projects_by_ids(db, homework_ids)
-        return {"homework": homework, "projects": projects}
-
-    # otherwise user is pupil:
-    # load all homework, where the course equals my course
-    courses = crud.get_courses_by_username(db=db, username=username)
-    new_homework = crud.get_homework_by_courses(db=db, courses=courses)
-
-    # then load the project's description/data for the new_homework
-    homework_ids = [h.template_project_id for h in new_homework]
-    projects = crud.get_projects_by_ids(db, homework_ids)
-
-    editing_homework = crud.get_editing_homework_by_username(
-        db=db, username=username)
-
-    return {"new": new_homework, "projects": projects, "editing": editing_homework}
-
 
 @code.get('/getProjectsAsTeacher', dependencies=[Depends(auth.check_teacher)])
 def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     all_homework = crud.get_teachers_homework_by_username(
         db=db, username=username)
-    print(all_homework)
 
     # own projects:
     all_projects = crud.get_projects_by_username(db=db, username=username)
-    print(all_projects)
 
     homework = []
     projects = []
@@ -208,6 +169,31 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
                 {"name": p.name, "description": p.description, "uuid": p.uuid})
 
     return {"homework": homework, "projects": projects}
+
+
+@code.get('/getProjectsAsPupil')
+def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    all_projects = crud.get_projects_by_username(db=db, username=username)
+
+    all_editing_homework = crud.get_editing_homework_by_username(
+        db=db, username=username)
+
+    all_new_homework = crud.get_pupils_homework_by_username(
+        db=db, username=username)
+
+    homework = []
+
+    for h in all_new_homework:
+        for e in all_editing_homework:
+            if h["id"] == e.homework_id:
+                # append those homeworks, that are already edited
+                homework.append({"is_editing": True, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
+                                "id": h["id"], "uuid": e.uuid, "oldest_commit_allowed": h["oldest_commit_allowed"]})
+        # ... and those, which are not yet started by the pupil
+        homework.append({"is_editing": False, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
+                         "id": h["id"], "uuid": h["uuid"], "oldest_commit_allowed": h["oldest_commit_allowed"]})
+
+    return {"homework": homework, "projects": all_projects}
 
 
 @ code.post('/prepareCompile/{project_uuid}', dependencies=[Depends(project_access_allowed)])

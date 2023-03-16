@@ -9,20 +9,13 @@ defineProps({
 </script>
 
 <template>
-  <span
-    class="badge rounded-pill mx-1"
-    :style="{
-      'background-color': color,
+  <span class="badge rounded-pill mx-1" :style="{
+    'background-color': color,
+    color: fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
+  }">{{ name }}
+    <a v-if="isDeletable" class="mini-btn" @click.prevent="$emit('remove')"><font-awesome-icon icon="fa-xmark" :style="{
       color: fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
-    }"
-    >{{ name }}
-    <a v-if="isDeletable" class="mini-btn" @click.prevent="$emit('remove')"
-      ><font-awesome-icon
-        icon="fa-xmark"
-        :style="{
-          color: fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
-        }" /></a
-  ></span>
+    }" /></a></span>
 </template>
 
 <style scoped>

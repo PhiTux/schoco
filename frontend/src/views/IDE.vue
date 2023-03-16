@@ -144,17 +144,20 @@ onBeforeMount(() => {
     }
   );
 
-  UserService.getAllCourses().then(
-    (response) => {
-      allCourses.value = response.data;
-    },
-    (error) => {
-      if (error.response.status == 403) {
-        const user = useAuthStore();
-        user.logout();
-      } else console.log(error.response);
-    }
-  );
+
+  if (authStore.isTeacher()) {
+    UserService.getAllCourses().then(
+      (response) => {
+        allCourses.value = response.data;
+      },
+      (error) => {
+        if (error.response.status == 403) {
+          const user = useAuthStore();
+          user.logout();
+        } else console.log(error.response);
+      }
+    );
+  }
 });
 
 function openFile(inputPath) {
