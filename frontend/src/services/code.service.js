@@ -75,6 +75,10 @@ class CodeService {
     createHomework(orig_project_uuid, course_id, deadlineDate, computationTime) {
         return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'course_id': course_id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
     }
+
+    startHomework(id) {
+        return axiosAuth.post('startHomework', {'id': id})
+    }
 }
 
 export default new CodeService()

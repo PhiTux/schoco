@@ -221,3 +221,19 @@ def get_editing_homework_by_username(db: Session, username: str):
     editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
         models_and_schemas.EditingHomework.owner == user)).all()
     return editing_homework
+
+
+def get_homework_by_id(db: Session, id: int):
+    homework = db.exec(select(models_and_schemas.Homework).where(models_and_schemas.Homework.id == id)).one()
+    return homework
+
+
+def create_editing_homework(db: Session, editing_homework: models_and_schemas.EditingHomework):
+    try:
+        db.add(editing_homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True

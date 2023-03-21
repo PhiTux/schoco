@@ -154,14 +154,14 @@ def update_file(project_uuid: str, path: str, content: str, sha: str):
     return {'sha': res['content']['sha']}
 
 
-def forkProject(orig_project_uuid: str, template_project_uuid: str):
+def forkProject(orig_project_uuid: str, fork_project_uuid: str):
 
     c = pycurl.Curl()
     #c.setopt(c.VERBOSE, True)
     c.setopt(c.URL, api_full_url(
         f"/repos/{settings.GITEA_USERNAME}/{orig_project_uuid}/forks"))
     c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
-    post_data = json.dumps({'name': template_project_uuid})
+    post_data = json.dumps({'name': fork_project_uuid})
     c.setopt(c.POSTFIELDS, post_data)
     c.setopt(pycurl.HTTPHEADER, [
              'Accept: application/json', 'Content-Type: application/json'])

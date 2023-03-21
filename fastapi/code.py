@@ -153,8 +153,8 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
 
     for p in all_projects:
         # if project is part of a homework then save it in homeworks...
+        is_homework = False
         for h in all_homework:
-            is_homework = False
             if p.id == h.template_project_id:
                 is_homework = True
                 course = crud.get_course_by_id(db=db, id=h.course_id)
@@ -268,9 +268,9 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
     orig_project_uuid = project_uuid
     template_project_uuid = str(uuid.uuid4())
 
-    # copy original gitea project to create template for the homework
+    # fork original gitea project to create template for the homework
     if not git.forkProject(
-            orig_project_uuid=orig_project_uuid, template_project_uuid=template_project_uuid):
+            orig_project_uuid=orig_project_uuid, fork_project_uuid=template_project_uuid):
         return False
 
     print("template", template_project_uuid)
@@ -310,3 +310,44 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
         return False
 
     return True
+
+
+@code.post('/startHomework', dependencies=[Depends(auth.oauth2_scheme)])
+def startHomework(startHomework: models_and_schemas.startHomework, username=Depends(auth.get_username_by_token), db: Session = Depends(database_config.get_db)):
+    id = startHomework.id
+
+    # check if editing_homework from user for given homework-id already exists
+    editing_homeworks = crud.get_editing_homework_by_username(db=db, username=username)
+    for h in editing_homeworks:
+        if h.id == id:
+            raise HTTPException(
+        status_code=409, detail="You're already working on this Homework.")
+
+    # get homework
+    try:
+        homework = crud.get_homework_by_id(db=db, id=id)
+    except:
+        raise HTTPException(
+        status_code=500, detail=f"Could not find homework with id {id}.")
+
+    # get project_uuid from project_id
+    template_project = crud.get_project_by_id(db=db, id=homework.template_project_id)
+
+    # fork project
+    new_project_uuid = str(uuid.uuid4())    
+    if not git.forkProject(
+            orig_project_uuid=template_project.uuid, fork_project_uuid=new_project_uuid):
+        raise HTTPException(
+        status_code=500, detail=f"Error on starting homework with id {id}.")
+
+    user = crud.get_user_by_username(db=db, username=username)
+
+    # create editing_homework - otherwise remove repo
+    editing_homework = models_and_schemas.EditingHomework(uuid=new_project_uuid, homework_id=id, owner_id=user.id)
+    if not crud.create_editing_homework(db,
+                                editing_homework=editing_homework):
+        git.remove_repo(project_uuid=new_project_uuid)
+        raise HTTPException(
+        status_code=500, detail=f"Error on starting homework with id {id}.")
+
+    return {'success': True, 'uuid': new_project_uuid}

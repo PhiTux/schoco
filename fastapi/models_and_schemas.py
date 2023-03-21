@@ -172,3 +172,7 @@ class create_homework(BaseModel):
     course_id: int
     deadline_date: str
     computation_time: int
+
+
+class startHomework(BaseModel):
+    id: int

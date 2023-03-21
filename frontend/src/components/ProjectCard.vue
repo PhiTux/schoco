@@ -37,7 +37,8 @@ defineProps({
             <p class="card-text">
                 {{ description }}
             </p>
-            <a v-if="!isTeacher && isHomework && !isEditing" :href="'#/startHomework/' + id"
+            <!-- :href="'#/startHomework/' + id" -->
+            <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)" 
                 class="btn btn-primary">🌟Hausaufgabe
                 beginnen</a>
             <a v-else-if="!isTeacher && isHomework && isEditing" :href="'#/ide/' + uuid" class="btn btn-primary">Hausaufgabe
