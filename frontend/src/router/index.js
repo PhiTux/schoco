@@ -5,6 +5,7 @@ import Home from "../views/Home.vue"
 import Users from "../views/Users.vue"
 import NewProject from "../views/NewProject.vue"
 import Ide from "../views/IDE.vue"
+import Homework from "../views/Homework.vue"
 
 
 const routes = [
@@ -13,6 +14,7 @@ const routes = [
     {path: '/users', name: "users", component: Users},
     {path: '/newProject', name: "newProject", component: NewProject},
     {path: '/ide/:project_uuid', name: "ide", component: Ide, params: {project_uuid: ""}},
+    {path: '/homework/:id', name: "homework", component: Homework, params: {id: ""}},
     {path: '/:pathMath(.*)*', redirect: "/home"}
 ]
 
@@ -26,7 +28,7 @@ router.beforeEach(async (to) => {
     const authRequired = !publicPages.includes(to.path)
     const auth = useAuthStore()
 
-    const teacherPages = ['/users']
+    const teacherPages = ['/users', '/homework']
     const teacherRequired = teacherPages.includes(to.path)
 
     if (authRequired && !auth.user) {

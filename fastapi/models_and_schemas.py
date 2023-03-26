@@ -175,5 +175,5 @@ class create_homework(BaseModel):
     computation_time: int
 
 
-class startHomework(BaseModel):
+class homeworkId(BaseModel):
     id: int

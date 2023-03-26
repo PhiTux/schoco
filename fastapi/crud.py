@@ -225,7 +225,7 @@ def get_editing_homework_by_username(db: Session, username: str):
 
 def get_homework_by_id(db: Session, id: int):
     homework = db.exec(select(models_and_schemas.Homework).where(
-        models_and_schemas.Homework.id == id)).one()
+        models_and_schemas.Homework.id == id)).first()
     return homework
 
 

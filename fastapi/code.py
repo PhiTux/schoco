@@ -334,8 +334,8 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
 
 
 @code.post('/startHomework', dependencies=[Depends(auth.oauth2_scheme)])
-def startHomework(startHomework: models_and_schemas.startHomework, username=Depends(auth.get_username_by_token), db: Session = Depends(database_config.get_db)):
-    id = startHomework.id
+def startHomework(homeworkId: models_and_schemas.homeworkId, username=Depends(auth.get_username_by_token), db: Session = Depends(database_config.get_db)):
+    id = homeworkId.id
 
     # check if editing_homework from user for given homework-id already exists
     editing_homeworks = crud.get_editing_homework_by_username(
@@ -375,3 +375,20 @@ def startHomework(startHomework: models_and_schemas.startHomework, username=Depe
             status_code=500, detail=f"Error on starting homework with id {id}.")
 
     return {'success': True, 'uuid': new_project_uuid}
+
+
+@code.post('/getHomeworkInfo', dependencies=[Depends(auth.check_teacher)])
+def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Depends(database_config.get_db)):
+    id = homeworkId.id
+
+    # get project_name and course_badge_info
+    homework = crud.get_homework_by_id(db=db, id=id)
+    template_project = crud.get_project_by_id(
+        db=db, id=homework.template_project_id)
+
+    result = {"name": template_project.name, "course_name": homework.course.name,
+              "course_color": homework.course.color, "course_font_dark": homework.course.fontDark}
+
+    # TODO get each user's results
+
+    return result

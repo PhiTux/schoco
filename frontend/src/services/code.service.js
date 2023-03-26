@@ -79,6 +79,10 @@ class CodeService {
     startHomework(id) {
         return axiosAuth.post('startHomework', {'id': id})
     }
+
+    getHomeworkInfo(id) {
+        return axiosAuth.post('getHomeworkInfo', {'id': id})
+    }
 }
 
 export default new CodeService()
