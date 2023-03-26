@@ -64,9 +64,9 @@ function startHomework(id) {
       console.log(response.data)
       if (response.data.success) {
         router.push({
-        name: "ide",
-        params: { project_uuid: response.data.uuid },
-      });
+          name: "ide",
+          params: { project_uuid: response.data.uuid },
+        });
       }
     },
     error => {
@@ -83,15 +83,15 @@ function startHomework(id) {
 <template>
   <!-- Toasts -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div class="toast align-items-center text-bg-danger border-0" id="toastStartHomeworkError" role="alert"
-        aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            Fehler beim Starten der Hausaufgabe. Probiere es erneut und frage andernfalls deine Lehrkraft um Hilfe.
-          </div>
+    <div class="toast align-items-center text-bg-danger border-0" id="toastStartHomeworkError" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Fehler beim Starten der Hausaufgabe. Probiere es erneut und frage andernfalls deine Lehrkraft um Hilfe.
         </div>
       </div>
     </div>
+  </div>
 
   <div class="container">
     <a class="btn btn-outline-success my-3" type="submit" href="/#/newProject">
@@ -100,24 +100,27 @@ function startHomework(id) {
     <h1>Aktuelle Hausaufgaben</h1>
     <div class="d-flex align-content-start flex-wrap">
       <!-- if teacher: -->
-      <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.new_homework" isHomework isNew isTeacher :name="h.name"
+      <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.new_homework" isHomework isTeacher :name="h.name"
         :description="h.description" :id="h.id" :deadline="h.deadline" :courseName="h.course_name"
         :courseColor="h.course_color" :courseFontDark="h.course_font_dark" />
 
       <!-- else -->
-      <ProjectCard v-else v-for="h in state.new_homework" isHomework isNew @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name"
-        :description="h.description" :id="h.id" :deadline="h.deadline" />
+      <ProjectCard v-else v-for="h in state.new_homework" isHomework @startHomework="startHomework"
+        :isEditing="h.is_editing" :name="h.name" :description="h.description" :uuid="h.uuid" :id="h.id"
+        :deadline="h.deadline" />
     </div>
 
     <h1>Frühere Hausaufgaben</h1>
     <div class="d-flex align-content-start flex-wrap">
+      <!-- if teacher: -->
       <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.old_homework" isHomework isOld isTeacher :name="h.name"
         :description="h.description" :id="h.id" :deadline="h.deadline" :courseName="h.course_name"
         :courseColor="h.course_color" :courseFontDark="h.course_font_dark" />
 
-      <ProjectCard v-else v-for="h in state.old_homework" isHomework isOld :name="h.name" :description="h.description"
-        :id="h.id" :deadline="h.deadline" :courseName="h.course_name" :courseColor="h.course_color"
-        :courseFontDark="h.course_font_dark" />
+      <!-- else -->
+      <ProjectCard v-else v-for="h in state.old_homework" isHomework isOld @startHomework="startHomework"
+        :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid" :description="h.description" :id="h.id"
+        :deadline="h.deadline" />
     </div>
 
     <h1>Meine Projekte</h1>

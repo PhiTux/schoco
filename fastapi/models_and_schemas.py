@@ -94,6 +94,7 @@ class EditingHomework(SQLModel, table=True):
     number_of_tests: Optional[int] = 0
 
     owner: "User" = Relationship()
+    homework: "Homework" = Relationship()
 
 # other models
 

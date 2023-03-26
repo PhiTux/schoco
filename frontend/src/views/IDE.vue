@@ -36,6 +36,7 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
+  isEditingHomework: true
 });
 
 let homework = reactive({
@@ -135,6 +136,7 @@ onBeforeMount(() => {
     (response) => {
       if (response.status == 200) {
         console.log(response.data)
+        state.isEditingHomework = response.data.isEditingHomework;
         state.projectName = response.data.name;
         state.projectDescription = response.data.description;
       }
@@ -812,7 +814,7 @@ function prepareHomeworkModal() {
                     <span>
                       {{ state.projectDescription }}
                     </span>
-                    <div class="position-absolute bottom-0 end-0">
+                    <div v-if="!state.isEditingHomework" class="position-absolute bottom-0 end-0">
                       <a @click.prevent="editDescription()" class="btn btn-overlay btn-edit">
                         <div>
                           <font-awesome-icon icon="fa-pencil" />

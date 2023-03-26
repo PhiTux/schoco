@@ -53,10 +53,16 @@ def project_access_allowed(project_uuid: str, db: Session = Depends(database_con
     if user.role == "teacher":
         return True
 
-    # otherwise: user must be owner
+    # otherwise: user must be owner of project...
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
-    if project.owner.username == username:
+    if project != None and project.owner.username == username:
+        return True
+
+    # ...or of editing_homework
+    editing_homework = crud.get_editing_homework_by_uuid(
+        db=db, project_uuid=project_uuid)
+    if editing_homework != None and editing_homework.owner.username == username:
         return True
 
     raise HTTPException(
@@ -104,11 +110,17 @@ def recursively_download_all_files(project_uuid: str, path: str):
 
 
 @ code.get('/loadAllFiles/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def loadAllFiles(project_uuid: str = Path()):
+def loadAllFiles(project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
     global results
     results = []
 
     res = recursively_download_all_files(project_uuid=project_uuid, path="/")
+
+    # remove Tests.java if uuid is "editing_homework"
+    editing_homework = crud.get_editing_homework_by_uuid(
+        db=db, project_uuid=project_uuid)
+    if editing_homework != None:
+        res = [f for f in res if not f['path'] == "Tests.java"]
 
     return res
 
@@ -124,7 +136,12 @@ def saveDescription(updateDescription: models_and_schemas.updateDescription, pro
 def getProjectName(project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
-    return {"name": project.name, "description": project.description}
+    if project != None:
+        return {"name": project.name, "description": project.description, "isEditingHomework": False}
+    else:
+        project = crud.get_template_project_of_editing_homework_by_uuid(
+            db=db, project_uuid=project_uuid)
+        return {"name": project.name, "description": project.description, "isEditingHomework": True}
 
 
 @ code.post('/saveFileChanges/{project_uuid}', dependencies=[Depends(project_access_allowed)])
@@ -184,14 +201,18 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
     homework = []
 
     for h in all_new_homework:
+        already_edited = False
         for e in all_editing_homework:
             if h["id"] == e.homework_id:
                 # append those homeworks, that are already edited
+                already_edited = True
                 homework.append({"is_editing": True, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
                                 "id": h["id"], "uuid": e.uuid, "oldest_commit_allowed": h["oldest_commit_allowed"]})
+                break
         # ... and those, which are not yet started by the pupil
-        homework.append({"is_editing": False, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                         "id": h["id"], "uuid": h["uuid"], "oldest_commit_allowed": h["oldest_commit_allowed"]})
+        if not already_edited:
+            homework.append({"is_editing": False, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
+                             "id": h["id"], "uuid": h["uuid"], "oldest_commit_allowed": h["oldest_commit_allowed"]})
 
     return {"homework": homework, "projects": all_projects}
 
@@ -317,37 +338,40 @@ def startHomework(startHomework: models_and_schemas.startHomework, username=Depe
     id = startHomework.id
 
     # check if editing_homework from user for given homework-id already exists
-    editing_homeworks = crud.get_editing_homework_by_username(db=db, username=username)
+    editing_homeworks = crud.get_editing_homework_by_username(
+        db=db, username=username)
     for h in editing_homeworks:
         if h.id == id:
             raise HTTPException(
-        status_code=409, detail="You're already working on this Homework.")
+                status_code=409, detail="You're already working on this Homework.")
 
     # get homework
     try:
         homework = crud.get_homework_by_id(db=db, id=id)
     except:
         raise HTTPException(
-        status_code=500, detail=f"Could not find homework with id {id}.")
+            status_code=500, detail=f"Could not find homework with id {id}.")
 
     # get project_uuid from project_id
-    template_project = crud.get_project_by_id(db=db, id=homework.template_project_id)
+    template_project = crud.get_project_by_id(
+        db=db, id=homework.template_project_id)
 
     # fork project
-    new_project_uuid = str(uuid.uuid4())    
+    new_project_uuid = str(uuid.uuid4())
     if not git.forkProject(
             orig_project_uuid=template_project.uuid, fork_project_uuid=new_project_uuid):
         raise HTTPException(
-        status_code=500, detail=f"Error on starting homework with id {id}.")
+            status_code=500, detail=f"Error on starting homework with id {id}.")
 
     user = crud.get_user_by_username(db=db, username=username)
 
     # create editing_homework - otherwise remove repo
-    editing_homework = models_and_schemas.EditingHomework(uuid=new_project_uuid, homework_id=id, owner_id=user.id)
+    editing_homework = models_and_schemas.EditingHomework(
+        uuid=new_project_uuid, homework_id=id, owner_id=user.id)
     if not crud.create_editing_homework(db,
-                                editing_homework=editing_homework):
+                                        editing_homework=editing_homework):
         git.remove_repo(project_uuid=new_project_uuid)
         raise HTTPException(
-        status_code=500, detail=f"Error on starting homework with id {id}.")
+            status_code=500, detail=f"Error on starting homework with id {id}.")
 
     return {'success': True, 'uuid': new_project_uuid}

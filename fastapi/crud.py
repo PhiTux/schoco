@@ -224,7 +224,8 @@ def get_editing_homework_by_username(db: Session, username: str):
 
 
 def get_homework_by_id(db: Session, id: int):
-    homework = db.exec(select(models_and_schemas.Homework).where(models_and_schemas.Homework.id == id)).one()
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.id == id)).one()
     return homework
 
 
@@ -237,3 +238,17 @@ def create_editing_homework(db: Session, editing_homework: models_and_schemas.Ed
         db.rollback()
         return False
     return True
+
+
+def get_template_project_of_editing_homework_by_uuid(db: Session, project_uuid: str):
+    editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+        models_and_schemas.EditingHomework.uuid == project_uuid)).first()
+    project = get_project_by_id(
+        db=db, id=editing_homework.homework.template_project_id)
+    return project
+
+
+def get_editing_homework_by_uuid(db: Session, project_uuid: str):
+    editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+        models_and_schemas.EditingHomework.uuid == project_uuid)).first()
+    return editing_homework
