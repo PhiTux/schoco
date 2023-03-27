@@ -389,6 +389,26 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
     result = {"name": template_project.name, "course_name": homework.course.name,
               "course_color": homework.course.color, "course_font_dark": homework.course.fontDark}
 
-    # TODO get each user's results
+    # get each user's results
+    pupils = crud.get_all_users_of_course_id(db=db, id=homework.course_id)
+    print(pupils)
+    editing_homework = crud.get_all_editing_homework_by_homework_id(
+        db=db, id=id)
+
+    pupils_results = []
+    for p in pupils:
+        found = False
+        for eh in editing_homework:
+            if p.id == eh.owner_id:
+                found = True
+                pupils_results.append({"name": p.full_name, "username": p.username, "uuid": eh.uuid, "best_result": eh.best_submission,
+                                      "#compilations": eh.number_of_compilations, "#runs": eh.number_of_runs, "#tests": eh.number_of_tests})
+                break
+
+        if not found:
+            pupils_results.append({"name": p.full_name, "username": p.username, "uuid": "",
+                                  "best_result": "", "compilations": 0, "runs": 0, "tests": 0})
+
+    result['pupils_results'] = pupils_results
 
     return result

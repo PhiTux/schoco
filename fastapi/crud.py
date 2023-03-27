@@ -252,3 +252,15 @@ def get_editing_homework_by_uuid(db: Session, project_uuid: str):
     editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
         models_and_schemas.EditingHomework.uuid == project_uuid)).first()
     return editing_homework
+
+
+def get_all_users_of_course_id(db: Session, id: str):
+    course = db.exec(select(models_and_schemas.Course).where(
+        models_and_schemas.Course.id == id)).first()
+    return course.users
+
+
+def get_all_editing_homework_by_homework_id(db: Session, id: str):
+    editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+        models_and_schemas.EditingHomework.homework_id == id)).all()
+    return editing_homework

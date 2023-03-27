@@ -11,6 +11,8 @@ let state = reactive({
     course_name: "",
     course_color: "",
     course_font_dark: true,
+    pupils: [],
+    showDetails: false
 })
 
 onBeforeMount(() => {
@@ -21,6 +23,7 @@ onBeforeMount(() => {
             state.course_name = response.data.course_name;
             state.course_color = response.data.course_color;
             state.course_font_dark = response.data.course_font_dark;
+            state.pupils = response.data.pupils_results;
         },
         error => {
             console.log(error.response)
@@ -37,6 +40,12 @@ onBeforeMount(() => {
             </CourseBadge> {{ state.name }}
         </h2>
 
+        <div class="my-3 form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="showDetails" v-model="state.showDetails">
+            <label class="form-check-label disable-select" for="showDetails">Zeige Ergebnisse</label>
+        </div>
+
+
         <table class="table table-dark table-striped table-hover align-middle">
             <thead>
                 <tr>
@@ -50,8 +59,14 @@ onBeforeMount(() => {
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td></td>
+                <tr v-for="p in state.pupils">
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.username }}</td>
+                    <td><a class="btn btn-primary" v-if="p.uuid !== ''" :href="'#/ide/' + p.uuid">Öffnen</a></td>
+                    <td><span v-if="state.showDetails">{{ p.best_result }}</span></td>
+                    <td><span v-if="state.showDetails">{{ p.compilations }}</span></td>
+                    <td><span v-if="state.showDetails">{{ p.runs }}</span></td>
+                    <td><span v-if="state.showDetails">{{ p.tests }}</span></td>
                 </tr>
             </tbody>
         </table>
@@ -61,5 +76,9 @@ onBeforeMount(() => {
 <style scoped>
 .container {
     margin-top: 1em;
+}
+
+.disable-select {
+    user-select: none;
 }
 </style>

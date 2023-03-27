@@ -77,7 +77,6 @@ class Homework(SQLModel, table=True):
     oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")
-    #original_project: "Project" = Relationship()
 
 
 class EditingHomework(SQLModel, table=True):
@@ -87,8 +86,11 @@ class EditingHomework(SQLModel, table=True):
         default=None, foreign_key="homework.id")
     owner_id: int = Field(
         default=None, foreign_key="user.id")
-    best_submission: Optional[str]
-    latest_submission: Optional[str]
+
+    best_submission: Optional[str] = ""
+    latest_submission: Optional[str] = ""
+    # each submission having the structure {commit: ..., list_of_files: ..., submission_result: ...}
+
     number_of_compilations: Optional[int] = 0
     number_of_runs: Optional[int] = 0
     number_of_tests: Optional[int] = 0
