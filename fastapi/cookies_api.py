@@ -274,7 +274,7 @@ def kill_n_create(container_uuid: str):
 # java -Djava.security.manager=default my.main.Class
 
 
-def prepare_execute(project_uuid: str):
+def prepare_execute(project_uuid: str, user_id: int):
     # grab and prepare new container and place it inside runningContainers
     try:
         c = newContainers.get(timeout=3)
@@ -284,7 +284,7 @@ def prepare_execute(project_uuid: str):
     runningContainers.append(c)
 
     # copy .class files to container-mount
-    sourcepath = os.path.join(data_path, project_uuid)
+    sourcepath = os.path.join(data_path, f"{project_uuid}_{user_id}")
     sourcefiles = os.listdir(sourcepath)
     destinationpath = os.path.join(data_path, str(c['uuid']))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)

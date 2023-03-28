@@ -260,9 +260,13 @@ def get_template_project_of_editing_homework_by_uuid(db: Session, project_uuid: 
     return project
 
 
-def get_editing_homework_by_uuid(db: Session, project_uuid: str):
+def get_editing_homework_by_uuid_and_user_id(db: Session, uuid: str, user_id: int):
+    template_project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.uuid == uuid)).first()
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.template_project_id == template_project.id)).first()
     editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
-        models_and_schemas.EditingHomework.uuid == project_uuid)).first()
+        models_and_schemas.EditingHomework.homework == homework, models_and_schemas.EditingHomework.owner_id == user_id)).first()
     return editing_homework
 
 
@@ -292,3 +296,56 @@ def get_uuid_of_homework(db: Session, homework_id: int):
     template_project = get_project_by_id(
         db=db, id=homework.template_project_id)
     return template_project.uuid
+
+
+def increase_compiles(db: Session, uuid: str, user_id: int):
+    editing_homework = get_editing_homework_by_uuid_and_user_id(
+        db=db, uuid=uuid, user_id=user_id)
+    editing_homework.number_of_compilations += 1
+
+    try:
+        db.add(editing_homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def increase_runs(db: Session, uuid: str, user_id: int):
+    editing_homework = get_editing_homework_by_uuid_and_user_id(
+        db=db, uuid=uuid, user_id=user_id)
+    editing_homework.number_of_runs += 1
+
+    try:
+        db.add(editing_homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def increase_tests(db: Session, uuid: str, user_id: int):
+    editing_homework = get_editing_homework_by_uuid_and_user_id(
+        db=db, uuid=uuid, user_id=user_id)
+    editing_homework.number_of_tests += 1
+
+    try:
+        db.add(editing_homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def get_homework_by_template_uuid(db: Session, uuid: str):
+    project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.uuid == uuid)).first()
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.template_project_id == project.id)).first()
+    return homework

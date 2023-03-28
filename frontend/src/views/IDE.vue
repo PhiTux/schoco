@@ -36,7 +36,7 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
-  isEditingHomework: true
+  isHomework: true
 });
 
 let homework = reactive({
@@ -136,7 +136,7 @@ onBeforeMount(() => {
     (response) => {
       if (response.status == 200) {
         console.log(response.data)
-        state.isEditingHomework = response.data.isEditingHomework;
+        state.isHomework = response.data.isHomework;
         state.projectName = response.data.name;
         state.projectDescription = response.data.description;
       }
@@ -317,7 +317,7 @@ function compile() {
     });
   }
 
-  CodeService.prepareCompile(projectFiles, route.params.project_uuid).then(
+  CodeService.prepareCompile(projectFiles, route.params.project_uuid, route.params.user_id).then(
     (response) => {
       console.log(response.data);
 
@@ -335,7 +335,8 @@ function compile() {
         response.data.ip,
         response.data.port,
         response.data.uuid,
-        route.params.project_uuid
+        route.params.project_uuid,
+        route.params.user_id
       );
     },
     (error) => {
@@ -345,8 +346,8 @@ function compile() {
   );
 }
 
-function startCompile(ip, port, container_uuid, project_uuid) {
-  CodeService.startCompile(ip, port, container_uuid, project_uuid).then(
+function startCompile(ip, port, container_uuid, project_uuid, user_id) {
+  CodeService.startCompile(ip, port, container_uuid, project_uuid, user_id).then(
     (response) => {
       state.isCompiling = false;
       console.log(response.data);
@@ -371,7 +372,7 @@ function execute() {
   state.isExecuting = true;
   state.receivedWS = false;
 
-  CodeService.prepareExecute(route.params.project_uuid).then(
+  CodeService.prepareExecute(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.data.executable == false) {
         results.value =
@@ -386,7 +387,8 @@ function execute() {
         response.data.ip,
         response.data.port,
         response.data.uuid,
-        route.params.project_uuid
+        route.params.project_uuid,
+        route.params.user_id
       );
     },
     (error) => {
@@ -434,8 +436,8 @@ function connectWebsocket(id) {
   };
 }
 
-function startExecute(ip, port, uuid, project_uuid) {
-  CodeService.startExecute(ip, port, uuid, project_uuid).then(
+function startExecute(ip, port, uuid, project_uuid, user_id) {
+  CodeService.startExecute(ip, port, uuid, project_uuid, user_id).then(
     (response) => {
       console.log("stopped executing")
       state.isExecuting = false;
@@ -455,7 +457,7 @@ function test() {
 
   results.value = "Programm wird getestet 📝➡️✅ bitte warten..."
 
-  CodeService.prepareTest(route.params.project_uuid).then(
+  CodeService.prepareTest(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.data.executable == false) {
         results.value =
@@ -468,7 +470,8 @@ function test() {
         response.data.ip,
         response.data.port,
         response.data.uuid,
-        route.params.project_uuid
+        route.params.project_uuid,
+        route.params.user_id,
       );
     },
     (error) => {
@@ -479,8 +482,8 @@ function test() {
 }
 
 
-function startTest(ip, port, uuid, project_uuid) {
-  CodeService.startTest(ip, port, uuid, project_uuid).then(
+function startTest(ip, port, uuid, project_uuid, user_id) {
+  CodeService.startTest(ip, port, uuid, project_uuid, user_id).then(
     (response) => {
       state.isTesting = false;
 
@@ -564,8 +567,21 @@ function createHomework() {
 
   CodeService.createHomework(route.params.project_uuid, projectFiles, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime).then(
     (response) => {
-      console.log(response.data)
+      // close modal
+      var elem = document.getElementById("createHomeworkModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      const toast = new Toast(
+        document.getElementById("toastHomeworkCreationSuccess")
+      );
+      toast.show();
     }, (error) => {
+      // close modal
+      var elem = document.getElementById("createHomeworkModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
       const toast = new Toast(
         document.getElementById("toastHomeworkCreationError")
       );
@@ -622,6 +638,15 @@ function prepareHomeworkModal() {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Erstellen der Hausaufgabe!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastHomeworkCreationSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Hausaufgabe erfolgreich erstellt!
           </div>
         </div>
       </div>
@@ -786,8 +811,8 @@ function prepareHomeworkModal() {
                 <font-awesome-icon v-else icon="fa-solid fa-list-check" /> Testen
               </button>
             </div>
-            <button v-if="authStore.isTeacher()" @click.prevent="prepareHomeworkModal()" type="button"
-              data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
+            <button v-if="authStore.isTeacher() && !state.isHomework" @click.prevent="prepareHomeworkModal()"
+              type="button" data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
               <font-awesome-icon icon="fa-solid fa-share-nodes" /> Hausaufgabe erstellen
             </button>
           </ul>
@@ -818,7 +843,7 @@ function prepareHomeworkModal() {
                     <span>
                       {{ state.projectDescription }}
                     </span>
-                    <div v-if="!state.isEditingHomework" class="position-absolute bottom-0 end-0">
+                    <div v-if="route.params.user_id == 0" class="position-absolute bottom-0 end-0">
                       <a @click.prevent="editDescription()" class="btn btn-overlay btn-edit">
                         <div>
                           <font-awesome-icon icon="fa-pencil" />

@@ -135,11 +135,12 @@ def getProjectName(project_uuid: str = Path(), db: Session = Depends(database_co
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
 
-    return {"name": project.name, "description": project.description, "isEditingHomework": False}
-    """ else:
-        project = crud.get_template_project_of_editing_homework_by_uuid(
-            db=db, project_uuid=project_uuid)
-        return {"name": project.name, "description": project.description, "isEditingHomework": True} """
+    homework = crud.get_homework_by_template_uuid(db=db, uuid=project_uuid)
+    isHomework = True
+    if homework == None:
+        isHomework = False
+
+    return {"name": project.name, "description": project.description, "isHomework": isHomework}
 
 
 @ code.post('/saveFileChanges/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
@@ -229,14 +230,17 @@ def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = 
 
 
 @ code.post('/startCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path()):
+def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
 
     result = cookies_api.startCompile(
         startCompile.container_uuid, startCompile.ip, startCompile.port)
 
+    if user_id != 0:
+        crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
+
     # save compilation-results (.class-files)
     cookies_api.save_compilation_result(
-        startCompile.container_uuid, project_uuid)
+        startCompile.container_uuid, f"{project_uuid}_{user_id}")
 
     # before return: start background_task to refill new_containers
     background_tasks.add_task(
@@ -245,20 +249,23 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
     return result
 
 
-@ code.get('/prepareExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def prepareExecute(project_uuid: str = Path()):
+@ code.get('/prepareExecute/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def prepareExecute(project_uuid: str = Path(), user_id: int = Path()):
 
     # prepares container by copying .class files into container-mount
     # returns {'executable': false} if no files are found
-    c = cookies_api.prepare_execute(project_uuid)
+    c = cookies_api.prepare_execute(project_uuid, user_id)
     return c
 
 
-@ code.post('/startExecute/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path()):
+@ code.post('/startExecute/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
 
     result = cookies_api.start_execute(
         startExecute.container_uuid, startExecute.ip, startExecute.port)
+
+    if user_id != 0:
+        crud.increase_runs(db=db, uuid=project_uuid, user_id=user_id)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startExecute.container_uuid)
@@ -266,18 +273,21 @@ def startExecute(startExecute: models_and_schemas.startExecute, background_tasks
     return result
 
 
-@ code.get('/prepareTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def prepareTest(project_uuid: str = Path()):
+@ code.get('/prepareTest/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def prepareTest(project_uuid: str = Path(), user_id: int = Path()):
     # we now use "prepare_execute", since it is (at least until now) the same code
-    c = cookies_api.prepare_execute(project_uuid)
+    c = cookies_api.prepare_execute(project_uuid, user_id)
     return c
 
 
-@ code.post('/startTest/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def startTest(startTest: models_and_schemas.startTest, background_tasks: BackgroundTasks, project_uuid: str = Path()):
+@ code.post('/startTest/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def startTest(startTest: models_and_schemas.startTest, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
 
     result = cookies_api.start_test(
         startTest.container_uuid, startTest.ip, startTest.port)
+
+    if user_id != 0:
+        crud.increase_tests(db=db, uuid=project_uuid, user_id=user_id)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startTest.container_uuid)

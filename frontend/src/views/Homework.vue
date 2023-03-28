@@ -52,10 +52,10 @@ onBeforeMount(() => {
                     <th scope="col">Name</th>
                     <th scope="col">Username</th>
                     <th scope="col"></th>
-                    <th scope="col">(Ergebnis)</th>
-                    <th scope="col">(# Kompilierungen)</th>
-                    <th scope="col">(# Ausführungen)</th>
-                    <th scope="col">(# Tests)</th>
+                    <th scope="col">Ergebnis</th>
+                    <th scope="col"># Kompilierungen</th>
+                    <th scope="col"># Ausführungen</th>
+                    <th scope="col"># Tests</th>
                 </tr>
             </thead>
             <tbody>

@@ -48,28 +48,28 @@ class CodeService {
         return axiosAuth.get('getProjectsAsPupil')
     }
 
-    prepareCompile(projectFiles, project_uuid) {
-        return axiosAuth.post(`prepareCompile/${project_uuid}`, { 'files': projectFiles })
+    prepareCompile(projectFiles, project_uuid, user_id) {
+        return axiosAuth.post(`prepareCompile/${project_uuid}/${user_id}`, { 'files': projectFiles })
     }
 
-    startCompile(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post(`startCompile/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
+    startCompile(ip, port, container_uuid, project_uuid, user_id) {
+        return axiosAuth.post(`startCompile/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
-    prepareExecute(project_uuid) {
-        return axiosAuth.get(`prepareExecute/${project_uuid}`)
+    prepareExecute(project_uuid, user_id) {
+        return axiosAuth.get(`prepareExecute/${project_uuid}/${user_id}`)
     }
 
-    startExecute(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post(`startExecute/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
+    startExecute(ip, port, container_uuid, project_uuid, user_id) {
+        return axiosAuth.post(`startExecute/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
-    prepareTest(project_uuid) {
-        return axiosAuth.get(`prepareTest/${project_uuid}`)
+    prepareTest(project_uuid, user_id) {
+        return axiosAuth.get(`prepareTest/${project_uuid}/${user_id}`)
     }
 
-    startTest(ip, port, container_uuid, project_uuid) {
-        return axiosAuth.post(`startTest/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
+    startTest(ip, port, container_uuid, project_uuid, user_id) {
+        return axiosAuth.post(`startTest/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
     createHomework(orig_project_uuid, project_files, course_id, deadlineDate, computationTime) {
