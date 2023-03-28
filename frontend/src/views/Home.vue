@@ -65,7 +65,7 @@ function startHomework(id) {
       if (response.data.success) {
         router.push({
           name: "ide",
-          params: { project_uuid: response.data.uuid },
+          params: { project_uuid: response.data.uuid, user_id: response.data.branch },
         });
       }
     },
@@ -106,7 +106,7 @@ function startHomework(id) {
 
       <!-- else -->
       <ProjectCard v-else v-for="h in state.new_homework" isHomework @startHomework="startHomework"
-        :isEditing="h.is_editing" :name="h.name" :description="h.description" :uuid="h.uuid" :id="h.id"
+        :isEditing="h.is_editing" :name="h.name" :description="h.description" :uuid="h.uuid" :branch="h.branch" :id="h.id"
         :deadline="h.deadline" />
     </div>
 
@@ -119,7 +119,7 @@ function startHomework(id) {
 
       <!-- else -->
       <ProjectCard v-else v-for="h in state.old_homework" isHomework isOld @startHomework="startHomework"
-        :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid" :description="h.description" :id="h.id"
+        :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid" :description="h.description" :branch="h.branch" :id="h.id"
         :deadline="h.deadline" />
     </div>
 

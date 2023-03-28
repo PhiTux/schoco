@@ -33,7 +33,7 @@ function newHelloWorld() {
     (response) => {
       router.push({
         name: "ide",
-        params: { project_uuid: response.data },
+        params: { project_uuid: response.data, user_id: 0 },
       });
     },
     (error) => {

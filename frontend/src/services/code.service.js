@@ -24,8 +24,8 @@ class CodeService {
         return axiosAuth.post('createNewHelloWorld', { 'projectName': helloWorldName, 'projectDescription': helloWorldDescription })
     }
 
-    loadAllFiles(project_uuid) {
-        return axiosAuth.get(`loadAllFiles/${project_uuid}`)
+    loadAllFiles(project_uuid, user_id) {
+        return axiosAuth.get(`loadAllFiles/${project_uuid}/${user_id}`)
     }
 
     getProjectInfo(project_uuid) {
@@ -36,8 +36,8 @@ class CodeService {
         return axiosAuth.post(`updateDescription/${project_uuid}`, { 'description': description })
     }
 
-    saveFileChanges(changes, project_uuid) {
-        return axiosAuth.post(`saveFileChanges/${project_uuid}`, { 'changes': changes })
+    saveFileChanges(changes, project_uuid, user_id) {
+        return axiosAuth.post(`saveFileChanges/${project_uuid}/${user_id}`, { 'changes': changes })
     }
 
     getProjectsAsTeacher() {
@@ -72,8 +72,8 @@ class CodeService {
         return axiosAuth.post(`startTest/${project_uuid}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
-    createHomework(orig_project_uuid, course_id, deadlineDate, computationTime) {
-        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'course_id': course_id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
+    createHomework(orig_project_uuid, project_files, course_id, deadlineDate, computationTime) {
+        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'files': project_files, 'course_id': course_id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
     }
 
     startHomework(id) {

@@ -6,6 +6,7 @@ defineProps({
     description: String,
     deadline: String,
     uuid: String,
+    branch: Number,
     id: String,
     isTeacher: Boolean,
     isHomework: Boolean,
@@ -38,13 +39,14 @@ defineProps({
                 {{ description }}
             </p>
             <!-- :href="'#/startHomework/' + id" -->
-            <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)" 
+            <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
                 class="btn btn-primary">🌟Hausaufgabe
                 beginnen</a>
-            <a v-else-if="!isTeacher && isHomework && isEditing" :href="'#/ide/' + uuid" class="btn btn-primary">Hausaufgabe
+            <a v-else-if="!isTeacher && isHomework && isEditing" :href="'#/ide/' + uuid + '/' + branch"
+                class="btn btn-primary">Hausaufgabe
                 bearbeiten</a>
             <a v-else-if="isTeacher && isHomework" :href="'#/homework/' + id" class="btn btn-primary">Details zeigen</a>
-            <a v-else-if="!isHomework" :href="'#/ide/' + uuid" class="btn btn-primary">Projekt öffnen</a>
+            <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
         </div>
     </div>
 </template>

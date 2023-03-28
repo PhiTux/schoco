@@ -103,7 +103,7 @@ function editorInit() {
 }
 
 onBeforeMount(() => {
-  CodeService.loadAllFiles(route.params.project_uuid).then(
+  CodeService.loadAllFiles(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.status == 200) {
         state.files = response.data;
@@ -249,8 +249,6 @@ function updateTabsWithChanges() {
 
 function saveAll() {
   if (state.isSaving || state.tabsWithChanges.length == 0) return;
-  console.log(state.tabsWithChanges.length)
-
   state.isSaving = true;
 
   let changes = [];
@@ -274,7 +272,7 @@ function saveAll() {
     }
   }
 
-  CodeService.saveFileChanges(changes, route.params.project_uuid).then(
+  CodeService.saveFileChanges(changes, route.params.project_uuid, route.params.user_id).then(
     (response) => {
       state.isSaving = false;
 
@@ -556,9 +554,15 @@ function saveDescription() {
 }
 
 function createHomework() {
-  console.log("createHomework")
+  let projectFiles = [];
+  for (let i = 0; i < state.files.length; i++) {
+    projectFiles.push({
+      path: state.files[i]["path"],
+      content: state.files[i]["content"],
+    });
+  }
 
-  CodeService.createHomework(route.params.project_uuid, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime).then(
+  CodeService.createHomework(route.params.project_uuid, projectFiles, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime).then(
     (response) => {
       console.log(response.data)
     }, (error) => {

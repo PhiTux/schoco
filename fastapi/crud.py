@@ -44,8 +44,8 @@ def get_course_by_id(db: Session, id: int):
 
 
 def get_user_by_username(db: Session, username: str):
-    user = db.query(models_and_schemas.User).filter(
-        models_and_schemas.User.username == username).first()
+    user = db.exec(select(models_and_schemas.User).where(
+        models_and_schemas.User.username == username)).first()
     return user
 
 
@@ -123,6 +123,18 @@ def create_project(db: Session, project: models_and_schemas.Project):
     return True
 
 
+def remove_project_by_uuid(db: Session, project_uuid: str):
+    project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.uuid == project_uuid)).first()
+    try:
+        db.delete(project)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
+
+
 def get_project_by_project_uuid(db: Session, project_uuid: str):
     project = db.exec(select(models_and_schemas.Project).where(
         models_and_schemas.Project.uuid == project_uuid)).first()
@@ -195,7 +207,7 @@ def get_pupils_homework_by_username(db: Session, username: str):
         models_and_schemas.Homework.course_id.in_(course_ids))).all()
     for h in homework:
         project = get_project_by_id(db=db, id=h.template_project_id)
-        results.append({"deadline": h.deadline, "id": h.id, "oldest_commit_allowed": h.oldest_commit_allowed,
+        results.append({"deadline": h.deadline, "id": h.id,
                        "name": project.name, "description": project.description, "uuid": project.uuid})
 
     return results
@@ -264,3 +276,19 @@ def get_all_editing_homework_by_homework_id(db: Session, id: str):
     editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
         models_and_schemas.EditingHomework.homework_id == id)).all()
     return editing_homework
+
+
+""" def get_template_project_of_homework_by_id(db: Session, homework_id: int):
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.id == homework_id)).first()
+    template_project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.id == homework.template_project_id)).first()
+    return template_project """
+
+
+def get_uuid_of_homework(db: Session, homework_id: int):
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.id == homework_id)).first()
+    template_project = get_project_by_id(
+        db=db, id=homework.template_project_id)
+    return template_project.uuid

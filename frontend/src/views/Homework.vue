@@ -62,7 +62,8 @@ onBeforeMount(() => {
                 <tr v-for="p in state.pupils">
                     <td>{{ p.name }}</td>
                     <td>{{ p.username }}</td>
-                    <td><a class="btn btn-primary" v-if="p.uuid !== ''" :href="'#/ide/' + p.uuid">Öffnen</a></td>
+                    <td><a class="btn btn-primary" v-if="p.uuid !== ''"
+                            :href="'#/ide/' + p.uuid + '/' + p.branch">Öffnen</a></td>
                     <td><span v-if="state.showDetails">{{ p.best_result }}</span></td>
                     <td><span v-if="state.showDetails">{{ p.compilations }}</span></td>
                     <td><span v-if="state.showDetails">{{ p.runs }}</span></td>

@@ -74,18 +74,18 @@ class Homework(SQLModel, table=True):
         default=None, foreign_key="project.id")
     deadline: str  # datetime
     computation_time: int
-    oldest_commit_allowed: str
+    #oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")
 
 
 class EditingHomework(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    uuid: str = Field(unique=True)
+    # uuid: str = Field(unique=True) -> get uuid from howework->template-project
     homework_id: int = Field(
         default=None, foreign_key="homework.id")
     owner_id: int = Field(
-        default=None, foreign_key="user.id")
+        default=None, foreign_key="user.id")  # owner_id = branch_name
 
     best_submission: Optional[str] = ""
     latest_submission: Optional[str] = ""
@@ -149,7 +149,7 @@ class File(BaseModel):
     content: str
 
 
-class prepareCompile(BaseModel):
+class filesList(BaseModel):
     files: List[File]
 
 
@@ -172,6 +172,7 @@ class startTest(BaseModel):
 
 
 class create_homework(BaseModel):
+    files: List[File]
     course_id: int
     deadline_date: str
     computation_time: int
