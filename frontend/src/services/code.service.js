@@ -28,8 +28,8 @@ class CodeService {
         return axiosAuth.get(`loadAllFiles/${project_uuid}/${user_id}`)
     }
 
-    getProjectInfo(project_uuid) {
-        return axiosAuth.get(`getProjectInfo/${project_uuid}`)
+    getProjectInfo(project_uuid, user_id) {
+        return axiosAuth.get(`getProjectInfo/${project_uuid}/${user_id}`)
     }
 
     updateDescription(project_uuid, description) {

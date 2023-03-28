@@ -50,8 +50,8 @@ def get_user_by_username(db: Session, username: str):
 
 
 def get_user_by_id(db: Session, id: int):
-    user = db.query(models_and_schemas.User).filter(
-        models_and_schemas.User.id == id).first()
+    user = db.exec(select(models_and_schemas.User).where(
+        models_and_schemas.User.id == id)).first()
     return user
 
 

@@ -36,7 +36,9 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
-  isHomework: true
+  isHomework: true,
+  fullUserName: "",
+  deadline: ""
 });
 
 let homework = reactive({
@@ -132,13 +134,17 @@ onBeforeMount(() => {
     }
   );
 
-  CodeService.getProjectInfo(route.params.project_uuid).then(
+  CodeService.getProjectInfo(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.status == 200) {
         console.log(response.data)
         state.isHomework = response.data.isHomework;
         state.projectName = response.data.name;
         state.projectDescription = response.data.description;
+        if (state.isHomework) {
+          state.fullUserName = response.data.fullusername;
+          state.deadline = response.data.deadline
+        }
       }
     },
     (error) => {
@@ -815,6 +821,13 @@ function prepareHomeworkModal() {
               type="button" data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
               <font-awesome-icon icon="fa-solid fa-share-nodes" /> Hausaufgabe erstellen
             </button>
+            <div class="d-flex align-items-center homework-badge px-2" v-if="state.isHomework">HA | <span
+                v-if="authStore.isTeacher() && route.params.user_id == 0">Vorlage</span><span
+                v-else-if="authStore.isTeacher() && route.params.user_id != 0">{{ state.fullUserName }}</span><span
+                v-else-if="!authStore.isTeacher()">Abgabe: {{ new
+                  Date(state.deadline).toLocaleString("default", {
+                    weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+                  }) }}</span></div>
           </ul>
         </div>
       </div>
@@ -913,6 +926,13 @@ function prepareHomeworkModal() {
 </template>
 
 <style scoped>
+.homework-badge {
+  border: 1px solid #666;
+  color: #999;
+  border-radius: 7px;
+  white-space: pre;
+}
+
 .btn-round {
   padding: 0;
   border: 0px;

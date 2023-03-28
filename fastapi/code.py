@@ -130,8 +130,8 @@ def saveDescription(updateDescription: models_and_schemas.updateDescription, pro
     return result
 
 
-@ code.get('/getProjectInfo/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
-def getProjectName(project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
+@ code.get('/getProjectInfo/{project_uuid}/{user_id}', dependencies=[Depends(auth.oauth2_scheme)])
+def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
 
@@ -140,7 +140,15 @@ def getProjectName(project_uuid: str = Path(), db: Session = Depends(database_co
     if homework == None:
         isHomework = False
 
-    return {"name": project.name, "description": project.description, "isHomework": isHomework}
+    result = {"name": project.name,
+              "description": project.description, "isHomework": isHomework}
+
+    if isHomework:
+        user = crud.get_user_by_id(db=db, id=user_id)
+        result['fullusername'] = user.full_name
+        result['deadline'] = homework.deadline
+
+    return result
 
 
 @ code.post('/saveFileChanges/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
