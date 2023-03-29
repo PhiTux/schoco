@@ -4,6 +4,7 @@ import { router } from './router'
 import App from './App.vue'
 import "bootstrap/dist/css/bootstrap.min.css"
 import "bootstrap"
+import "./assets/css/main.css"
 import { VAceEditor } from 'vue3-ace-editor';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon, FontAwesomeLayers } from '@fortawesome/vue-fontawesome'

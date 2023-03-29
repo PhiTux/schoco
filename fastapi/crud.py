@@ -1,3 +1,4 @@
+import json
 from sqlmodel import Session, select
 from sqlalchemy import exc
 import auth
@@ -349,3 +350,19 @@ def get_homework_by_template_uuid(db: Session, uuid: str):
     homework = db.exec(select(models_and_schemas.Homework).where(
         models_and_schemas.Homework.template_project_id == project.id)).first()
     return homework
+
+
+def save_test_result(db: Session, uuid: str, user_id: int, result: dict):
+    editing_homework = get_editing_homework_by_uuid_and_user_id(
+        db=db, uuid=uuid, user_id=user_id)
+    editing_homework.submission = json.dumps({
+        'passed_tests': result['passed_tests'], 'failed_tests': result['failed_tests']})
+
+    try:
+        db.add(editing_homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True

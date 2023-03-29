@@ -123,8 +123,8 @@ def loadAllFiles(project_uuid: str = Path(), user_id: int = Path(), db: Session 
     return res
 
 
-@ code.post('/updateDescription/{project_uuid}', dependencies=[Depends(project_access_allowed)])
-def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
+@ code.post('/updateDescription/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
     result = crud.update_description(
         db=db, project_uuid=project_uuid, description=updateDescription.description)
     return result
@@ -143,7 +143,7 @@ def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Sessio
     result = {"name": project.name,
               "description": project.description, "isHomework": isHomework}
 
-    if isHomework:
+    if isHomework and user_id != 0:
         user = crud.get_user_by_id(db=db, id=user_id)
         result['fullusername'] = user.full_name
         result['deadline'] = homework.deadline
@@ -231,6 +231,12 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
 @ code.post('/prepareCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = Path(), user_id: int = Path()):
 
+    # separately load Tests.java from homework-template if I'm watching a pupil's solution (user_id != 0)
+    if user_id != 0:
+        tests = git.download_Tests_java(project_uuid=project_uuid)
+        filesList.files.append(models_and_schemas.File(
+            path="Tests.java", content=tests))
+
     # write files to container-mount and return WS-URL
     c = cookies_api.prepareCompile(filesList.files)
 
@@ -297,6 +303,9 @@ def startTest(startTest: models_and_schemas.startTest, background_tasks: Backgro
     if user_id != 0:
         crud.increase_tests(db=db, uuid=project_uuid, user_id=user_id)
 
+    crud.save_test_result(db=db, uuid=project_uuid,
+                          user_id=user_id, result=result)
+
     background_tasks.add_task(
         cookies_api.kill_n_create, startTest.container_uuid)
 
@@ -343,7 +352,6 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
 
     if not crud.create_homework(db,
                                 homework=homework):
-        print("huhu")
         git.remove_repo(project_uuid=template_project_uuid)
         crud.remove_project_by_uuid(db=db, project_uuid=new_project.uuid)
         return False
@@ -394,7 +402,7 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
     template_project = crud.get_project_by_id(
         db=db, id=homework.template_project_id)
 
-    result = {"name": template_project.name, "course_name": homework.course.name,
+    result = {"name": template_project.name, "uuid": template_project.uuid, "course_name": homework.course.name,
               "course_color": homework.course.color, "course_font_dark": homework.course.fontDark}
 
     # get each user's results
@@ -408,7 +416,7 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
         for eh in editing_homework:
             if p.id == eh.owner_id:
                 found = True
-                pupils_results.append({"name": p.full_name, "username": p.username, "uuid": template_project.uuid, "branch": p.id, "best_result": eh.best_submission,
+                pupils_results.append({"name": p.full_name, "username": p.username, "uuid": template_project.uuid, "branch": p.id, "result": eh.submission,
                                       "compilations": eh.number_of_compilations, "runs": eh.number_of_runs, "tests": eh.number_of_tests})
                 break
 

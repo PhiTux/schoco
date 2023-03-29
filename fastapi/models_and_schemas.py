@@ -87,9 +87,8 @@ class EditingHomework(SQLModel, table=True):
     owner_id: int = Field(
         default=None, foreign_key="user.id")  # owner_id = branch_name
 
-    best_submission: Optional[str] = ""
-    latest_submission: Optional[str] = ""
-    # each submission having the structure {commit: ..., list_of_files: ..., submission_result: ...}
+    submission: Optional[str] = ""
+    # submission having the structure {passed_tests: ..., failed_tests: ...}
 
     number_of_compilations: Optional[int] = 0
     number_of_runs: Optional[int] = 0

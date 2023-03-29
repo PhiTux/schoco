@@ -116,6 +116,24 @@ def load_all_meta_content(project_uuid: str, id: int, path: str):
     return content
 
 
+def download_Tests_java(project_uuid):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL,
+             f"{api_base_url()}/{settings.GITEA_USERNAME}/{project_uuid}/raw/branch/main/Tests.java")
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    if not (res_code >= 200 and res_code < 300):
+        raise HTTPException(
+            status_code=500, detail="Could not load contents from repo!")
+
+    return buffer.getvalue().decode('utf-8')
+
+
 def download_file_by_url(url: str):
     buffer = BytesIO()
     c = pycurl.Curl()

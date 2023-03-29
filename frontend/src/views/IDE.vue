@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeMount, reactive, watch, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Toast, Popover } from "bootstrap";
+import { Toast, Popover, Modal } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { useAuthStore } from "../stores/auth.store.js";
@@ -36,7 +36,7 @@ let state = reactive({
   results: "",
   receivedWS: false,
   sendMessage: "",
-  isHomework: true,
+  isHomework: false,
   fullUserName: "",
   deadline: ""
 });
@@ -144,6 +144,13 @@ onBeforeMount(() => {
         if (state.isHomework) {
           state.fullUserName = response.data.fullusername;
           state.deadline = response.data.deadline
+
+          // show warning about editing the template
+          if (route.params.user_id == 0) {
+            //var elem = document.getElementById("templateWarningModal");
+            var modal = new Modal(document.getElementById('templateWarningModal'));
+            modal.show();
+          }
         }
       }
     },
@@ -535,7 +542,7 @@ function saveDescription() {
   if (state.isSavingDescription) return;
   state.isSavingDescription = true
 
-  CodeService.updateDescription(route.params.project_uuid, state.newProjectDescription).then(
+  CodeService.updateDescription(route.params.project_uuid, route.params.user_id, state.newProjectDescription).then(
     (response) => {
       if (response.data) {
         state.projectDescription = state.newProjectDescription;
@@ -659,6 +666,37 @@ function prepareHomeworkModal() {
     </div>
 
     <!-- Modals -->
+    <div class="modal fade" id="templateWarningModal" tabindex="-1" aria-labelledby="templateWarningModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content dark-text">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Änderung der Vorlage kann zu Inkonsistenzen führen!</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Sie bearbeiten gerade die <u>Vorlage</u> einer Hausaufgabe! Wenn Sie Änderungen am <b>Code</b> durchführen und
+            speichern,
+            dann kann dies zu Inkonsistenzen bei den verschiedenen SuS führen:
+            <ul>
+              <li>Bei SuS, welche diese Hausaufgabe bereits bearbeiten, werden diese Änderungen <b>nicht ankommen</b>,
+                solange sie die HA nicht neu starten.</li>
+              <li>SuS, welche diese Hausaufgabe noch nicht gestartet haben, werden beim erstmaligen Öffnen immer den zu
+                diesem Zeitpunkt aktuellsten Code dieser Vorlage verwenden.</li>
+            </ul>
+            Änderungen des <b>Titels oder der Projektbeschreibung</b> sind hingegen kein Problem, können jederzeit
+            geändert
+            werden und werden direkt bei den SuS
+            aktualisiert.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="modal fade" id="createHomeworkModal" tabindex="-1" aria-labelledby="createHomeworkModalLabel"
       aria-hidden="true">
       <div class="modal-dialog modal-lg">

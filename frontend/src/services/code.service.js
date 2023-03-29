@@ -32,8 +32,8 @@ class CodeService {
         return axiosAuth.get(`getProjectInfo/${project_uuid}/${user_id}`)
     }
 
-    updateDescription(project_uuid, description) {
-        return axiosAuth.post(`updateDescription/${project_uuid}`, { 'description': description })
+    updateDescription(project_uuid, user_id, description) {
+        return axiosAuth.post(`updateDescription/${project_uuid}/${user_id}`, { 'description': description })
     }
 
     saveFileChanges(changes, project_uuid, user_id) {

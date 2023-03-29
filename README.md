@@ -38,8 +38,8 @@ Even a completed task just means, that the specific base-work is done, but that 
     - [x] Compilation
     - [x] Running/Executing (Input and output can be send via Websocket ✔)
     - [x] JUnit-Testing
-- [ ] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
-- [ ] Save amount of compilations, executions,... per project and make them visible
+- [x] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
+- [x] Save amount of compilations, executions,... per project and make them visible
 - [ ] Mark projects as templates (when being a teacher)
 - [ ] Import/export projects/templates as zip
 
