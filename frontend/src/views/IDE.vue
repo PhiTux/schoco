@@ -137,7 +137,6 @@ onBeforeMount(() => {
   CodeService.getProjectInfo(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.status == 200) {
-        console.log(response.data)
         state.isHomework = response.data.isHomework;
         state.projectName = response.data.name;
         state.projectDescription = response.data.description;
@@ -332,7 +331,6 @@ function compile() {
 
   CodeService.prepareCompile(projectFiles, route.params.project_uuid, route.params.user_id).then(
     (response) => {
-      console.log(response.data);
 
       if (response.data.success == false) {
         state.isCompiling = false;
@@ -363,7 +361,6 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
   CodeService.startCompile(ip, port, container_uuid, project_uuid, user_id).then(
     (response) => {
       state.isCompiling = false;
-      console.log(response.data);
       if (response.data.status === "connect_error") {
         results.value =
           'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';

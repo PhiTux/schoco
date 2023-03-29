@@ -19,7 +19,6 @@ let state = reactive({
 onBeforeMount(() => {
     CodeService.getHomeworkInfo(route.params.id).then(
         response => {
-            console.log(response.data)
             state.name = response.data.name;
             state.course_name = response.data.course_name;
             state.course_color = response.data.course_color;
