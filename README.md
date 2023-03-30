@@ -98,7 +98,7 @@ Probably not necessary - not even in production:
 5. Create docker network for schoco: `docker network create schoco` 
 6. Set the `DOCKER_GROUP_ID` env variable: `export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)`
 7. Make sure you have a `data/` directory in the repo root. This is where the sqlite db is stored.
-8. Start schoco with `docker-compose up -d`
+8. Start schoco with `docker compose up -d`
 9. Schoco is available under [http://localhost](http://localhost)
 
 > **On the first startup** you will need to add the gitea user using the following command
