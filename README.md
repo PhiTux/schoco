@@ -93,8 +93,8 @@ Probably not necessary - not even in production:
 
 1. Build fastapi image: `cd fastapi && docker build -t phitux/schoco-backend:latest .`
 2. Compile the cookies API: `cd cookies/api && javac Java_api.java`
-3. Build cookies worker image: `cd cookies && docker build -t phitux/cookies`
-4. Build frontend image: `docker build . -t phitux/schoco-nginx:latest`
+3. Build cookies worker image: `cd cookies && docker build -t phitux/cookies .`
+4. Build frontend image: `docker build -t phitux/schoco-nginx:latest .`
 5. Create docker network for schoco: `docker network create schoco` 
 6. Set the `DOCKER_GROUP_ID` env variable: `export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)`
 7. Make sure you have a `data/` directory in the repo root. This is where the sqlite db is stored.
@@ -102,5 +102,5 @@ Probably not necessary - not even in production:
 9. Schoco is available under [http://localhost](http://localhost)
 
 > **On the first startup** you will need to add the gitea user using the following command
-> `docker exec --user 1000 gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
+> `docker exec --user 1000 schoco-gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
 

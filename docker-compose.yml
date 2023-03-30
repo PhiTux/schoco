@@ -10,9 +10,9 @@ services:
     container_name: schoco-backend
     user: "1000:1000"
     group_add:
-      - ${DOCKER_GROUP_ID} 
+      - ${DOCKER_GROUP_ID}
     environment:
-      - FULL_DATA_PATH=/home/mk/git/schoco/data
+      - FULL_DATA_PATH=/path/to/my/data
       - MAX_CONTAINERS=4
       - SECRET_KEY=secret
       - TEACHER_KEY=teacherkey

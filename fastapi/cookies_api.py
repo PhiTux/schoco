@@ -3,6 +3,7 @@ import json
 import queue
 import time
 import traceback
+import models_and_schemas
 from typing import List
 from pathlib import Path
 import os
@@ -83,7 +84,7 @@ newContainers = m.Queue()  # maxsize=settings.MAX_CONTAINERS)
 runningContainers = ContainerList()
 
 
-def writeFiles(files: List[str], uuid: str):
+def writeFiles(files: models_and_schemas.filesList.files, uuid: str):
     dir = os.path.join(data_path, str(uuid))
 
     # check if dir is already existing -> delete content
@@ -190,7 +191,7 @@ def fillNewContainersQueue():
     refillNewContainersQueue()
 
 
-def prepareCompile(files: List[str]):
+def prepareCompile(files: models_and_schemas.filesList.files):
     # get next container out of queue - return if no new one is available after 2 seconds.
     # prepare the container and place it inside runningContainers
     try:
