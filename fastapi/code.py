@@ -302,9 +302,8 @@ def startTest(startTest: models_and_schemas.startTest, background_tasks: Backgro
 
     if user_id != 0:
         crud.increase_tests(db=db, uuid=project_uuid, user_id=user_id)
-
-    crud.save_test_result(db=db, uuid=project_uuid,
-                          user_id=user_id, result=result)
+        crud.save_test_result(db=db, uuid=project_uuid,
+                              user_id=user_id, result=result)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startTest.container_uuid)
