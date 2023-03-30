@@ -84,7 +84,7 @@ newContainers = m.Queue()  # maxsize=settings.MAX_CONTAINERS)
 runningContainers = ContainerList()
 
 
-def writeFiles(files: models_and_schemas.filesList.files, uuid: str):
+def writeFiles(filesList: models_and_schemas.filesList, uuid: str):
     dir = os.path.join(data_path, str(uuid))
 
     # check if dir is already existing -> delete content
@@ -100,7 +100,7 @@ def writeFiles(files: models_and_schemas.filesList.files, uuid: str):
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
 
     # write files
-    for f in files:
+    for f in filesList.files:
         output_file = Path(os.path.join(dir, f.path))
         output_file.parent.mkdir(exist_ok=True, parents=True)
         output_file.write_text(f.content)
@@ -191,7 +191,7 @@ def fillNewContainersQueue():
     refillNewContainersQueue()
 
 
-def prepareCompile(files: models_and_schemas.filesList.files):
+def prepareCompile(filesList: models_and_schemas.filesList):
     # get next container out of queue - return if no new one is available after 2 seconds.
     # prepare the container and place it inside runningContainers
     try:
@@ -203,7 +203,7 @@ def prepareCompile(files: models_and_schemas.filesList.files):
     print("prepared: " + c['uuid'] + " with port: " + str(c['port']))
 
     # write files to filesystem
-    writeFiles(files, c['uuid'])
+    writeFiles(filesList, c['uuid'])
 
     return c
 

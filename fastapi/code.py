@@ -238,7 +238,7 @@ def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = 
             path="Tests.java", content=tests))
 
     # write files to container-mount and return WS-URL
-    c = cookies_api.prepareCompile(filesList.files)
+    c = cookies_api.prepareCompile(filesList)
 
     return c
 
