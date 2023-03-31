@@ -672,8 +672,8 @@ function prepareHomeworkModal() {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Sie bearbeiten gerade die <u>Vorlage</u> einer Hausaufgabe! Wenn Sie Änderungen am <b>Code</b> durchführen und
-            speichern,
+            Du bearbeitest gerade die <u>Vorlage</u> einer Hausaufgabe! Wenn du Änderungen am <b>Code</b> durchführst und
+            speicherst,
             dann kann dies zu Inkonsistenzen bei den verschiedenen SuS führen:
             <ul>
               <li>Bei SuS, welche diese Hausaufgabe bereits bearbeiten, werden diese Änderungen <b>nicht ankommen</b>,

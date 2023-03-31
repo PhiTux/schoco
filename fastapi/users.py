@@ -127,6 +127,11 @@ def get_secured(db: Session = Depends(database_config.get_db)):
     return "secured"
 
 
-@ users.post('/teacher', dependencies=[Depends(auth.check_teacher)])
-def get_teacher(db: Session = Depends(database_config.get_db)):
-    return "teachers only"
+@users.post('/changeName', dependencies=[Depends(auth.check_teacher)])
+def change_name(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
+    return crud.change_name(db=db, user_id=changeName.user_id, name=changeName.name)
+
+
+@users.post('/changeUsername', dependencies=[Depends(auth.check_teacher)])
+def change_username(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
+    return crud.change_username(db=db, user_id=changeName.user_id, name=changeName.name)

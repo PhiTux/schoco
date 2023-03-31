@@ -124,6 +124,11 @@ class UserById(BaseModel):
     user_id: int
 
 
+class changeName(BaseModel):
+    user_id: int
+    name: str
+
+
 class newProject(BaseModel):
     projectName: str
     projectDescription: str

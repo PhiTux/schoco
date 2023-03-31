@@ -113,6 +113,30 @@ def remove_user(db: Session, user: models_and_schemas.User):
     return True
 
 
+def change_name(db: Session, user_id: str, name: str):
+    user = get_user_by_id(db=db, id=user_id)
+    user.full_name = name
+    try:
+        db.add(user)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
+
+
+def change_username(db: Session, user_id: str, name: str):
+    user = get_user_by_id(db=db, id=user_id)
+    user.username = name
+    try:
+        db.add(user)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
+
+
 def create_project(db: Session, project: models_and_schemas.Project):
     try:
         db.add(project)

@@ -32,7 +32,22 @@ let state = reactive({
   deleteUserFullname: "",
   deleteUserUsername: "",
   deleteUserId: 0,
+  selectedUser: false,
+  edit_user_id: 0,
+  edit_user_property: "",
+  edited_name: "",
+  changingName: false,
+  edited_username: "",
+  changingUsername: false,
 });
+
+function selectUser(user) {
+  state.selectedUser = user;
+}
+
+function unselectUser() {
+  state.selectedUser = false
+}
 
 function preparePupilModal() {
   while (newPupils.length) newPupils.pop();
@@ -379,6 +394,72 @@ function showNewPassword() {
 function hideNewPassword() {
   state.showNewPassword = false;
 }
+
+function edit_user(id, property, content) {
+  state.edit_user_id = id;
+  state.edit_user_property = property;
+  if (property === "name") {
+    state.edited_name = content
+  } else if (property === "username") {
+    state.edited_username = content
+  }
+}
+
+function abort_edit_user() {
+  state.edit_user_id = 0;
+  state.edit_user_property = ""
+}
+
+function change_name(id) {
+  state.changingName = true
+  UserService.changeName(id, state.edited_name).then(
+    response => {
+      if (response.data) {
+        for (let i = 0; i < allUsers.value.length; i++) {
+          if (allUsers.value[i].id == id) {
+            allUsers.value[i].full_name = state.edited_name
+            break
+          }
+        }
+
+      }
+      state.changingName = false
+      abort_edit_user()
+    },
+    error => {
+      state.changingName = false
+      abort_edit_user()
+      console.log(error.response)
+    })
+}
+
+function change_username(id) {
+  state.changingUsername = true
+  UserService.changeUsername(id, state.edited_username).then(
+    response => {
+      if (response.data) {
+        for (let i = 0; i < allUsers.value.length; i++) {
+          if (allUsers.value[i].id == id) {
+            allUsers.value[i].username = state.edited_username
+            break
+          }
+        }
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastUsernameChangeError")
+        );
+        toast.show();
+      }
+
+      state.changingUsername = false
+      abort_edit_user()
+    },
+    error => {
+      state.changingUsername = false
+      abort_edit_user()
+      console.log(error.response)
+    })
+}
 </script>
 
 <template>
@@ -394,6 +475,13 @@ function hideNewPassword() {
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">Fehler beim Ändern des Passworts.</div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-danger border-0" id="toastUsernameChangeError" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">Fehler beim Ändern des Usernamens. Vielleicht existiert er bereits.</div>
       </div>
     </div>
 
@@ -789,14 +877,52 @@ function hideNewPassword() {
         </tr>
       </thead>
       <tbody>
-        <tr class="py-1" v-for="x in allUsersFilteredSorted">
+        <tr class="py-1" v-for="x in allUsersFilteredSorted" @mouseover="selectUser(x)" @mouseleave="unselectUser()">
           <th scope="row">{{ x.id }}</th>
-          <td>{{ x.full_name }}</td>
-          <td>{{ x.username }}</td>
+          <td>
+            <div v-if="!(state.edit_user_id == x.id && state.edit_user_property === 'name')">{{ x.full_name
+            }} <a style="cursor: pointer" @click.prevent="edit_user(x.id, 'name', x.full_name)"
+                :class="{ invisible: x != state.selectedUser }"><font-awesome-icon style="color: var(--bs-secondary);"
+                  icon="fa-solid fa-pencil" /></a></div>
+            <!-- edit-area -->
+            <div v-else class="col-auto">
+              <input class="form-control w-auto d-inline" type="text" v-model="state.edited_name">
+              <a v-if="!state.changingName" class="mx-2" @click.prevent="change_name(x.id)"
+                style="color: green; cursor: pointer;">
+                <font-awesome-icon icon="fa-check" />
+              </a>
+              <a v-if="!state.changingName" @click.prevent="abort_edit_user()" style="color: red; cursor: pointer;">
+                <font-awesome-icon icon="fa-xmark" />
+              </a>
+              <div v-if="state.changingName" class="spinner-border" role="status">
+                <span class="visually-hidden"></span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div v-if="!(state.edit_user_id == x.id && state.edit_user_property === 'username')">{{ x.username
+            }} <a style="cursor: pointer" @click.prevent="edit_user(x.id, 'username', x.username)"
+                :class="{ invisible: x != state.selectedUser }"><font-awesome-icon style="color: var(--bs-secondary);"
+                  icon="fa-solid fa-pencil" /></a></div>
+            <!-- edit-area -->
+            <div v-else class="col-auto">
+              <input class="form-control w-auto d-inline" type="text" v-model="state.edited_username">
+              <a v-if="!state.changingUsername" class="mx-2" @click.prevent="change_username(x.id)"
+                style="color: green; cursor: pointer;">
+                <font-awesome-icon icon="fa-check" />
+              </a>
+              <a v-if="!state.changingUsername" @click.prevent="abort_edit_user()" style="color: red; cursor: pointer;">
+                <font-awesome-icon icon="fa-xmark" />
+              </a>
+              <div v-if="state.changingUsername" class="spinner-border" role="status">
+                <span class="visually-hidden"></span>
+              </div>
+            </div>
+          </td>
           <td>
             <CourseBadge v-for="c in x.courses" :color="c.color" :font-dark="c.fontDark" :name="c.name"
               :is-deletable="true" @remove="removeCourseFromUser(x.id, c.id)" />
-            <div class="btn-group">
+            <div class="btn-group" v-if="x.role === 'pupil'">
               <a class="btn-round btn" data-bs-toggle="dropdown">
                 <font-awesome-layers class="fa-lg">
                   <font-awesome-icon icon="fa-circle" style="color: var(--bs-secondary)" />
@@ -814,7 +940,7 @@ function hideNewPassword() {
               </ul>
             </div>
           </td>
-          <td>{{ x.role }}</td>
+          <td><span v-if="x.role === 'teacher'">👨‍🏫</span><span v-else>📚</span> {{ x.role }}</td>
           <td>
             <a class="btn-round btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal"
               @click.prevent="openModalChangePassword(x.id)">
@@ -842,6 +968,14 @@ function hideNewPassword() {
 </template>
 
 <style scoped>
+.invisible {
+  visibility: hidden;
+}
+
+/* table>tbody>tr:hover>#name>a {
+  display: inline;
+} */
+
 .round-left {
   border-top-left-radius: var(--bs-border-radius-pill);
   border-bottom-left-radius: var(--bs-border-radius-pill);

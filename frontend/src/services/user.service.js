@@ -61,6 +61,14 @@ class UserService {
     deleteUser(user_id) {
         return axiosAuth.post('deleteUser', { 'user_id': user_id })
     }
+
+    changeName(user_id, name) {
+        return axiosAuth.post('changeName', {'user_id': user_id, 'name': name})
+    }
+
+    changeUsername(user_id, username) {
+        return axiosAuth.post('changeUsername', {'user_id': user_id, 'name': username})
+    }
 }
 
 export default new UserService()
