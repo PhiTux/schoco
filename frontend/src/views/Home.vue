@@ -181,7 +181,7 @@ function deleteHomework(id) {
     <a class="btn btn-outline-success my-3" type="submit" href="/#/newProject">
       Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
     </a>
-    <h1>Aktuelle Hausaufgaben</h1>
+    <h1 v-if="state.new_homework.length">Aktuelle Hausaufgaben</h1>
     <div class="d-flex align-content-start flex-wrap">
       <!-- if teacher: -->
       <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.new_homework" isHomework isTeacher :name="h.name"
@@ -194,7 +194,7 @@ function deleteHomework(id) {
         :deadline="h.deadline" @deleteProject="deleteProject" />
     </div>
 
-    <h1>Frühere Hausaufgaben</h1>
+    <h1 v-if="state.old_homework.length">Frühere Hausaufgaben</h1>
     <div class="d-flex align-content-start flex-wrap">
       <!-- if teacher: -->
       <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.old_homework" isHomework isOld isTeacher :name="h.name"
@@ -207,7 +207,7 @@ function deleteHomework(id) {
         :deadline="h.deadline" @deleteProject="deleteProject" />
     </div>
 
-    <h1>Meine Projekte</h1>
+    <h1 v-if="state.myProjects.length">Meine Projekte</h1>
     <div class="d-flex align-content-start flex-wrap">
       <ProjectCard v-for="p in state.myProjects" :name="p.name" :description="p.description" :uuid="p.uuid"
         @deleteProject="deleteProject" />
