@@ -1,5 +1,12 @@
-> 🛠️️ This project is pre-alpha and under heavy development! It's planned to have it 'finished' by ~September 2023
+> 🛠️️ This project is close to alpha-testing (April 2023) and under heavy development! It's planned to have it 'finished' by ~September 2023
 
+# Chapters
+- [What is schoco? {🍫}](#what-is-schoco-)
+  - [Planned main-features](#planned-main-features)
+  - [Architecture](#architecture)
+  - [Progress](#progress)
+- [Start developing](#start-developing)
+- [Build and run schoco locally](#build-and-run-schoco-locally)
 
 # What is schoco? {🍫}
 
@@ -27,6 +34,8 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 
 ## Progress
+**Progress is far (around 80% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can already see and view all pupils solutions and their results of JUnit-Tests ✨**
+
 Even a completed task just means, that the specific base-work is done, but that the feature might still need some fine tuning...
 - [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
 - [x] Classroom-management (Creation of courses and assigning pupils to courses)
@@ -83,9 +92,10 @@ For Websocket-communication, there must always be running nginx (even during dev
 
 
 ## 5) Backend ('Cookies' for compilation/execution)
-**This chapter is currently WIP and may receive large changes!**
 
-Probably not necessary - not even in production:  
+Considering nproc, the separate schoco-user might get interesting!?
+
+Otherwise not necessary (neither during developing nor production): 
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
 
 
