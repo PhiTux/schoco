@@ -216,7 +216,7 @@ def get_teachers_homework_by_username(db: Session, username: str):
     project_ids = db.exec(select(models_and_schemas.Project.id).join(
         models_and_schemas.User).where(models_and_schemas.User.username == username)).all()
     homework = db.exec(select(models_and_schemas.Homework).where(
-        models_and_schemas.Homework.original_project_id.in_(project_ids))).all()
+        models_and_schemas.Homework.template_project_id.in_(project_ids))).all()
     return homework
 
 
@@ -384,6 +384,46 @@ def save_test_result(db: Session, uuid: str, user_id: int, result: dict):
 
     try:
         db.add(editing_homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def remove_all_editing_homework_by_homework_id(db: Session, id: int):
+    editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+        models_and_schemas.EditingHomework.homework_id == id)).all()
+    for eh in editing_homework:
+        db.delete(eh)
+    try:
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def remove_homework_by_id(db: Session, id: int):
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.id == id)).first()
+    db.delete(homework)
+    try:
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def remove_editing_homework_by_uuid_and_user_id(db: Session, uuid: str, user_id: int):
+    editing_homework = get_editing_homework_by_uuid_and_user_id(
+        db=db, uuid=uuid, user_id=user_id)
+    db.delete(editing_homework)
+    try:
         db.commit()
     except Exception as e:
         print(e)

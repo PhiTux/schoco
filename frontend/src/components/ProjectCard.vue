@@ -39,19 +39,43 @@ defineProps({
                 {{ description }}
             </p>
             <!-- :href="'#/startHomework/' + id" -->
-            <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
-                class="btn btn-primary">🌟Hausaufgabe
-                beginnen</a>
-            <a v-else-if="!isTeacher && isHomework && isEditing" :href="'#/ide/' + uuid + '/' + branch"
-                class="btn btn-primary">Hausaufgabe
-                bearbeiten</a>
-            <a v-else-if="isTeacher && isHomework" :href="'#/homework/' + id" class="btn btn-primary">Details zeigen</a>
-            <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
+            <div class="d-flex align-items-center">
+                <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
+                    class="btn btn-primary">🌟Hausaufgabe
+                    beginnen</a>
+                <a v-else-if="!isTeacher && isHomework && isEditing" :href="'#/ide/' + uuid + '/' + branch"
+                    class="btn btn-primary">Hausaufgabe
+                    bearbeiten</a>
+                <a v-else-if="isTeacher && isHomework" :href="'#/homework/' + id" class="btn btn-primary">Details zeigen</a>
+                <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
+
+                <!-- add a button to delete a project -->
+                <a v-if="isTeacher && isHomework" @click.prevent="$emit('deleteHomework', id)"
+                    class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a>
+                <a v-else-if="(isTeacher && !isHomework) || (!isTeacher && !(isHomework && !isEditing))"
+                    @click.prevent="$emit('deleteProject', uuid, branch)" class="deleteButton ms-auto"><font-awesome-icon
+                        icon="fa-trash" /></a>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.card:hover .deleteButton {
+    display: block;
+}
+
+.card .deleteButton {
+    display: none;
+    cursor: pointer;
+    color: rgb(54, 54, 54);
+    transition: ease 0.3s;
+}
+
+.deleteButton:hover {
+    color: red;
+}
+
 .old_homework {
     border-color: darkorange !important;
     color: lightgray !important;

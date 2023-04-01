@@ -582,10 +582,17 @@ function createHomework() {
       var modal = Modal.getInstance(elem);
       modal.hide();
 
-      const toast = new Toast(
-        document.getElementById("toastHomeworkCreationSuccess")
-      );
-      toast.show();
+      if (response.data) {
+        const toast = new Toast(
+          document.getElementById("toastHomeworkCreationSuccess")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastHomeworkCreationError")
+        );
+        toast.show();
+      }
     }, (error) => {
       // close modal
       var elem = document.getElementById("createHomeworkModal");

@@ -259,12 +259,23 @@ function addNewCourse() {
         );
         toast.show();
 
+        //close modal #addCoursesModal
+        var elem = document.getElementById("addCoursesModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+
         getAllCourses();
       } else {
         const toast = new Toast(
           document.getElementById("toastErrorCourseCreated")
         );
         toast.show();
+
+        //close modal #addCoursesModal
+        var elem = document.getElementById("addCoursesModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+
         console.log(response.data);
       }
     },
@@ -273,6 +284,12 @@ function addNewCourse() {
         document.getElementById("toastErrorCourseCreated")
       );
       toast.show();
+
+      //close modal #addCoursesModal
+      var elem = document.getElementById("addCoursesModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
       console.log(error);
     }
   );

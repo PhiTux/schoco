@@ -83,6 +83,14 @@ class CodeService {
     getHomeworkInfo(id) {
         return axiosAuth.post('getHomeworkInfo', {'id': id})
     }
+
+    deleteProject(uuid, user_id) {
+        return axiosAuth.post(`deleteProject/${uuid}`, {'user_id': user_id})
+    }
+
+    deleteHomework(id) {
+        return axiosAuth.post('deleteHomework', {'id': id})
+    }
 }
 
 export default new CodeService()

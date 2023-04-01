@@ -344,6 +344,7 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
 
     # prepare to create Homework-entry
     p = crud.get_project_by_project_uuid(db, template_project_uuid)
+
     template_project_id = p.id
 
     homework = models_and_schemas.Homework(course_id=create_homework.course_id, template_project_id=template_project_id,
@@ -426,3 +427,69 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
     result['pupils_results'] = pupils_results
 
     return result
+
+
+@code.post('/deleteHomework', dependencies=[Depends(auth.check_teacher)])
+def deleteHomework(homework_id: models_and_schemas.homeworkId, db: Session = Depends(database_config.get_db)):
+    homework = crud.get_homework_by_id(db=db, id=homework_id.id)
+    if homework == None:
+        return False
+
+    template_project = crud.get_project_by_id(
+        db=db, id=homework.template_project_id)
+    if template_project == None:
+        return False
+
+    # delete git repo
+    if not git.remove_repo(project_uuid=template_project.uuid):
+        print("Error on deleting git repo: " + template_project.uuid)
+
+    # delete db template_project
+    if not crud.remove_project_by_uuid(db=db, project_uuid=template_project.uuid):
+        print("Error on deleting project: " + template_project.uuid)
+
+    # delete db editing_homework
+    if not crud.remove_all_editing_homework_by_homework_id(
+            db=db, id=homework_id.id):
+        print("Error on deleting editing_homeworks of homework_id: " + homework_id.id)
+
+    # delete db homework
+    if not crud.remove_homework_by_id(db=db, id=homework_id.id):
+        print("Error on deleting homework: " + homework_id.id)
+        return False
+
+    return True
+
+
+@ code.post('/deleteProject/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
+def deleteProject(user_id: models_and_schemas.UserById, project_uuid: str = Path(), db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    # delete db project
+    # if user_id is 0: check if user is owner
+    if user_id.user_id == 0:
+        project = crud.get_project_by_project_uuid(
+            db=db, project_uuid=project_uuid)
+        if project == None:
+            return False
+
+        user = crud.get_user_by_username(db=db, username=username)
+        if user.id != project.owner_id:
+            return False
+
+        # remove project from db
+        if not crud.remove_project_by_uuid(db=db, project_uuid=project_uuid):
+            return False
+
+        # delete git repo
+        if not git.remove_repo(project_uuid=project_uuid):
+            return False
+
+    else:
+        # remove editing_homework from db
+        if not crud.remove_editing_homework_by_uuid_and_user_id(db=db, uuid=project_uuid, user_id=user_id.user_id):
+            return False
+
+        # delete git branch
+        if not git.remove_branch(uuid=project_uuid, branch=user_id.user_id):
+            return False
+
+    return True
