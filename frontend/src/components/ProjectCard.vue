@@ -50,11 +50,11 @@ defineProps({
                 <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
 
                 <!-- add a button to delete a project -->
-                <a v-if="isTeacher && isHomework" @click.prevent="$emit('deleteHomework', id)"
+                <a v-if="isTeacher && isHomework" @click.prevent="$emit('deleteHomework', id, name)"
                     class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a>
                 <a v-else-if="(isTeacher && !isHomework) || (!isTeacher && !(isHomework && !isEditing))"
-                    @click.prevent="$emit('deleteProject', uuid, branch)" class="deleteButton ms-auto"><font-awesome-icon
-                        icon="fa-trash" /></a>
+                    @click.prevent="$emit('deleteProject', uuid, branch, name)"
+                    class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a>
             </div>
         </div>
     </div>

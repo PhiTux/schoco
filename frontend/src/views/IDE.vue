@@ -146,7 +146,6 @@ onBeforeMount(() => {
 
           // show warning about editing the template
           if (route.params.user_id == 0) {
-            //var elem = document.getElementById("templateWarningModal");
             var modal = new Modal(document.getElementById('templateWarningModal'));
             modal.show();
           }
