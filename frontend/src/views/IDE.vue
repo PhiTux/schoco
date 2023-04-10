@@ -38,7 +38,8 @@ let state = reactive({
   sendMessage: "",
   isHomework: false,
   fullUserName: "",
-  deadline: ""
+  deadline: "",
+  websocket_open: false,
 });
 
 let homework = reactive({
@@ -441,7 +442,11 @@ function connectWebsocket(id) {
   };
 
   ws.onopen = function (event) {
-    console.log("Successfully connected to websocket server...");
+    state.websocket_open = true;
+  };
+
+  ws.onclose = function (event) {
+    state.websocket_open = false;
   };
 }
 
@@ -952,10 +957,11 @@ function prepareHomeworkModal() {
             <div class="input align-items-center d-flex flex-row">
               <label for="inputMessage" class="px-2 col-form-label">Eingabe:</label>
               <!-- <div> -->
-              <input class="rounded flex-fill" @keyup.enter="sendMessage()" type="text" id="inputMessage"
-                v-model="state.sendMessage" placeholder="Eingabe (Entertaste zum Senden)" />
+              <input class="rounded flex-fill" :disabled="!state.websocket_open" @keyup.enter="sendMessage()" type="text"
+                id="inputMessage" v-model="state.sendMessage" placeholder="Eingabe (Entertaste zum Senden)" />
               <!-- </div> -->
-              <button @click.prevent="sendMessage()" type="button" class="btn btn-light btn-sm mx-2">
+              <button :disabled="!state.websocket_open" @click.prevent="sendMessage()" type="button"
+                class="btn btn-light btn-sm mx-2" id="messageSendButton">
                 Senden
               </button>
             </div>
@@ -967,6 +973,14 @@ function prepareHomeworkModal() {
 </template>
 
 <style scoped>
+#inputMessage {
+  transition: 0.4s;
+}
+
+#messageSendButton {
+  transition: 0.4s;
+}
+
 .homework-badge {
   border: 1px solid #666;
   color: #999;

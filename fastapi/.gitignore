@@ -2,3 +2,5 @@ __pycache__/
 sql_app.db
 data/*
 *.class
+.envrc*
+..envrc.un~
