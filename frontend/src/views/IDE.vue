@@ -21,6 +21,9 @@ const route = useRoute();
 
 let state = reactive({
   projectName: "",
+  newProjectName: "",
+  editingProjectName: false,
+  isSavingProjectName: false,
   projectDescription: "",
   newProjectDescription: "",
   isSavingDescription: false,
@@ -530,6 +533,45 @@ function sendMessage() {
   ws.send(state.sendMessage + "\r");  // sending not possible without trailing \r...
 }
 
+function editProjectName() {
+  state.newProjectName = state.projectName
+  state.editingProjectName = true
+}
+
+function abortProjectName() {
+  state.editingProjectName = false;
+}
+
+function saveProjectName() {
+  if (state.isSavingProjectName) return;
+  state.isSavingProjectName = true
+
+  CodeService.updateProjectName(route.params.project_uuid, route.params.user_id, state.newProjectName).then(
+    (response) => {
+      if (response.data) {
+        state.projectName = state.newProjectName;
+        state.isSavingProjectName = false;
+        state.editingProjectName = false;
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastUpdateProjectNameError")
+        );
+        toast.show();
+        state.isSavingProjectName = false;
+        state.editingProjectName = false;
+      }
+    },
+    (error) => {
+      const toast = new Toast(
+        document.getElementById("toastUpdateProjectNameError")
+      );
+      toast.show();
+      state.isSavingProjectName = false;
+      state.editingProjectName = false;
+    }
+  );
+}
+
 function editDescription() {
   state.newProjectDescription = state.projectDescription
   state.editingDescription = true
@@ -644,6 +686,17 @@ function prepareHomeworkModal() {
           </div>
         </div>
       </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateProjectNameError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Speichern des Projektnamens!
+          </div>
+        </div>
+      </div>
+
+
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastProjectAccessError" role="alert"
         aria-live="assertive" aria-atomic="true">
@@ -886,13 +939,40 @@ function prepareHomeworkModal() {
             <pane min-size="15" size="20" max-size="30">
               <splitpanes class="default-theme" horizontal :push-other-panes="false">
                 <pane style="background-color: #383838">
-                  <div class="projectName">
+                  <div class="projectName d-flex align-items-center justify-content-center position-relative">
                     <p class="placeholder-wave" v-if="state.projectName === ''">
                       <span class="placeholder col-12"></span>
                     </p>
-                    <p v-else class="d-flex justify-content-center m-auto">
-                      {{ state.projectName }}
-                    </p>
+                    <div v-else>
+                      <div v-if="!state.editingProjectName">
+                        <span>{{ state.projectName }}</span>
+                        <div v-if="route.params.user_id == 0" class="position-absolute top-50 end-0 translate-middle-y">
+                          <a @click.prevent="editProjectName()" class="btn btn-overlay btn-edit">
+                            <div>
+                              <font-awesome-icon icon="fa-pencil" />
+                            </div>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="state.editingProjectName" class="flex-fill">
+                      <div class="align-items-center d-flex flex-row">
+                        <input class="rounded flex-fill" type="text" id="inputMessage" v-model="state.newProjectName" />
+                        <a @click.prevent="abortProjectName()" class="btn btn-overlay btn-abort mx-1">
+                          <div>
+                            <font-awesome-icon icon="fa-solid fa-times" />
+                          </div>
+                        </a>
+                        <a @click.prevent="saveProjectName()" class="btn btn-overlay btn-edit">
+                          <div v-if="state.isSavingProjectName" class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                          </div>
+                          <div v-else>
+                            <font-awesome-icon icon="fa-solid fa-check" />
+                          </div>
+                        </a>
+                      </div>
+                    </div>
                   </div>
                   <IDEFileTree :files="state.files" @openFile="openFile" />
                 </pane>
@@ -1017,7 +1097,8 @@ function prepareHomeworkModal() {
 }
 
 .btn-overlay:hover {
-  box-shadow: 0 0 10px 7px #555;
+  box-shadow: inset 0 0 30px 30px rgba(150, 150, 150, 0.7);
+  ;
 }
 
 .description {
@@ -1078,8 +1159,8 @@ ul.nav-tabs {
 }
 
 .projectName {
-  /* background-color: red; */
-  height: 56px;
+  height: 50px;
+  border-bottom: 1px solid #555;
 }
 
 .ide {

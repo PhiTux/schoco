@@ -124,9 +124,16 @@ def loadAllFiles(project_uuid: str = Path(), user_id: int = Path(), db: Session 
 
 
 @ code.post('/updateDescription/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def saveDescription(updateDescription: models_and_schemas.updateDescription, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+def saveDescription(updateDescription: models_and_schemas.updateText, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
     result = crud.update_description(
-        db=db, project_uuid=project_uuid, description=updateDescription.description)
+        db=db, project_uuid=project_uuid, description=updateDescription.text)
+    return result
+
+
+@code.post('/updateProjectName/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def saveProjectName(updateProjectName: models_and_schemas.updateText, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    result = crud.update_project_name(
+        db=db, project_uuid=project_uuid, name=updateProjectName.text)
     return result
 
 

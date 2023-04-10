@@ -33,7 +33,11 @@ class CodeService {
     }
 
     updateDescription(project_uuid, user_id, description) {
-        return axiosAuth.post(`updateDescription/${project_uuid}/${user_id}`, { 'description': description })
+        return axiosAuth.post(`updateDescription/${project_uuid}/${user_id}`, { 'text': description })
+    }
+
+    updateProjectName(project_uuid, user_id, projectName) {
+        return axiosAuth.post(`updateProjectName/${project_uuid}/${user_id}`, { 'text': projectName })
     }
 
     saveFileChanges(changes, project_uuid, user_id) {
@@ -77,19 +81,19 @@ class CodeService {
     }
 
     startHomework(id) {
-        return axiosAuth.post('startHomework', {'id': id})
+        return axiosAuth.post('startHomework', { 'id': id })
     }
 
     getHomeworkInfo(id) {
-        return axiosAuth.post('getHomeworkInfo', {'id': id})
+        return axiosAuth.post('getHomeworkInfo', { 'id': id })
     }
 
     deleteProject(uuid, user_id) {
-        return axiosAuth.post(`deleteProject/${uuid}`, {'user_id': user_id})
+        return axiosAuth.post(`deleteProject/${uuid}`, { 'user_id': user_id })
     }
 
     deleteHomework(id) {
-        return axiosAuth.post('deleteHomework', {'id': id})
+        return axiosAuth.post('deleteHomework', { 'id': id })
     }
 }
 

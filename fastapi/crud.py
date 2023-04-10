@@ -199,6 +199,20 @@ def update_description(db: Session, project_uuid: str, description: str):
     return True
 
 
+def update_project_name(db: Session, project_uuid: str, name: str):
+    try:
+        project = db.exec(select(models_and_schemas.Project).where(
+            models_and_schemas.Project.uuid == project_uuid)).first()
+        project.name = name
+        db.add(project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
 def create_homework(db: Session, homework: models_and_schemas.Homework):
     try:
         db.add(homework)
