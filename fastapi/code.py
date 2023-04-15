@@ -15,6 +15,9 @@ code = APIRouter(prefix="/api")
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
 def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
 
+    if len(newProject.projectName) < 3:
+        raise HTTPException(status_code=400, detail="Project name too short")
+
     project_uuid = str(uuid.uuid4())
     user = crud.get_user_by_username(db=db, username=username)
     project = models_and_schemas.Project(
@@ -132,6 +135,10 @@ def saveDescription(updateDescription: models_and_schemas.updateText, project_uu
 
 @code.post('/updateProjectName/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def saveProjectName(updateProjectName: models_and_schemas.updateText, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if len(updateProjectName.text) < 3:
+        raise HTTPException(
+            status_code=400, detail="Project name must be at least 3 characters long")
+
     result = crud.update_project_name(
         db=db, project_uuid=project_uuid, name=updateProjectName.text)
     return result

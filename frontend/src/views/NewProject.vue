@@ -23,12 +23,6 @@ function newHelloWorld() {
 
   state.creatingProject = true;
 
-  /* router.push({
-    name: "ide",
-    params: { project_uuid: "0840baae-eca9-450b-885a-e0759d60f028" },
-  });
-  return; */
-
   CodeService.createNewHelloWorld(state.helloWorldName, state.helloWorldDescription).then(
     (response) => {
       router.push({
@@ -38,10 +32,20 @@ function newHelloWorld() {
     },
     (error) => {
       console.log(error.response);
-      const toast = new Toast(
-        document.getElementById("toastProjectNotCreated")
-      );
-      toast.show();
+
+      if (error.response.status === 400) {
+        const toast = new Toast(
+          document.getElementById("toastProjectNameTooShort")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastProjectNotCreated")
+        );
+        toast.show();
+      }
+
+
     }
   );
 }

@@ -546,6 +546,15 @@ function saveProjectName() {
   if (state.isSavingProjectName) return;
   state.isSavingProjectName = true
 
+  if (state.newProjectName.length < 3) {
+    const toast = new Toast(
+      document.getElementById("toastUpdateProjectNameTooShort")
+    );
+    toast.show();
+    state.isSavingProjectName = false;
+    return;
+  }
+
   CodeService.updateProjectName(route.params.project_uuid, route.params.user_id, state.newProjectName).then(
     (response) => {
       if (response.data) {
@@ -562,10 +571,19 @@ function saveProjectName() {
       }
     },
     (error) => {
-      const toast = new Toast(
-        document.getElementById("toastUpdateProjectNameError")
-      );
-      toast.show();
+      if (error.response.status === 400) {
+        const toast = new Toast(
+          document.getElementById("toastUpdateProjectNameTooShort")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastUpdateProjectNameError")
+        );
+        toast.show();
+      }
+
+
       state.isSavingProjectName = false;
       state.editingProjectName = false;
     }
@@ -696,7 +714,14 @@ function prepareHomeworkModal() {
         </div>
       </div>
 
-
+      <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateProjectNameTooShort" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Projektname muss mindestens 3 Zeichen lang sein!
+          </div>
+        </div>
+      </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastProjectAccessError" role="alert"
         aria-live="assertive" aria-atomic="true">
@@ -946,8 +971,9 @@ function prepareHomeworkModal() {
                     <div v-else>
                       <div v-if="!state.editingProjectName">
                         <span>{{ state.projectName }}</span>
-                        <div v-if="route.params.user_id == 0" class="position-absolute top-50 end-0 translate-middle-y">
-                          <a @click.prevent="editProjectName()" class="btn btn-overlay btn-edit">
+                        <div v-if="route.params.user_id == 0"
+                          class="position-absolute top-50 end-0 mx-1 translate-middle-y">
+                          <a @click.prevent="editProjectName()" class="btn btn-overlay btn-outline-secondary">
                             <div>
                               <font-awesome-icon icon="fa-pencil" />
                             </div>
@@ -983,7 +1009,7 @@ function prepareHomeworkModal() {
                       {{ state.projectDescription }}
                     </span>
                     <div v-if="route.params.user_id == 0" class="position-absolute bottom-0 end-0">
-                      <a @click.prevent="editDescription()" class="btn btn-overlay btn-edit">
+                      <a @click.prevent="editDescription()" class="btn btn-overlay btn-outline-secondary">
                         <div>
                           <font-awesome-icon icon="fa-pencil" />
                         </div>
