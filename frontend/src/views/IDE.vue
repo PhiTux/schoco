@@ -450,6 +450,7 @@ function connectWebsocket(id) {
 
   ws.onclose = function (event) {
     state.websocket_open = false;
+    state.sendMessage = "";
   };
 }
 
@@ -1079,8 +1080,8 @@ function prepareHomeworkModal() {
 </template>
 
 <style scoped>
-#inputMessage {
-  transition: 0.4s;
+#inputMessage:disabled {
+  background-color: white;
 }
 
 #messageSendButton {

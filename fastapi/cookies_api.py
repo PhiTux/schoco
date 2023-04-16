@@ -14,7 +14,7 @@ from multiprocessing import Manager
 from config import settings
 import pycurl
 
-COMPILETIME = 10
+#COMPILETIME = 10
 
 if settings.PRODUCTION:
     data_path = "/app/data"
@@ -208,7 +208,7 @@ def prepareCompile(filesList: models_and_schemas.filesList):
     return c
 
 
-def startCompile(uuid: str, ip: str, port: int):
+def startCompile(uuid: str, port: int, computation_time: int):
     print("start compile at port: " + str(port))
 
     # pycurl to cookies-java-server "/compile"
@@ -219,7 +219,8 @@ def startCompile(uuid: str, ip: str, port: int):
     else:
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/compile")
-    post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
+    post_data = {'timeout_cpu': computation_time,
+                 'timeout_session': computation_time}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...
     tries = 7
@@ -307,7 +308,7 @@ def prepare_execute(project_uuid: str, user_id: int):
     return c
 
 
-def start_execute(uuid: str, ip: str, port: int):
+def start_execute(uuid: str, port: int, computation_time: int):
     print("start execute at port: " + str(port))
 
     # pycurl to cookies-java-server "/execute"
@@ -319,7 +320,8 @@ def start_execute(uuid: str, ip: str, port: int):
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/execute")
 
-    post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
+    post_data = {'timeout_cpu': computation_time,
+                 'timeout_session': computation_time}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...
     tries = 7
@@ -341,7 +343,7 @@ def start_execute(uuid: str, ip: str, port: int):
     return json.loads(buffer.getvalue().decode('utf-8'), strict=False)
 
 
-def start_test(uuid: str, ip: str, port: int):
+def start_test(uuid: str, port: int, computation_time: int):
     print("start test at port: " + str(port))
 
     # pycurl to cookies-java-server "/test"
@@ -354,7 +356,8 @@ def start_test(uuid: str, ip: str, port: int):
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/test")
 
-    post_data = {'timeout_cpu': COMPILETIME, 'timeout_session': COMPILETIME}
+    post_data = {'timeout_cpu': computation_time,
+                 'timeout_session': computation_time}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...
     tries = 7

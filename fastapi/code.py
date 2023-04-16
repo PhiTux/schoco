@@ -11,6 +11,8 @@ from sqlmodel import Session
 
 code = APIRouter(prefix="/api")
 
+DEFAULT_COMPUTATION_TIME = 10
+
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
 def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
@@ -21,7 +23,7 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
     project_uuid = str(uuid.uuid4())
     user = crud.get_user_by_username(db=db, username=username)
     project = models_and_schemas.Project(
-        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id)
+        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id, computation_time=DEFAULT_COMPUTATION_TIME)
 
     # create git repo
     if not git.create_repo(project_uuid):
@@ -242,6 +244,12 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
     return {"homework": homework, "projects": all_projects}
 
 
+def getComputationTime(db: Session, project_uuid: str):
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+    return project.computation_time
+
+
 @ code.post('/prepareCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = Path(), user_id: int = Path()):
 
@@ -260,8 +268,10 @@ def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = 
 @ code.post('/startCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
 
+    computation_time = getComputationTime(db=db, project_uuid=project_uuid)
+
     result = cookies_api.startCompile(
-        startCompile.container_uuid, startCompile.ip, startCompile.port)
+        startCompile.container_uuid, startCompile.port, computation_time)
 
     if user_id != 0:
         crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
@@ -289,8 +299,10 @@ def prepareExecute(project_uuid: str = Path(), user_id: int = Path()):
 @ code.post('/startExecute/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def startExecute(startExecute: models_and_schemas.startExecute, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
 
+    computation_time = getComputationTime(db=db, project_uuid=project_uuid)
+
     result = cookies_api.start_execute(
-        startExecute.container_uuid, startExecute.ip, startExecute.port)
+        startExecute.container_uuid, startExecute.port, computation_time)
 
     if user_id != 0:
         crud.increase_runs(db=db, uuid=project_uuid, user_id=user_id)
@@ -311,8 +323,10 @@ def prepareTest(project_uuid: str = Path(), user_id: int = Path()):
 @ code.post('/startTest/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def startTest(startTest: models_and_schemas.startTest, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
 
+    computation_time = getComputationTime(db=db, project_uuid=project_uuid)
+
     result = cookies_api.start_test(
-        startTest.container_uuid, startTest.ip, startTest.port)
+        startTest.container_uuid, startTest.port, computation_time)
 
     if user_id != 0:
         crud.increase_tests(db=db, uuid=project_uuid, user_id=user_id)
@@ -348,9 +362,8 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
 
     original_project_id = project.id
 
-    # project.uuid = template_project_uuid
     new_project = models_and_schemas.Project(
-        uuid=template_project_uuid, name=project.name, description=project.description, owner_id=project.owner_id)
+        uuid=template_project_uuid, name=project.name, description=project.description, owner_id=project.owner_id, computation_time=create_homework.computation_time)
     if not crud.create_project(db=db, project=new_project):
         # delete git repo
         git.remove_repo(project_uuid=template_project_uuid)
@@ -362,7 +375,7 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
     template_project_id = p.id
 
     homework = models_and_schemas.Homework(course_id=create_homework.course_id, template_project_id=template_project_id,
-                                           original_project_id=original_project_id, deadline=create_homework.deadline_date, computation_time=create_homework.computation_time)
+                                           original_project_id=original_project_id, deadline=create_homework.deadline_date)
 
     if not crud.create_homework(db,
                                 homework=homework):

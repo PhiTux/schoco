@@ -59,9 +59,9 @@ class Project(SQLModel, table=True):
     name: str
     description: str
     owner_id: int = Field(foreign_key="user.id")
+    computation_time: int
 
     owner: "User" = Relationship(back_populates="projects")
-    # homework: "Homework" = Relationship()
 
 
 class Homework(SQLModel, table=True):
@@ -73,7 +73,7 @@ class Homework(SQLModel, table=True):
     original_project_id: int = Field(
         default=None, foreign_key="project.id")
     deadline: str  # datetime
-    computation_time: int
+    #computation_time: int
     # oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")
