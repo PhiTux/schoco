@@ -507,6 +507,11 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
 
       results.value = ""
 
+      if (response.data.status === "security_error") {
+        results.value = "💥🙈 es gab wohl einen Sicherheitsfehler beim Testen deines Programms. Scheinbar hat dein Programm versucht, Dinge auszuführen, die nicht erlaubt sind. Korrigiere dies zuerst.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden."
+        return
+      }
+
       if (response.data.failed_tests == 0) {
         results.value += "Alle Tests bestanden 🎉🤩\n\nDu kannst nun höchstens noch versuchen, deinen Quellcode zu \"verschönern\" ;-)"
       } else if (response.data.passed_tests == 0) {
@@ -522,7 +527,7 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
       results.value += response.data.stdout
     },
     (error) => {
-      results.value = "💥🙈 es gab wohl einen Fehler beim Testen deines Programms. Probiere es erneut!\nStelle zunächst sicher, dass dein Programm ausgeführt werden kann.\nWenn das Problem bestehen bleibt solltest du dich an deine Lehrerin \\ deinen Lehrer wenden."
+      results.value = "💥🙈 es gab wohl einen Fehler beim Testen deines Programms. Probiere es erneut!\nStelle zunächst sicher, dass dein Programm ausgeführt werden kann.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden."
       state.isTesting = false;
       console.log(error.response);
     }

@@ -1,9 +1,15 @@
 import static org.junit.Assert.*;
-
+import org.junit.BeforeClass;
 //import org.junit.jupiter.api.DisplayName;
 import org.junit.Test;
 
 public class Tests {
+	/** 🛑 don't touch the following code-block!!
+     *  It activates the security-manager which ensures limited rights of student's code during Testing. */
+    @BeforeClass
+    public static void setUp() {
+        System.setSecurityManager(new SecurityManager());
+    }
 
 	@Test
 	// would need JUnit5 for features like @DisplayName()

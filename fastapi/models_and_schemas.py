@@ -73,7 +73,6 @@ class Homework(SQLModel, table=True):
     original_project_id: int = Field(
         default=None, foreign_key="project.id")
     deadline: str  # datetime
-    #computation_time: int
     # oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")

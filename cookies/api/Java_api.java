@@ -72,7 +72,7 @@ public class Java_api {
 					int exitCode = 0;
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp Schoco' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -Djava.security.manager=default -cp /app/tmp Schoco' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
 						Process p = new ProcessBuilder().inheritIO().command(command).start();
 						exitCode = p.waitFor();
 						System.out.flush();

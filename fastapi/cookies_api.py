@@ -14,7 +14,7 @@ from multiprocessing import Manager
 from config import settings
 import pycurl
 
-#COMPILETIME = 10
+# COMPILETIME = 10
 
 if settings.PRODUCTION:
     data_path = "/app/data"
@@ -375,6 +375,11 @@ def start_test(uuid: str, port: int, computation_time: int):
                 return {'status': 'connect_error'}
             time.sleep(0.2)
     c.close()
+
+    # hack to check, if JUnit-testing ran into a security error. It's a bit ugly but should work...
+    # Otherwise the text is no valid json since the quote gets closed too early.
+    if ("at java.lang.SecurityManager" in buffer.getvalue().decode('utf-8')):
+        return {'status': 'security_error'}
 
     results = json.loads(buffer.getvalue().decode('utf-8'), strict=False)
 
