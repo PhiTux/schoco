@@ -733,7 +733,7 @@ function prepareHomeworkModal() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Du kannst nur deine eigenen Projekte öffnen!
+            Projekt existiert nicht, oder du hast keinen Zugriff darauf!
           </div>
         </div>
       </div>
@@ -940,7 +940,8 @@ function prepareHomeworkModal() {
                 <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
                 Ausführen
               </button>
-              <button @click.prevent="test()" type="button" class="btn btn-indigo">
+              <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="test()" type="button"
+                class="btn btn-indigo">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>

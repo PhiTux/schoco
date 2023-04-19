@@ -30,8 +30,9 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
         raise HTTPException(status_code=500, detail="Could not create project")
 
     # load the template files into the git repo
+    # don't load Tests.java if user is a pupil
     for file in os.listdir("./java_helloWorld"):
-        if file.endswith(".class"):
+        if file.endswith(".class") or (user.role == "pupil" and file == "Tests.java"):
             continue
         file_content = open(file=f"./java_helloWorld/{file}", mode="rb").read()
         if not git.add_file(project_uuid=project_uuid,
