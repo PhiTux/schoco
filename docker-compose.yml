@@ -8,6 +8,7 @@ services:
   schoco-backend:
     image: phitux/schoco-backend:latest-dev
     container_name: schoco-backend
+    restart: always
     user: "1000:1000"
     group_add:
       - ${DOCKER_GROUP_ID}
@@ -19,7 +20,6 @@ services:
       - GITEA_USERNAME=schoco
       - GITEA_PASSWORD=schoco1234
       - GITEA_HOST=http://schoco-gitea:3000
-    #restart: always
     networks:
       - schoco
     volumes:
@@ -29,6 +29,7 @@ services:
   schoco-nginx:
     image: phitux/schoco-nginx:latest-dev
     container_name: schoco-nginx
+    restart: always
     group_add:
       - ${DOCKER_GROUP_ID}
     networks:
@@ -41,11 +42,11 @@ services:
   schoco-gitea:
     image: gitea/gitea:1.17.3
     container_name: schoco-gitea
+    restart: always
     environment:
       - USER_UID=1000
       - USER_GID=1000
       - GITEA__security__INSTALL_LOCK=true
-    restart: always
     networks:
       - schoco
     volumes:
