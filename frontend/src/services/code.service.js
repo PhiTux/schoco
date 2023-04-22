@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth.store.js';
+import jwt_decode from 'jwt-decode'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -9,6 +10,13 @@ const axiosAuth = axios.create({
 axiosAuth.interceptors.request.use((config) => {
     const authStore = useAuthStore()
     if (authStore.user) {
+        // go to login if token has expired
+        let decoded = jwt_decode(authStore.user.access_token)
+        if (decoded.exp < Date.now() / 1000) {
+            authStore.logout_token_expired()
+            return Promise.reject('Token expired')
+        }
+
         const token = authStore.user.access_token
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`

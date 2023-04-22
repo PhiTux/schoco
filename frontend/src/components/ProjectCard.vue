@@ -7,7 +7,7 @@ defineProps({
     deadline: String,
     uuid: String,
     branch: Number,
-    id: String,
+    id: Number,
     isTeacher: Boolean,
     isHomework: Boolean,
     isEditing: Boolean,

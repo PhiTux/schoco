@@ -335,10 +335,12 @@ function getAllCourses() {
       allCourses.value = response.data;
     },
     (error) => {
-      if (error.response.status == 403) {
-        const user = useAuthStore();
-        user.logout();
-      } else console.log(error);
+      if (error.response) {
+        if (error.response.status == 403) {
+          const user = useAuthStore();
+          user.logout();
+        } else console.log(error);
+      }
     }
   );
 }
@@ -360,10 +362,12 @@ function getAllUsers() {
       }
     },
     (error) => {
-      if (error.response.status == 403) {
-        const user = useAuthStore();
-        user.logout();
-      } else console.log(error);
+      if (error.response) {
+        if (error.response.status == 403) {
+          const user = useAuthStore();
+          user.logout();
+        } else console.log(error);
+      }
     }
   );
 }

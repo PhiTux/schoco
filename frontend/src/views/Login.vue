@@ -1,7 +1,11 @@
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth.store.js";
 import UserService from "../services/user.service.js";
+import { useRoute, useRouter } from "vue-router";
+import { Toast } from "bootstrap";
+
+const router = useRouter();
 
 const state = reactive({
   showLoginPassword: false,
@@ -24,6 +28,17 @@ const register = reactive({
   username: "",
   password1: "",
   password2: "",
+})
+
+onMounted(() => {
+  let route = useRoute()
+  if (route.query.token_expired) {
+    const toast = new Toast(
+      document.getElementById("toastTokenExpiredError")
+    );
+    toast.show();
+  }
+  router.replace({ query: {} });
 })
 
 async function loginUser() {
@@ -121,6 +136,16 @@ const registerPasswordTooShort = computed(() => {
 </script>
 
 <template>
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-danger border-0" id="toastTokenExpiredError" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Deine Sitzung ist abgelaufen. Du musst dich erneut anmelden.
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="center-fix d-flex flex-column">
     <div class="container-fluid flex-fill align-items-center d-flex justify-content-center">
       <div class="w-100 row text-center align-items-center">

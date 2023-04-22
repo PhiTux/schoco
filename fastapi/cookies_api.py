@@ -152,10 +152,8 @@ def refillNewContainersQueue():
     """Just fills up the Queue to the amount of containers needed.
     Runs every time when a command ends and a container
     is removed from runningContainers."""
-    print(time.time(), "start refill")
     while (runningContainers.length() + newContainers.qsize()) < settings.MAX_CONTAINERS:
         newContainers.put(createNewContainer())
-    print(time.time(), "end refill")
 
 
 def fillNewContainersQueue():

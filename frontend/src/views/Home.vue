@@ -29,7 +29,6 @@ onBeforeMount(() => {
 function getProjectsAsTeacher() {
   CodeService.getProjectsAsTeacher().then(
     (response) => {
-      console.log(response.data)
       state.myProjects = response.data.projects
       response.data.homework.forEach(h => {
         if (new Date(h.deadline) > new Date()) {
@@ -40,7 +39,9 @@ function getProjectsAsTeacher() {
       })
     },
     (error) => {
-      console.log(error.response)
+      if (error.response) {
+        console.log(error.response)
+      }
     }
   )
 }
@@ -48,7 +49,6 @@ function getProjectsAsTeacher() {
 function getProjectsAsPupil() {
   CodeService.getProjectsAsPupil().then(
     (response) => {
-      console.log(response.data)
       state.myProjects = response.data.projects
       state.new_homework = []
       state.old_homework = []
@@ -62,7 +62,10 @@ function getProjectsAsPupil() {
       })
     },
     (error) => {
-      console.log(error.response)
+      if (error.response) {
+        console.log(error.response)
+      }
+
     }
   )
 }
