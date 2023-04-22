@@ -697,9 +697,8 @@ function change_username(id) {
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               Schließen
             </button>
-            <button type="button" class="btn btn-primary" @click.prevent="changePassword()" :disabled="
-              state.changePasswordLoading || state.newPassword.length < 8
-            ">
+            <button type="button" class="btn btn-primary" @click.prevent="changePassword()" :disabled="state.changePasswordLoading || state.newPassword.length < 8
+                ">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                 v-if="state.changePasswordLoading"></span>
               Neues Passwort speichern
@@ -777,14 +776,13 @@ function change_username(id) {
                 <span v-if="pupil.fullname != '' || pupil.username != ''">{{
                   index + 1
                 }}</span>&nbsp;
-                <font-awesome-layers v-if="
-                  pupil.fullname != '' &&
-                  pupil.username != '' &&
-                  ((!state.useUnifiedPassword &&
-                    pupil.password.length >= 8) ||
-                    (state.useUnifiedPassword &&
-                      state.unifiedPassword.length >= 8))
-                ">
+                <font-awesome-layers v-if="pupil.fullname != '' &&
+                    pupil.username != '' &&
+                    ((!state.useUnifiedPassword &&
+                      pupil.password.length >= 8) ||
+                      (state.useUnifiedPassword &&
+                        state.unifiedPassword.length >= 8))
+                    ">
                   <font-awesome-icon icon="fa-circle" style="color: var(--bs-success)" />
                   <font-awesome-icon icon="fa-check" transform="shrink-5" style="color: white" />
                 </font-awesome-layers>
@@ -961,7 +959,7 @@ function change_username(id) {
               </ul>
             </div>
           </td>
-          <td><span v-if="x.role === 'teacher'">👨‍🏫</span><span v-else>📚</span> {{ x.role }}</td>
+          <td><span v-if="x.role === 'teacher'">👨‍🏫</span><!--<span v-else>📚</span>--> {{ x.role }}</td>
           <td>
             <a class="btn-round btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal"
               @click.prevent="openModalChangePassword(x.id)">

@@ -19,6 +19,10 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
  1. Installation of the cumbersome JRE and IDEs
  2. Saving and sharing the solutions via Mail/USB/Messenger??? WTF!?
 ---
+ ![IDE](./readme/IDE.png)
+  See all screenshots [here](./readme/README.md)!
+
+---
 
 ## Main-features
 - No registration methods for pupils. Only teachers can register pupils who can be member of multiple courses.
