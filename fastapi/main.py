@@ -7,6 +7,7 @@ import database_config
 import users
 import code
 import cookies_api
+from fastapi_utils.tasks import repeat_every
 
 
 app = FastAPI()
@@ -33,10 +34,18 @@ app.add_middleware(CORSMiddleware, allow_origins=origins,
 
 
 lock = Lock()
+firstRun = True
 
 
 @app.on_event("startup")
+@repeat_every(seconds=60)
 def startup_event():
-    database_config.create_db_and_tables()
-    with lock:
-        cookies_api.fillNewContainersQueue()
+    global firstRun
+    if firstRun:
+        database_config.create_db_and_tables()
+        firstRun = False
+        with lock:
+            cookies_api.fillNewContainersQueue()
+    else:
+        with lock:
+            cookies_api.refillNewContainersQueue()
