@@ -322,7 +322,7 @@ function compile() {
 
   state.isCompiling = true;
   state.receivedWS = false;
-  results.value = "Kompilierung gestartet... 🛠";
+  results.value = "";
 
   let projectFiles = [];
   for (let i = 0; i < state.files.length; i++) {
@@ -367,8 +367,9 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
       if (response.data.status === "connect_error") {
         results.value =
           'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
-      }
-      if (response.data.exitCode == 0 && !state.receivedWS) {
+      } else if (!state.websocket_open) {
+        showWSError();
+      } else if (response.data.exitCode == 0 && !state.receivedWS) {
         results.value = "Erfolgreich kompiliert 🎉";
       }
     },
@@ -379,38 +380,10 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
   );
 }
 
-function execute() {
-  if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
 
-  state.isExecuting = true;
-  state.receivedWS = false;
-
-  CodeService.prepareExecute(route.params.project_uuid, route.params.user_id).then(
-    (response) => {
-      if (response.data.executable == false) {
-        results.value =
-          "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
-        state.isExecuting = false;
-        return;
-      }
-
-      connectWebsocket(response.data.id);
-
-      startExecute(
-        response.data.ip,
-        response.data.port,
-        response.data.uuid,
-        route.params.project_uuid,
-        route.params.user_id
-      );
-    },
-    (error) => {
-      state.isExecuting = false;
-      console.log(error.response);
-    }
-  );
+function showWSError() {
+  results.value = "Verbindungsfehler ⚡\nAktuell kann keine Ausgabe angezeigt werden.\n\nWenn das Problem bestehen bleibt, dann gib bitte deiner Lehrkraft Bescheid!";
 }
-
 
 
 function connectWebsocket(id) {
@@ -444,14 +417,69 @@ function connectWebsocket(id) {
     results.value += msg;
   };
 
+  ws.onerror = function (event) {
+    state.websocket_open = false;
+    showWSError();
+    if (state.isCompiling) {
+      state.isCompiling = false;
+    } else if (state.isExecuting) {
+      state.isExecuting = false;
+    } else if (state.isTesting) {
+      state.isTesting = false;
+    }
+  };
+
   ws.onopen = function (event) {
     state.websocket_open = true;
+    if (state.isCompiling) {
+      results.value = "Kompilierung gestartet... 🛠";
+    } else if (state.isExecuting) {
+      results.value = "Programm wird ausgeführt...";
+    }
+    //not used at the moment, since testing doesn't require WS...
+    else if (state.isTesting) {
+      results.value = "Programm wird getestet 📝➡️✅ bitte warten..."
+    }
   };
 
   ws.onclose = function (event) {
     state.websocket_open = false;
     state.sendMessage = "";
   };
+}
+
+function execute() {
+  if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
+
+  state.isExecuting = true;
+  state.receivedWS = false;
+
+  results.value = "";
+
+  CodeService.prepareExecute(route.params.project_uuid, route.params.user_id).then(
+    (response) => {
+      if (response.data.executable == false) {
+        results.value =
+          "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
+        state.isExecuting = false;
+        return;
+      }
+
+      connectWebsocket(response.data.id);
+
+      startExecute(
+        response.data.ip,
+        response.data.port,
+        response.data.uuid,
+        route.params.project_uuid,
+        route.params.user_id
+      );
+    },
+    (error) => {
+      state.isExecuting = false;
+      console.log(error.response);
+    }
+  );
 }
 
 function startExecute(ip, port, uuid, project_uuid, user_id) {
@@ -473,6 +501,7 @@ function test() {
   state.isTesting = true;
   state.receivedWS = false;
 
+  // using this line here (instead at opening WS), since Testing does not start a WS-connection
   results.value = "Programm wird getestet 📝➡️✅ bitte warten..."
 
   CodeService.prepareTest(route.params.project_uuid, route.params.user_id).then(
@@ -1050,9 +1079,9 @@ function prepareHomeworkModal() {
               <ul class="nav nav-tabs pt-2">
                 <li class="nav-item" v-for="f in state.openFiles">
                   <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                    active: f.tab == state.activeTab,
-                    changed: state.tabsWithChanges.includes(f.tab),
-                  }">
+                      active: f.tab == state.activeTab,
+                      changed: state.tabsWithChanges.includes(f.tab),
+                    }">
                     {{ f.path }}
                   </div>
                 </li>
