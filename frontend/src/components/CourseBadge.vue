@@ -9,11 +9,11 @@ defineProps({
 </script>
 
 <template>
-  <span class="badge rounded-pill mx-1" :style="{
+  <span class="badge rounded-pill mx-1 d-inline-flex" :style="{
     'background-color': color,
     color: fontDark ? 'var(--bs-dark)' : 'var(--bs-light)',
   }">
-    <span class="align-middle">{{ name }}</span>
+    <span class="align-self-center">{{ name }}</span>
     <a v-if="isDeletable" class="mini-btn" @click.prevent="$emit('remove')">
       <font-awesome-layers class="fa-lg">
         <font-awesome-icon id="background" icon="fa-circle" />

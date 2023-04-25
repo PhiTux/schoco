@@ -31,7 +31,7 @@ defineProps({
             }) }}</span></div>
         <div class="card-body">
 
-            <h5 class="card-title">
+            <h5 class="card-title d-inline-flex">
                 <CourseBadge v-if="isTeacher && isHomework" :color="courseColor" :font-dark="courseFontDark"
                     :name="courseName"></CourseBadge>{{ name }}
             </h5>
