@@ -183,3 +183,7 @@ class create_homework(BaseModel):
 
 class homeworkId(BaseModel):
     id: int
+
+
+class courseID(BaseModel):
+    id: int

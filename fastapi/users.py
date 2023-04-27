@@ -65,6 +65,17 @@ async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depen
     return {'success': True}
 
 
+@users.post('/removeCourse', dependencies=[Depends(auth.check_teacher)])
+def removeCourse(courseId: models_and_schemas.courseID, db: Session = Depends(database_config.get_db)):
+
+    # remove course and associated homework, editingHomework, template-projects and user-course-links
+    if not crud.remove_course(db=db, course_id=courseId.id):
+        raise HTTPException(
+            status_code=500, detail="Course deletion not successful")
+
+    return {'success': True}
+
+
 @users.post('/addCourseToUser', dependencies=[Depends(auth.check_teacher)])
 def addCourseToUser(addUserCourseLink: models_and_schemas.AddUserCourseLink, db: Session = Depends(database_config.get_db)):
     course = crud.get_course_by_coursename(

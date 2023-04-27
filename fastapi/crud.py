@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from sqlalchemy import exc
 import auth
 import models_and_schemas
+import git
 
 
 def create_user(db: Session, user: models_and_schemas.UserSchema):
@@ -106,6 +107,48 @@ def remove_UserCourseLink(db: Session, link: models_and_schemas.UserCourseLink):
 def remove_user(db: Session, user: models_and_schemas.User):
     try:
         db.delete(user)
+        db.commit()
+    except:
+        db.rollback()
+        return False
+    return True
+
+
+def remove_course(db: Session, course_id: int):
+    try:
+        # remove user-course links
+        userCourseLinks = db.exec(select(models_and_schemas.UserCourseLink).where(
+            models_and_schemas.UserCourseLink.course_id == course_id)).all()
+        for ucl in userCourseLinks:
+            db.delete(ucl)
+
+        # remove homeworks and template-projects (including git repos)
+        homeworks = db.exec(select(models_and_schemas.Homework).where(
+            models_and_schemas.Homework.course_id == course_id)).all()
+        for h in homeworks:
+            # remove git repo
+            template_project = db.exec(select(models_and_schemas.Project).where(
+                models_and_schemas.Project.id == h.template_project_id)).first()
+            if not git.remove_repo(template_project.uuid):
+                raise Exception(
+                    f"Failed to remove git repo {template_project.uuid}")
+            # remove project
+            db.delete(template_project)
+
+            # remove editing_homework
+            editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+                models_and_schemas.EditingHomework.homework_id == h.id)).first()
+            db.delete(editing_homework)
+
+            # remove homework
+            db.delete(h)
+
+        # remove course
+        course = db.exec(select(models_and_schemas.Course).where(
+            models_and_schemas.Course.id == course_id)).first()
+        db.delete(course)
+
+        # db.delete(course)
         db.commit()
     except:
         db.rollback()

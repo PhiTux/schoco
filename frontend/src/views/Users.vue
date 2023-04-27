@@ -39,6 +39,8 @@ let state = reactive({
   changingName: false,
   edited_username: "",
   changingUsername: false,
+  removeCourseId: 0,
+  removeCourseName: "",
 });
 
 function selectUser(user) {
@@ -481,6 +483,58 @@ function change_username(id) {
       console.log(error.response)
     })
 }
+
+
+function removeCourse() {
+  UserService.removeCourse(state.removeCourseId).then(
+    (response) => {
+      const modal = Modal.getInstance(
+        document.getElementById("removeCourseModal")
+      );
+      modal.hide();
+
+      if (response.data.success) {
+        getAllCourses();
+        getAllUsers();
+        const toast = new Toast(
+          document.getElementById("toastSuccessCourseRemoved")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastErrorCourseRemoved")
+        );
+        toast.show();
+      }
+    },
+    (error) => {
+      console.log(error.response)
+      const modal = Modal.getInstance(
+        document.getElementById("removeCourseModal")
+      );
+      modal.hide();
+
+      const toast = new Toast(
+        document.getElementById("toastErrorCourseRemoved")
+      );
+      toast.show();
+    }
+  )
+}
+
+
+function openModalRemoveCourse(id) {
+  state.removeCourseId = id
+  //get coursename from allcourses by id
+  allCourses.value.forEach(course => {
+    if (course.id == id) {
+      state.removeCourseName = course.name
+    }
+  })
+
+  const modal = new Modal(document.getElementById("removeCourseModal"));
+  modal.show();
+}
 </script>
 
 <template>
@@ -535,10 +589,19 @@ function change_username(id) {
       </div>
     </div>
 
-    <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseCreated" role="alert"
+    <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseRemoved" role="alert"
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
-        <div class="toast-body">Kurs wurde erstellt.</div>
+        <div class="toast-body">Kurs wurde gelöscht.</div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-danger border-0" id="toastErrorCourseRemoved" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Fehler beim Löschen des Kurses.
+        </div>
       </div>
     </div>
 
@@ -588,6 +651,31 @@ function change_username(id) {
         <div class="mt-2 pt-2 border-top">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
             Schließen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="removeCourseModal" tabindex="-1" aria-labelledby="removeCourseModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content dark-text">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">Kurs löschen</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Möchten Sie den Kurs <b>{{ state.removeCourseName }}</b> wirklich löschen?</p>
+          Damit werden auch Hausaufgaben gelöscht, die diesem Kurs zugeordnet sind. Außerdem werden alle Schüler aus dem
+          Kurs entfernt.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Schließen
+          </button>
+          <button type="button" class="btn btn-primary" @click.prevent="removeCourse()">
+            Kurs löschen
           </button>
         </div>
       </div>
@@ -867,7 +955,8 @@ function change_username(id) {
     <div class="row mb-4 ms-1">
       Kurse:
       <div class="col">
-        <CourseBadge v-for="c in allCourses" :color="c.color" :font-dark="c.fontDark" :name="c.name" />
+        <CourseBadge v-for="c in allCourses" :color="c.color" :font-dark="c.fontDark" :name="c.name" :is-deletable="true"
+          @remove="openModalRemoveCourse(c.id)" />
       </div>
     </div>
     <div class="row">

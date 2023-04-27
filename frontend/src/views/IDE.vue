@@ -801,14 +801,12 @@ function prepareHomeworkModal() {
             dann kann dies zu Inkonsistenzen bei den verschiedenen SuS führen:
             <ul>
               <li>Bei SuS, welche diese Hausaufgabe bereits bearbeiten, werden diese Änderungen <b>nicht ankommen</b>,
-                solange sie die HA nicht neu starten.</li>
+                solange sie ihren Fortschritt nicht löschen und die HA anschließend neu starten.</li>
               <li>SuS, welche diese Hausaufgabe noch nicht gestartet haben, werden beim erstmaligen Öffnen immer den zu
                 diesem Zeitpunkt aktuellsten Code dieser Vorlage verwenden.</li>
             </ul>
             Änderungen des <b>Titels oder der Projektbeschreibung</b> sind hingegen kein Problem, können jederzeit
-            geändert
-            werden und werden direkt bei den SuS
-            aktualisiert.
+            geändert werden und werden beim Neuladen der IDE bei den SuS aktualisiert.
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
