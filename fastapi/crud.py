@@ -106,6 +106,62 @@ def remove_UserCourseLink(db: Session, link: models_and_schemas.UserCourseLink):
 
 def remove_user(db: Session, user: models_and_schemas.User):
     try:
+        # if teacher: remove homework, editingHomework, projects
+        if user.role == "teacher":
+            # get all projects
+            projects = db.exec(select(models_and_schemas.Project).where(
+                models_and_schemas.Project.owner_id == user.id)).all()
+            # remove homeworks of projects
+            for p in projects:
+                homework = db.exec(select(models_and_schemas.Homework).where(
+                    models_and_schemas.Homework.template_project_id == p.id)).first()
+                # remove editingHomeworks of homework
+                editingHomeworks = db.exec(select(models_and_schemas.EditingHomework).where(
+                    models_and_schemas.EditingHomework.homework_id == homework.id)).all()
+                for eh in editingHomeworks:
+                    db.delete(eh)
+                db.delete(homework)
+
+            # remove projects
+            for p in projects:
+                # remove git repo
+                if not git.remove_repo(p.uuid):
+                    raise Exception("Failed to remove git repo")
+                db.delete(p)
+
+        else:
+            # remove editingHomework
+            editingHomeworks = db.exec(select(models_and_schemas.EditingHomework).where(
+                models_and_schemas.EditingHomework.owner_id == user.id)).all()
+            for eh in editingHomeworks:
+                # get homework
+                homework = db.exec(select(models_and_schemas.Homework).where(
+                    models_and_schemas.Homework.id == eh.homework_id)).first()
+                # get template project
+                template_project = db.exec(select(models_and_schemas.Project).where(
+                    models_and_schemas.Project.id == homework.template_project_id)).first()
+
+                # remove git branch
+                if not git.remove_branch(uuid=template_project.uuid, branch=user.id):
+                    raise Exception("Failed to remove git branch")
+
+                db.delete(eh)
+
+            # remove projects
+            projects = db.exec(select(models_and_schemas.Project).where(
+                models_and_schemas.Project.owner_id == user.id)).all()
+            for p in projects:
+                # remove git repo
+                if not git.remove_repo(p.uuid):
+                    raise Exception("Failed to remove git repo")
+                db.delete(p)
+
+            # remove user-course links
+            userCourseLinks = db.exec(select(models_and_schemas.UserCourseLink).where(
+                models_and_schemas.UserCourseLink.user_id == user.id)).all()
+            for ucl in userCourseLinks:
+                db.delete(ucl)
+
         db.delete(user)
         db.commit()
     except:
