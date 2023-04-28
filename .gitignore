@@ -1,2 +1,3 @@
 data
 *.envrc
+.DS_Store

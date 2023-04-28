@@ -9,3 +9,4 @@ python-multipart
 bcrypt==4.0.1
 pycurl==7.45.2
 docker
+fastapi_utils
