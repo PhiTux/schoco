@@ -716,6 +716,10 @@ function prepareHomeworkModal() {
   const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
 }
 
+function renameFileModal(path) {
+  console.log(path)
+}
+
 </script>
 
 <template>
@@ -1034,11 +1038,11 @@ function prepareHomeworkModal() {
                       </div>
                     </div>
                   </div>
-                  <IDEFileTree :files="state.files" @openFile="openFile" />
+                  <IDEFileTree :files="state.files" @openFile="openFile" @renameFile="renameFileModal" />
                 </pane>
                 <!-- Description -->
                 <pane min-size="10" size="50" max-size="60" style="background-color: #383838">
-                  <div v-if="!state.editingDescription" class="position-relative description">
+                  <div v-if="!state.editingDescription" class="position-relative description p-1">
                     <span>
                       {{ state.projectDescription }}
                     </span>

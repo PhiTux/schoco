@@ -772,7 +772,8 @@ function openModalRemoveCourse(id) {
             <span class="input-group-text" id="basic-addon1">
               <a class="greyButton" @mousedown="showNewPassword()" @mouseup="hideNewPassword()"
                 @mouseleave="hideNewPassword()"><font-awesome-icon v-if="!state.showNewPassword"
-                  icon="fa-solid fa-eye-slash" /><font-awesome-icon v-else icon="fa-solid fa-eye" /></a></span>
+                  icon="fa-solid fa-eye-slash" fixed-width /><font-awesome-icon v-else icon="fa-solid fa-eye"
+                  fixed-width /></a></span>
           </div>
 
           <div v-if="state.showPasswordTooShort" class="alert alert-danger alert-dismissible" role="alert">
@@ -1076,13 +1077,15 @@ function openModalRemoveCourse(id) {
 </template>
 
 <style scoped>
+.greyButton {
+  text-decoration: none;
+  color: inherit;
+}
+
 .invisible {
   visibility: hidden;
 }
 
-/* table>tbody>tr:hover>#name>a {
-  display: inline;
-} */
 
 .round-left {
   border-top-left-radius: var(--bs-border-radius-pill);
