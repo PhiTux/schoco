@@ -187,3 +187,10 @@ class homeworkId(BaseModel):
 
 class courseID(BaseModel):
     id: int
+
+
+class RenameFile(BaseModel):
+    old_path: str
+    new_path: str
+    content: str
+    sha: str

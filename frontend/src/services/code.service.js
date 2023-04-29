@@ -103,6 +103,10 @@ class CodeService {
     deleteHomework(id) {
         return axiosAuth.post('deleteHomework', { 'id': id })
     }
+
+    renameFile(project_uuid, user_id, oldName, newName, fileContent, sha) {
+        return axiosAuth.post(`renameFile/${project_uuid}/${user_id}`, { 'old_path': oldName, 'new_path': newName, 'content': fileContent, 'sha': sha })
+    }
 }
 
 export default new CodeService()

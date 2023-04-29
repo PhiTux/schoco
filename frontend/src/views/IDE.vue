@@ -43,6 +43,8 @@ let state = reactive({
   fullUserName: "",
   deadline: "",
   websocket_open: false,
+  renameFilePath: "",
+  renameFileNewName: "",
 });
 
 let homework = reactive({
@@ -716,8 +718,72 @@ function prepareHomeworkModal() {
   const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
 }
 
+
 function renameFileModal(path) {
-  console.log(path)
+  state.renameFilePath = String(path).replace(/\/$/g, "")
+  state.renameFileNewName = ""
+
+  var modal = new Modal(document.getElementById("renameFileModal"));
+  modal.show();
+}
+
+function renameFile() {
+  // close modal
+  var elem = document.getElementById("renameFileModal");
+  var modal = Modal.getInstance(elem);
+  modal.hide();
+
+  if (state.renameFileNewName.trim() === "") {
+    const toast = new Toast(
+      document.getElementById("toastRenameFileEmpty")
+    );
+    toast.show();
+    return;
+  }
+
+  // combine path and new name
+  let newPath = state.renameFilePath.split("/")
+  newPath.pop()
+  newPath.push(state.renameFileNewName)
+  newPath = newPath.join("/")
+
+  // get file content and sha
+  let fileContent = ""
+  let sha = ""
+  for (let i = 0; i < state.files.length; i++) {
+    if (state.files[i]["path"] === state.renameFilePath) {
+      fileContent = state.files[i]["content"]
+      sha = state.files[i]["sha"]
+      break
+    }
+  }
+
+  CodeService.renameFile(route.params.project_uuid, route.params.user_id, state.renameFilePath, newPath, fileContent, sha).then(
+    (response) => {
+      if (response.data.success) {
+        const toast = new Toast(
+          document.getElementById("toastRenameFileSuccess")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastRenameFileError")
+        );
+        toast.show();
+      }
+
+      state.renameFilePath = ""
+      state.renameFileNewName = ""
+    }, (error) => {
+      const toast = new Toast(
+        document.getElementById("toastRenameFileError")
+      );
+      toast.show();
+      console.log(error.response)
+
+      state.renameFilePath = ""
+      state.renameFileNewName = ""
+    })
 }
 
 </script>
@@ -731,6 +797,33 @@ function renameFileModal(path) {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Laden des Projekts. Bitte zurück oder neu laden.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastRenameFileEmpty" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Dateiname darf nicht leer sein!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastRenameFileError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Datei konnte nicht umbenannt werden!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastRenameFileSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Datei erfolgreich umbenannt!
           </div>
         </div>
       </div>
@@ -814,6 +907,32 @@ function renameFileModal(path) {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="renameFileModal" tabindex="-1" aria-labelledby="renameFileLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content dark-text">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Datei umbenennen</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Gib den neuen Dateinamen für die Datei <u>{{ state.renameFilePath }}</u> ein. Denke an die Dateiendung
+            (typischerweise <i>.java</i>)!
+
+            <div class="input-group mt-3">
+              <input type="text" class="form-control" id="renameFilenameInput"
+                :placeholder="state.renameFilePath.split('/').slice(-1)" v-model="state.renameFileNewName"
+                @keyup.enter="renameFile()">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-primary" @click.prevent="renameFile()">Umbenennen</button>
           </div>
         </div>
       </div>
@@ -1081,9 +1200,9 @@ function renameFileModal(path) {
               <ul class="nav nav-tabs pt-2">
                 <li class="nav-item" v-for="f in state.openFiles">
                   <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                      active: f.tab == state.activeTab,
-                      changed: state.tabsWithChanges.includes(f.tab),
-                    }">
+                    active: f.tab == state.activeTab,
+                    changed: state.tabsWithChanges.includes(f.tab),
+                  }">
                     {{ f.path }}
                   </div>
                 </li>

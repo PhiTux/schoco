@@ -214,7 +214,7 @@ def create_branch(uuid: str, new_branch: int):
     c.setopt(c.POSTFIELDS, post_data)
     c.setopt(pycurl.HTTPHEADER, [
              'Accept: application/json', 'Content-Type: application/json'])
-    #c.setopt(c.CUSTOMREQUEST, 'PUT')
+    # c.setopt(c.CUSTOMREQUEST, 'PUT')
     buffer = BytesIO()
     c.setopt(c.WRITEDATA, buffer)
     c.perform()
@@ -225,8 +225,8 @@ def create_branch(uuid: str, new_branch: int):
         print(buffer.getvalue().decode('utf8'))
         return False
 
-    #res = buffer.getvalue().decode('utf8')
-    #res = json.loads(res)
+    # res = buffer.getvalue().decode('utf8')
+    # res = json.loads(res)
 
     return True
 
@@ -239,6 +239,37 @@ def remove_branch(uuid: str, branch: int):
     c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
     c.setopt(c.WRITEDATA, buffer)
     c.setopt(c.CUSTOMREQUEST, 'DELETE')
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    if (res_code >= 200 and res_code < 300):
+        return True
+    return False
+
+
+def renameFile(old_path: str, new_path: str, uuid: str, user_id: int, content: str, sha: str):
+    # PUT /repos/{owner}/{repo}/contents/{filepath}
+    # url-filepath ist neue Datei, in BODY: from_path, branch, content, sha
+
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{settings.GITEA_USERNAME}/{uuid}/contents/{new_path}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
+    post_data = {'content': base64.b64encode(
+                 content.encode('utf-8')).decode('utf-8'), 'sha': sha}
+
+    if user_id != 0:
+        post_data['branch'] = str(user_id)
+
+    post_data['from_path'] = old_path
+
+    c.setopt(c.POSTFIELDS, json.dumps(post_data))
+    c.setopt(pycurl.HTTPHEADER, [
+        'Accept: application/json', 'Content-Type: application/json'])
+    c.setopt(c.CUSTOMREQUEST, 'PUT')
+    c.setopt(c.WRITEDATA, buffer)
     c.perform()
     res_code = c.getinfo(c.RESPONSE_CODE)
     c.close()

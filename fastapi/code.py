@@ -521,3 +521,16 @@ def deleteProject(user_id: models_and_schemas.UserById, project_uuid: str = Path
             return False
 
     return True
+
+
+@code.post('/renameFile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def renameFile(file: models_and_schemas.RenameFile, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if file.new_path.strip() == "":
+        raise HTTPException(
+            status_code=400, detail="Wrong input: New path is empty.")
+
+    if not git.renameFile(file.old_path, file.new_path, project_uuid, user_id, file.content, file.sha):
+        raise HTTPException(
+            status_code=500, detail="Error on renaming file.")
+
+    return {'success': True}
