@@ -45,6 +45,7 @@ let state = reactive({
   websocket_open: false,
   renameFilePath: "",
   renameFileNewName: "",
+  isRenamingFile: false,
 });
 
 let homework = reactive({
@@ -728,10 +729,7 @@ function renameFileModal(path) {
 }
 
 function renameFile() {
-  // close modal
-  var elem = document.getElementById("renameFileModal");
-  var modal = Modal.getInstance(elem);
-  modal.hide();
+  state.isRenamingFile = true;
 
   if (state.renameFileNewName.trim() === "") {
     const toast = new Toast(
@@ -760,11 +758,35 @@ function renameFile() {
 
   CodeService.renameFile(route.params.project_uuid, route.params.user_id, state.renameFilePath, newPath, fileContent, sha).then(
     (response) => {
+      state.isRenamingFile = false;
+
+      // close modal
+      var elem = document.getElementById("renameFileModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
       if (response.data.success) {
         const toast = new Toast(
           document.getElementById("toastRenameFileSuccess")
         );
         toast.show();
+
+        //update file list
+        for (let i = 0; i < state.files.length; i++) {
+          if (state.files[i]["path"] === state.renameFilePath) {
+            state.files[i]["path"] = newPath
+            break
+          }
+        }
+
+        // update open file list
+        for (let i = 0; i < state.openFiles.length; i++) {
+          if (state.openFiles[i]["path"] === state.renameFilePath) {
+            state.openFiles[i]["path"] = newPath
+            break
+          }
+        }
+
       } else {
         const toast = new Toast(
           document.getElementById("toastRenameFileError")
@@ -775,6 +797,13 @@ function renameFile() {
       state.renameFilePath = ""
       state.renameFileNewName = ""
     }, (error) => {
+      state.isRenamingFile = false;
+
+      // close modal
+      var elem = document.getElementById("renameFileModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
       const toast = new Toast(
         document.getElementById("toastRenameFileError")
       );
@@ -932,7 +961,12 @@ function renameFile() {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
-            <button type="button" class="btn btn-primary" @click.prevent="renameFile()">Umbenennen</button>
+            <button type="button" class="btn btn-primary" @click.prevent="renameFile()">
+              <span v-if="!state.isRenamingFile">Umbenennen</span>
+              <div v-else class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
@@ -1200,9 +1234,9 @@ function renameFile() {
               <ul class="nav nav-tabs pt-2">
                 <li class="nav-item" v-for="f in state.openFiles">
                   <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                    active: f.tab == state.activeTab,
-                    changed: state.tabsWithChanges.includes(f.tab),
-                  }">
+                      active: f.tab == state.activeTab,
+                      changed: state.tabsWithChanges.includes(f.tab),
+                    }">
                     {{ f.path }}
                   </div>
                 </li>

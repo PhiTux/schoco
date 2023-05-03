@@ -249,8 +249,6 @@ def remove_branch(uuid: str, branch: int):
 
 
 def renameFile(old_path: str, new_path: str, uuid: str, user_id: int, content: str, sha: str):
-    # PUT /repos/{owner}/{repo}/contents/{filepath}
-    # url-filepath ist neue Datei, in BODY: from_path, branch, content, sha
 
     buffer = BytesIO()
     c = pycurl.Curl()
