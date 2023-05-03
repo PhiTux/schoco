@@ -40,7 +40,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 ## Progress
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
 
-**From now on, there are just a few more features missing (and polishing here and there of course...**
+**From now on, there are just a few more features missing (and polishing here and there of course...)**
 
 - [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
 - [x] Classroom-management (Creation of courses and assigning pupils to courses)
