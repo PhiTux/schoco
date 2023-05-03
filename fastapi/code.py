@@ -549,8 +549,23 @@ def renameHomework(homework: models_and_schemas.RenameHomework, db: Session = De
     return {'success': True}
 
 
-@code.post('/renameProject/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def renameProject(new_name: models_and_schemas.updateText, project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
+@code.post('/renameProject/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
+def renameProject(new_name: models_and_schemas.updateText, project_uuid: str = Path(), db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    # check if user is owner
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+    if project == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Project not found.")
+    user = crud.get_user_by_username(db=db, username=username)
+    if user == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: User not found.")
+    if user.id != project.owner_id:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: User is not owner of project.")
+
+    # check name input
     if new_name.text.strip() == "":
         raise HTTPException(
             status_code=400, detail="Wrong input: New name is empty.")
@@ -558,5 +573,55 @@ def renameProject(new_name: models_and_schemas.updateText, project_uuid: str = P
     if not crud.rename_project(db=db, uuid=project_uuid, new_name=new_name.text):
         raise HTTPException(
             status_code=500, detail="Error on renaming project.")
+
+    return {'success': True}
+
+
+@code.post('/duplicateProject/{project_uuid}', dependencies=[Depends(auth.oauth2_scheme)])
+def duplicateProject(project_uuid: str = Path(), db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    user = crud.get_user_by_username(db=db, username=username)
+    if user == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: User not found.")
+
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+    if project == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Project not found.")
+
+    if project.owner_id != user.id:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: User is not owner of project.")
+
+    # download all files
+    global results
+    results = []
+
+    res = recursively_download_all_files(
+        project_uuid=project_uuid, id=0, path="/")
+
+    new_project_uuid = str(uuid.uuid4())
+
+    # create new repo
+    if not git.create_repo(new_project_uuid):
+        return False
+    # add files
+    for f in res:
+        if not git.add_file(new_project_uuid, f['path'], str.encode(f['content'])):
+            git.remove_repo(new_project_uuid)
+            return False
+
+    # create db project entry
+    orig_project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+
+    new_project = models_and_schemas.Project(uuid=new_project_uuid, name=orig_project.name + " (copy)",
+                                             description=orig_project.description, owner_id=user.id, computation_time=orig_project.computation_time)
+
+    if not crud.create_project(db=db, project=new_project):
+        # delete git repo
+        git.remove_repo(project_uuid=new_project_uuid)
+        return False
 
     return {'success': True}

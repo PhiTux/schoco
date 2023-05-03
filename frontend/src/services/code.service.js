@@ -112,8 +112,12 @@ class CodeService {
         return axiosAuth.post('renameHomework', { 'id': id, 'new_name': newName })
     }
 
-    renameProject(uuid, user_id, new_name) {
-        return axiosAuth.post(`renameProject/${uuid}/${user_id}`, { 'text': new_name })
+    renameProject(uuid, new_name) {
+        return axiosAuth.post(`renameProject/${uuid}`, { 'text': new_name })
+    }
+
+    duplicateProject(uuid) {
+        return axiosAuth.post(`duplicateProject/${uuid}`)
     }
 }
 

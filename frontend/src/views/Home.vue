@@ -17,7 +17,6 @@ let state = reactive({
   old_homework: [],
   projectToDelete: null,
   renameUuid: "",
-  renameBranch: 0,
   renameId: 0,
   renameName: "",
   renameNameNew: "",
@@ -37,6 +36,9 @@ function getProjectsAsTeacher() {
   CodeService.getProjectsAsTeacher().then(
     (response) => {
       state.myProjects = response.data.projects
+      state.new_homework = []
+      state.old_homework = []
+
       response.data.homework.forEach(h => {
         if (new Date(h.deadline) > new Date()) {
           state.new_homework.push(h)
@@ -231,9 +233,8 @@ function renameHomework() {
   )
 }
 
-function askRenameProject(uuid, branch, name) {
+function askRenameProject(uuid, name) {
   state.renameUuid = uuid
-  state.renameBranch = branch
   state.renameName = name
   state.renameNameNew = name
   const modal = new Modal(document.getElementById("renameProjectModal"))
@@ -243,7 +244,7 @@ function askRenameProject(uuid, branch, name) {
 function renameProject() {
   state.isRenaming = true
 
-  CodeService.renameProject(state.renameUuid, state.renameBranch, state.renameNameNew).then(
+  CodeService.renameProject(state.renameUuid, state.renameNameNew).then(
     (response) => {
       state.isRenaming = false
 
@@ -283,6 +284,38 @@ function renameProject() {
   )
 }
 
+function duplicateProject(uuid) {
+  state.isDuplicating = true
+
+  CodeService.duplicateProject(uuid,).then(
+    (response) => {
+      state.isDuplicating = false
+      if (response.data.success) {
+        const toast = new Toast(
+          document.getElementById("toastDuplicateProjectSuccess")
+        );
+        toast.show();
+
+        // reload all projects
+        if (authStore.isTeacher()) {
+          getProjectsAsTeacher()
+        } else {
+          getProjectsAsPupil()
+        }
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastDuplicateProjectError")
+        );
+        toast.show();
+      }
+    },
+    error => {
+      state.isDuplicating = false
+      console.log(error.response)
+    }
+  )
+}
+
 </script>
 
 <template>
@@ -295,6 +328,24 @@ function renameProject() {
       <div class="d-flex">
         <div class="toast-body">
           Fehler beim Starten der Hausaufgabe. Probiere es erneut und frage andernfalls deine Lehrkraft um Hilfe.
+        </div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-success border-0" id="toastDuplicateProjectSuccess" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Projekt wurde dupliziert.
+        </div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-danger border-0" id="toastDuplicateProjectError" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Fehler beim Duplizieren des Projekts.
         </div>
       </div>
     </div>
@@ -517,7 +568,12 @@ function renameProject() {
         :deadline="h.deadline" @deleteHomework="askDeleteHomework" />
     </div>
 
-    <h1 v-if="state.myProjects.length">Meine Projekte</h1>
+    <h1 v-if="state.myProjects.length">Meine Projekte
+      <div v-if="state.isDuplicating" class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+
+    </h1>
     <div class="d-flex align-content-start flex-wrap">
       <ProjectCard v-for="p in state.myProjects" :name="p.name" :description="p.description" :uuid="p.uuid"
         @renameProject="askRenameProject" @duplicateProject="duplicateProject" @deleteProject="askDeleteProject" />

@@ -41,7 +41,7 @@ defineProps({
                         fixed-width /></a>
                 <ul class="dropdown-menu">
                     <li v-if="!isHomework"><a class="dropdown-item"
-                            @click="$emit('renameProject', uuid, branch, name)"><font-awesome-icon icon="fa-solid fa-pencil"
+                            @click="$emit('renameProject', uuid, name)"><font-awesome-icon icon="fa-solid fa-pencil"
                                 fixed-width /> Umbenennen</a></li>
                     <li v-if="isHomework && isTeacher"><a class="dropdown-item"
                             @click="$emit('renameHomework', id, name)"><font-awesome-icon icon="fa-solid fa-pencil"
