@@ -1,4 +1,4 @@
-> 🛠️️ This project is close to alpha-testing (April 2023) and under heavy development! It's planned to have it 'finished' by ~September 2023
+> 🛠️️ This project is close to alpha-testing (May 2023) and under heavy development! It's planned to have it 'finished' by ~September 2023
 
 # Chapters
 - [What is schoco? {🍫}](#what-is-schoco-)
@@ -17,7 +17,7 @@ The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github
 ---
 It is mainly developed to enable coding-homeworks for pupils what has failed so far in reality for two reasons:
  1. Installation of the cumbersome JRE and IDEs
- 2. Saving and sharing the solutions via Mail/USB/Messenger??? WTF!?
+ 2. Saving and sharing the solutions via Mail/USB-Stick/Messenger??? WTF!?
 ---
  ![IDE](./readme/IDE.png)
   See all screenshots [here](./readme/README.md)!
@@ -38,9 +38,10 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 
 ## Progress
-**Progress is far (around 80% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can already see and view all pupils solutions and their results of JUnit-Tests ✨**
+**Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
 
-Even a completed task just means, that the specific base-work is done, but that the feature might still need some fine tuning...
+**From now on, there are just a few more features missing (and polishing here and there of course...**
+
 - [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
 - [x] Classroom-management (Creation of courses and assigning pupils to courses)
 - [x] Create a new Java-Project based on a Hello-World-template

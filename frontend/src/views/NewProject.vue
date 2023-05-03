@@ -100,8 +100,8 @@ function newHelloWorld() {
       </div>
     </div>
 
-    <h2>2) Vorlage wählen</h2>
-    <h2>3) Zip hochladen</h2>
+    <!-- <h2>2) Vorlage wählen</h2>
+    <h2>3) Zip hochladen</h2> -->
   </div>
 </template>
 

@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeMount, reactive, watch, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Toast, Popover, Modal } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
@@ -18,6 +18,7 @@ import '@vuepic/vue-datepicker/dist/main.css'
 
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 
 let state = reactive({
   projectName: "",
@@ -815,6 +816,28 @@ function renameFile() {
     })
 }
 
+function exit() {
+  //include some way to ask, if editor should really get closed if there are unsaved changes...
+
+  /* if (state.tabsWithChanges.length !== 0) {
+    var elem = document.getElementById("exitModal");
+    var modal = Modal.getInstance(elem);
+    modal.show();
+    return
+  } */
+
+  // if (pupil) OR (teacher and !homework): go to /home
+  if (!authStore.isTeacher() || (authStore.isTeacher() && !state.isHomework)) {
+    router.push({
+      name: "home"
+    });
+  } else { // else: teacher
+    router.go(-1)
+  }
+
+}
+
+
 </script>
 
 <template>
@@ -1063,7 +1086,7 @@ function renameFile() {
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse d-flex" id="navbarSupportedContent">
           <ul class="navbar-nav">
             <li class="nav-item dropdown mx-3">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -1072,23 +1095,15 @@ function renameFile() {
               <ul class="dropdown-menu">
                 <li>
                   <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
-                    Neue Datei</a>
+                    Neue Datei (ohne Funktion)</a>
                 </li>
                 <li>
                   <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-folder-plus" /> Neuer
-                    Ordner</a>
+                    Ordner (ohne Funktion)</a>
                 </li>
                 <li>
                   <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
-                    löschen</a>
-                </li>
-                <li>
-                  <hr class="dropdown-divider" />
-                </li>
-
-                <li>
-                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-xmark" /> Projekt
-                    schließen</a>
+                    löschen (ohne Funktion)</a>
                 </li>
               </ul>
             </li>
@@ -1144,6 +1159,8 @@ function renameFile() {
                     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
                   }) }}</span></div>
           </ul>
+          <a class="ms-auto btn btn-primary" @click.prevent="exit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
+              size="xl" /></a>
         </div>
       </div>
     </nav>
