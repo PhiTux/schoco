@@ -584,19 +584,19 @@ function saveProjectName() {
   if (state.isSavingProjectName) return;
   state.isSavingProjectName = true
 
-  if (state.newProjectName.length < 3) {
+  if (state.newProjectName.trim() === "") {
     const toast = new Toast(
-      document.getElementById("toastUpdateProjectNameTooShort")
+      document.getElementById("toastUpdateProjectNameEmpty")
     );
     toast.show();
     state.isSavingProjectName = false;
     return;
   }
 
-  CodeService.updateProjectName(route.params.project_uuid, route.params.user_id, state.newProjectName).then(
+  CodeService.updateProjectName(route.params.project_uuid, route.params.user_id, state.newProjectName.trim()).then(
     (response) => {
       if (response.data) {
-        state.projectName = state.newProjectName;
+        state.projectName = state.newProjectName.trim();
         state.isSavingProjectName = false;
         state.editingProjectName = false;
       } else {
@@ -611,7 +611,7 @@ function saveProjectName() {
     (error) => {
       if (error.response.status === 400) {
         const toast = new Toast(
-          document.getElementById("toastUpdateProjectNameTooShort")
+          document.getElementById("toastUpdateProjectNameEmpty")
         );
         toast.show();
       } else {
@@ -875,11 +875,11 @@ function renameFile() {
         </div>
       </div>
 
-      <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateProjectNameTooShort" role="alert"
+      <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateProjectNameEmpty" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Projektname muss mindestens 3 Zeichen lang sein!
+            Projektname darf nicht leer sein!
           </div>
         </div>
       </div>

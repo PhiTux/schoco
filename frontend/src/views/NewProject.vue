@@ -13,9 +13,9 @@ let state = reactive({
 });
 
 function newHelloWorld() {
-  if (state.helloWorldName.length < 3) {
+  if (state.helloWorldName.trim() === "") {
     const toast = new Toast(
-      document.getElementById("toastProjectNameTooShort")
+      document.getElementById("toastProjectNameEmpty")
     );
     toast.show();
     return;
@@ -23,8 +23,9 @@ function newHelloWorld() {
 
   state.creatingProject = true;
 
-  CodeService.createNewHelloWorld(state.helloWorldName, state.helloWorldDescription).then(
+  CodeService.createNewHelloWorld(state.helloWorldName.trim(), state.helloWorldDescription).then(
     (response) => {
+      state.creatingProject = false;
       router.push({
         name: "ide",
         params: { project_uuid: response.data, user_id: 0 },
@@ -32,10 +33,11 @@ function newHelloWorld() {
     },
     (error) => {
       console.log(error.response);
+      state.creatingProject = false;
 
       if (error.response.status === 400) {
         const toast = new Toast(
-          document.getElementById("toastProjectNameTooShort")
+          document.getElementById("toastProjectNameEmpty")
         );
         toast.show();
       } else {
@@ -54,11 +56,11 @@ function newHelloWorld() {
 <template>
   <!-- Toasts -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNameTooShort" role="alert"
+    <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNameEmpty" role="alert"
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
-          Du musst einen Projektnamen mit mindestens 3 Zeichen eingeben.
+          Dein Projektname darf nicht leer sein.
         </div>
       </div>
     </div>

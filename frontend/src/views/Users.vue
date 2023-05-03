@@ -434,13 +434,21 @@ function abort_edit_user() {
 }
 
 function change_name(id) {
+  if (state.edited_name.trim() == "") {
+    const toast = new Toast(
+      document.getElementById("toastUpdateNameEmpty")
+    );
+    toast.show();
+    return
+  }
+
   state.changingName = true
-  UserService.changeName(id, state.edited_name).then(
+  UserService.changeName(id, state.edited_name.trim()).then(
     response => {
       if (response.data) {
         for (let i = 0; i < allUsers.value.length; i++) {
           if (allUsers.value[i].id == id) {
-            allUsers.value[i].full_name = state.edited_name
+            allUsers.value[i].full_name = state.edited_name.trim()
             break
           }
         }
@@ -457,13 +465,21 @@ function change_name(id) {
 }
 
 function change_username(id) {
+  if (state.edited_username.trim() == "") {
+    const toast = new Toast(
+      document.getElementById("toastUpdateNameEmpty")
+    );
+    toast.show();
+    return
+  }
+
   state.changingUsername = true
-  UserService.changeUsername(id, state.edited_username).then(
+  UserService.changeUsername(id, state.edited_username.trim()).then(
     response => {
       if (response.data) {
         for (let i = 0; i < allUsers.value.length; i++) {
           if (allUsers.value[i].id == id) {
-            allUsers.value[i].username = state.edited_username
+            allUsers.value[i].username = state.edited_username.trim()
             break
           }
         }
@@ -539,6 +555,15 @@ function openModalRemoveCourse(id) {
 
 <template>
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateNameEmpty" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Projektname darf nicht leer sein!
+        </div>
+      </div>
+    </div>
+
     <div class="toast align-items-center text-bg-success border-0" id="toastSuccessPasswordChanged" role="alert"
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
