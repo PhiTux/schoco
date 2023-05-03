@@ -534,3 +534,29 @@ def renameFile(file: models_and_schemas.RenameFile, project_uuid: str = Path(), 
             status_code=500, detail="Error on renaming file.")
 
     return {'success': True}
+
+
+@code.post('/renameHomework', dependencies=[Depends(auth.check_teacher)])
+def renameHomework(homework: models_and_schemas.RenameHomework, db: Session = Depends(database_config.get_db)):
+    if homework.new_name.strip() == "":
+        raise HTTPException(
+            status_code=400, detail="Wrong input: New name is empty.")
+
+    if not crud.rename_homework(db=db, id=homework.id, new_name=homework.new_name):
+        raise HTTPException(
+            status_code=500, detail="Error on renaming homework.")
+
+    return {'success': True}
+
+
+@code.post('/renameProject/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def renameProject(new_name: models_and_schemas.updateText, project_uuid: str = Path(), db: Session = Depends(database_config.get_db)):
+    if new_name.text.strip() == "":
+        raise HTTPException(
+            status_code=400, detail="Wrong input: New name is empty.")
+
+    if not crud.rename_project(db=db, uuid=project_uuid, new_name=new_name.text):
+        raise HTTPException(
+            status_code=500, detail="Error on renaming project.")
+
+    return {'success': True}

@@ -31,10 +31,33 @@ defineProps({
             }) }}</span></div>
         <div class="card-body">
 
-            <h5 class="card-title d-inline-flex">
-                <CourseBadge v-if="isTeacher && isHomework" :color="courseColor" :font-dark="courseFontDark"
-                    :name="courseName"></CourseBadge>{{ name }}
-            </h5>
+            <div class="d-flex align-items-center">
+                <h5 class="card-title d-inline-flex">
+                    <CourseBadge v-if="isTeacher && isHomework" :color="courseColor" :font-dark="courseFontDark"
+                        :name="courseName"></CourseBadge>{{ name }}
+                </h5>
+                <!-- Menu -->
+                <a class="deleteButton ms-auto" data-bs-toggle="dropdown"><font-awesome-icon icon="fa-bars"
+                        fixed-width /></a>
+                <ul class="dropdown-menu">
+                    <li v-if="!isHomework"><a class="dropdown-item"
+                            @click="$emit('renameProject', uuid, branch, name)"><font-awesome-icon icon="fa-solid fa-pencil"
+                                fixed-width /> Umbenennen</a></li>
+                    <li v-if="isHomework && isTeacher"><a class="dropdown-item"
+                            @click="$emit('renameHomework', id, name)"><font-awesome-icon icon="fa-solid fa-pencil"
+                                fixed-width /> Umbenennen</a></li>
+                    <li v-if="!isHomework"><a class="dropdown-item"
+                            @click="$emit('duplicateProject', uuid)"><font-awesome-icon icon="fa-solid fa-copy"
+                                fixed-width /> Duplizieren</a></li>
+                    <li v-if="isHomework"><a class="dropdown-item"
+                            @click.prevent="$emit('deleteHomework', id, name)"><font-awesome-icon icon="fa-solid fa-trash"
+                                fixed-width /> Löschen</a></li>
+                    <li v-else><a class="dropdown-item"
+                            @click.prevent="$emit('deleteProject', uuid, branch, name)"><font-awesome-icon
+                                icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
+                </ul>
+            </div>
+
             <p class="card-text">
                 {{ description }}
             </p>
@@ -50,23 +73,27 @@ defineProps({
                 <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
 
                 <!-- add a button to delete a project -->
-                <a v-if="isTeacher && isHomework" @click.prevent="$emit('deleteHomework', id, name)"
+                <!-- <a v-if="isTeacher && isHomework" @click.prevent="$emit('deleteHomework', id, name)"
                     class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a>
                 <a v-else-if="(isTeacher && !isHomework) || (!isTeacher && !(isHomework && !isEditing))"
                     @click.prevent="$emit('deleteProject', uuid, branch, name)"
-                    class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a>
+                    class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a> -->
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.dropdown-item {
+    cursor: pointer;
+}
+
 .card:hover .deleteButton {
-    display: block;
+    color: #5d5fea;
 }
 
 .card .deleteButton {
-    display: none;
+    /* display: none; */
     cursor: pointer;
     color: rgb(54, 54, 54);
     transition: ease 0.3s;

@@ -107,6 +107,14 @@ class CodeService {
     renameFile(project_uuid, user_id, oldName, newName, fileContent, sha) {
         return axiosAuth.post(`renameFile/${project_uuid}/${user_id}`, { 'old_path': oldName, 'new_path': newName, 'content': fileContent, 'sha': sha })
     }
+
+    renameHomework(id, newName) {
+        return axiosAuth.post('renameHomework', { 'id': id, 'new_name': newName })
+    }
+
+    renameProject(uuid, user_id, new_name) {
+        return axiosAuth.post(`renameProject/${uuid}/${user_id}`, { 'text': new_name })
+    }
 }
 
 export default new CodeService()

@@ -194,3 +194,8 @@ class RenameFile(BaseModel):
     new_path: str
     content: str
     sha: str
+
+
+class RenameHomework(BaseModel):
+    id: int
+    new_name: str

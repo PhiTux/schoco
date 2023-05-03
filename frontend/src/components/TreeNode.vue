@@ -32,8 +32,8 @@ function renameFile(path) {
             <a v-else @click="$emit('toggleFolder', props.path, $event)">
                 <div class="name px-1">{{ props.name }}</div>
             </a>
-            <a v-if="props.path !== 'Schoco.java/'" class="file-dropdown dropdown-toggle dropdown-toggle-split"
-                data-bs-toggle="dropdown"></a>
+            <a v-if="props.path !== 'Schoco.java/' && props.path !== 'Tests.java/'"
+                class="file-dropdown dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></a>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" @click="$emit('renameFile', props.path)"><font-awesome-icon
                             icon="fa-solid fa-pencil" fixed-width /> Umbenennen</a></li>

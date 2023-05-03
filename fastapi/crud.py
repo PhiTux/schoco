@@ -543,3 +543,31 @@ def remove_editing_homework_by_uuid_and_user_id(db: Session, uuid: str, user_id:
         db.rollback()
         return False
     return True
+
+
+def rename_homework(db: Session, id: int, new_name: str):
+    template_project_id = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.id == id)).first().template_project_id
+    template_project = get_project_by_id(db, template_project_id)
+    template_project.name = new_name
+    try:
+        db.add(template_project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def rename_project(db: Session, uuid: str, new_name: str):
+    project = get_project_by_project_uuid(db, uuid)
+    project.name = new_name
+    try:
+        db.add(project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True

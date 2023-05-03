@@ -16,6 +16,13 @@ let state = reactive({
   new_homework: [],
   old_homework: [],
   projectToDelete: null,
+  renameUuid: "",
+  renameBranch: 0,
+  renameId: 0,
+  renameName: "",
+  renameNameNew: "",
+  isRenaming: false,
+  isDeleting: false,
 });
 
 onBeforeMount(() => {
@@ -168,16 +175,162 @@ function deleteHomework(id) {
   )
 }
 
+function askRenameHomework(id, name) {
+  state.renameId = id
+  state.renameName = name
+  state.renameNameNew = name
+  const modal = new Modal(document.getElementById("renameHomeworkModal"))
+  modal.show()
+}
+
+function renameHomework() {
+  state.isRenaming = true
+
+  CodeService.renameHomework(state.renameId, state.renameNameNew).then(
+    (response) => {
+      state.isRenaming = false
+
+      // close modal
+      var elem = document.getElementById("renameHomeworkModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        // update name in list
+        state.new_homework.forEach(h => {
+          if (h.id == state.renameId) {
+            h.name = state.renameNameNew
+          }
+        })
+        state.old_homework.forEach(h => {
+          if (h.id == state.renameId) {
+            h.name = state.renameNameNew
+          }
+        })
+
+        const toast = new Toast(
+          document.getElementById("toastRenameHomeworkSuccess")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastRenameHomeworkError")
+        );
+        toast.show();
+      }
+    },
+    error => {
+      // close modal
+      var elem = document.getElementById("renameHomeworkModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      state.isRenaming = false
+      console.log(error.response)
+    }
+  )
+}
+
+function askRenameProject(uuid, branch, name) {
+  state.renameUuid = uuid
+  state.renameBranch = branch
+  state.renameName = name
+  state.renameNameNew = name
+  const modal = new Modal(document.getElementById("renameProjectModal"))
+  modal.show()
+}
+
+function renameProject() {
+  state.isRenaming = true
+
+  CodeService.renameProject(state.renameUuid, state.renameBranch, state.renameNameNew).then(
+    (response) => {
+      state.isRenaming = false
+
+      // close modal
+      var elem = document.getElementById("renameProjectModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        // update name in list
+        state.myProjects.forEach(p => {
+          if (p.uuid == state.renameUuid) {
+            p.name = state.renameNameNew
+          }
+        })
+
+        const toast = new Toast(
+          document.getElementById("toastRenameProjectSuccess")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastRenameProjectError")
+        );
+        toast.show();
+      }
+    },
+    error => {
+      // close modal
+      var elem = document.getElementById("renameProjectModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      state.isRenaming = false
+      console.log(error.response)
+    }
+  )
+}
+
 </script>
 
 <template>
   <!-- Toasts -->
+
+
   <div class="toast-container position-fixed bottom-0 end-0 p-3">
     <div class="toast align-items-center text-bg-danger border-0" id="toastStartHomeworkError" role="alert"
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
           Fehler beim Starten der Hausaufgabe. Probiere es erneut und frage andernfalls deine Lehrkraft um Hilfe.
+        </div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-success border-0" id="toastRenameHomeworkSuccess" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Hausaufgabe wurde umbenannt.
+        </div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-danger border-0" id="toastRenameHomeworkError" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Hausaufgabe konnte nicht umbenannt werden.
+        </div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-success border-0" id="toastRenameProjectSuccess" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Projekt wurde umbenannt.
+        </div>
+      </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-danger border-0" id="toastRenameProjectError" role="alert"
+      aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+          Projekt konnte nicht umbenannt werden.
         </div>
       </div>
     </div>
@@ -202,6 +355,67 @@ function deleteHomework(id) {
   </div>
 
   <!-- Modals -->
+  <div class="modal fade" id="renameHomeworkModal" tabindex="-1" aria-labelledby="renameHomeworkModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content dark-text">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Hausaufgabe umbenennen</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Gib den neuen Namen für die Hausaufgabe <b>{{ state.renameName }}</b> ein:
+          <div class="input-group mt-3">
+            <input type="text" class="form-control" id="renameHomeworknameInput" :placeholder="state.renameName"
+              v-model="state.renameNameNew" @keyup.enter="renameHomework()">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+          <button :disabled="state.renameNameNew.trim() === ''" @click.prevent="renameHomework()" type="button"
+            class="btn btn-primary">
+            <span v-if="!state.isRenaming">
+              Umbenennen
+            </span>
+            <div v-else class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="renameProjectModal" tabindex="-1" aria-labelledby="renameProjectModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content dark-text">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Projekt umbenennen</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Gib den neuen Namen für das Projekt <b>{{ state.renameName }}</b> ein:
+          <div class="input-group mt-3">
+            <input type="text" class="form-control" id="renameProjectnameInput" :placeholder="state.renameName"
+              v-model="state.renameNameNew" @keyup.enter="renameProject()">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+          <button :disabled="state.renameNameNew.trim() === ''" @click.prevent="renameProject()" type="button"
+            class="btn btn-primary"><span v-if="!state.isRenaming">
+              Umbenennen
+            </span>
+            <div v-else class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-labelledby="deleteProjectModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
@@ -280,12 +494,13 @@ function deleteHomework(id) {
       <!-- if teacher: -->
       <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.new_homework" isHomework isTeacher :name="h.name"
         :description="h.description" :id="h.id" :deadline="h.deadline" :courseName="h.course_name"
-        :courseColor="h.course_color" :courseFontDark="h.course_font_dark" @deleteHomework="askDeleteHomework" />
+        :courseColor="h.course_color" :courseFontDark="h.course_font_dark" @renameHomework="askRenameHomework"
+        @deleteHomework="askDeleteHomework" />
 
       <!-- else -->
       <ProjectCard v-else v-for="h in state.new_homework" isHomework @startHomework="startHomework"
         :isEditing="h.is_editing" :name="h.name" :description="h.description" :uuid="h.uuid" :branch="h.branch" :id="h.id"
-        :deadline="h.deadline" @deleteProject="askDeleteProject" />
+        :deadline="h.deadline" @deleteHomework="askDeleteHomework" />
     </div>
 
     <h1 v-if="state.old_homework.length">Frühere Hausaufgaben</h1>
@@ -293,18 +508,19 @@ function deleteHomework(id) {
       <!-- if teacher: -->
       <ProjectCard v-if="authStore.isTeacher()" v-for="h in state.old_homework" isHomework isOld isTeacher :name="h.name"
         :description="h.description" :id="h.id" :deadline="h.deadline" :courseName="h.course_name"
-        :courseColor="h.course_color" :courseFontDark="h.course_font_dark" @deleteHomework="askDeleteHomework" />
+        :courseColor="h.course_color" :courseFontDark="h.course_font_dark" @renameHomework="askRenameHomework"
+        @deleteHomework="askDeleteHomework" />
 
       <!-- else -->
       <ProjectCard v-else v-for="h in state.old_homework" isHomework isOld @startHomework="startHomework"
         :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid" :description="h.description" :branch="h.branch" :id="h.id"
-        :deadline="h.deadline" @deleteProject="askDeleteProject" />
+        :deadline="h.deadline" @deleteHomework="askDeleteHomework" />
     </div>
 
     <h1 v-if="state.myProjects.length">Meine Projekte</h1>
     <div class="d-flex align-content-start flex-wrap">
       <ProjectCard v-for="p in state.myProjects" :name="p.name" :description="p.description" :uuid="p.uuid"
-        @deleteProject="askDeleteProject" />
+        @renameProject="askRenameProject" @duplicateProject="duplicateProject" @deleteProject="askDeleteProject" />
     </div>
   </div>
 </template>
