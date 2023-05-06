@@ -31,7 +31,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity sending directories or files.
 - Pupils can only open their own project or homeworks - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
 - Use gitea on backend for storing all code.
-- Compilation and running of the programs works completely on the server. Done by [/cookies](/cookies) which stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Well, actually it's part of schoco and therefore will be renamed to schoco-cookies 🍪 in the future 🤭.
+- Compilation and running of the programs works completely on the server. Done by [/cookies](/cookies) which stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Well, actually it's part of schoco and therefore the image + container are called schoco-cookies 🍪🤭.
 
 ## Architecture
 <img src="./schoco_architecture.svg">
