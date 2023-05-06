@@ -2,12 +2,21 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import JSONResponse
-from multiprocessing import Lock, current_process
+from multiprocessing import Lock
 import database_config
 import users
 import code
 import cookies_api
 from fastapi_utils.tasks import repeat_every
+""" from fastapi.logger import logger
+import logging
+
+gunicorn_logger = logging.getLogger('gunicorn.error')
+logger.handlers = gunicorn_logger.handlers
+if __name__ != "main":
+    logger.setLevel(gunicorn_logger.level)
+else:
+    logger.setLevel(logging.DEBUG) """
 
 
 app = FastAPI()

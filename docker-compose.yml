@@ -17,6 +17,7 @@ services:
       - MAX_CONTAINERS=4
       - SECRET_KEY=secret
       - TEACHER_KEY=teacherkey
+      - COOKIES_TAG=1.0.0
       - GITEA_USERNAME=schoco
       - GITEA_PASSWORD=schoco1234
       - GITEA_HOST=http://schoco-gitea:3000

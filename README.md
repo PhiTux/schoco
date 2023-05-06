@@ -108,7 +108,7 @@ Otherwise not necessary (neither during developing nor production):
 
 1. Build fastapi image: `cd fastapi && docker build -t phitux/schoco-backend:latest .`
 2. Compile the cookies API: `cd cookies/api && javac Java_api.java`
-3. Build cookies worker image: `cd cookies && docker build -t phitux/cookies .`
+3. Build cookies worker image: `cd cookies && docker build -t phitux/schoco-cookies .`
 4. Build frontend image: `docker build -t phitux/schoco-nginx:latest .`
 5. Create docker network for schoco: `docker network create schoco` 
 6. Set the `DOCKER_GROUP_ID` env variable: `export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)`

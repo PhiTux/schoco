@@ -13,6 +13,15 @@ import uuid
 from multiprocessing import Manager
 from config import settings
 import pycurl
+#from fastapi.logger import logger
+#import logging
+
+""" gunicorn_logger = logging.getLogger('gunicorn.error')
+logger.handlers = gunicorn_logger.handlers
+if __name__ != "main":
+    logger.setLevel(gunicorn_logger.level)
+else:
+    logger.setLevel(logging.DEBUG) """
 
 
 if settings.PRODUCTION:
@@ -123,7 +132,7 @@ def save_compilation_result(container_uuid: str, project_uuid: str):
 def createNewContainer():
     """Creates (and runs!) new container and returns the id, uuid, ip and port."""
     new_uuid = uuid.uuid4()
-    new_name = f"cookies-{new_uuid}"
+    new_name = f"schoco-cookies-{new_uuid}"
 
     # build and create directory for this uuid
     uuid_dir = Path(os.path.join(settings.FULL_DATA_PATH, str(new_uuid)))
@@ -135,9 +144,7 @@ def createNewContainer():
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=3700, hard=5000)
     new_container = client.containers.run(
-        'phitux/cookies', detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
-    # TODO place all schoco+cookies-containers in same schoco-network -> then a cookies-container can get called by its containername!!
-    # -> user-defined bridge
+        f"phitux/schoco-cookies", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
     ip = apiclient.inspect_container(new_name)[
@@ -165,13 +172,11 @@ def fillNewContainersQueue():
     client = docker.from_env()
     containers = client.containers.list(all=True)
     for c in containers:
-        if str(c.name).startswith('cookies-'):
-            print("remove container name:", str(c.name))
-            print("remove container id:", str(c.id))
+        if str(c.name).startswith('schoco-cookies-'):
 
             # remove dir
             try:
-                dir = os.path.join(data_path, c.name[8:])
+                dir = os.path.join(data_path, c.name[15:])
                 if os.path.exists(dir):
                     shutil.rmtree(dir)
             except:
@@ -208,13 +213,12 @@ def prepareCompile(filesList: models_and_schemas.filesList):
 
 
 def startCompile(uuid: str, port: int, computation_time: int):
-    print("start compile at port: " + str(port))
 
     # pycurl to cookies-java-server "/compile"
     buffer = BytesIO()
     c = pycurl.Curl()
     if settings.PRODUCTION:
-        host = f"cookies-{uuid}:8080"
+        host = f"schoco-cookies-{uuid}:8080"
     else:
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/compile")
@@ -244,8 +248,6 @@ def startCompile(uuid: str, port: int, computation_time: int):
 def kill_n_create(container_uuid: str):
     """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
 
-    print("kill " + container_uuid)
-
     # remove containerInfo from runningContainers
     runningContainers.remove_by_uuid(container_uuid)
 
@@ -256,7 +258,7 @@ def kill_n_create(container_uuid: str):
     # kill and (hopefully automatically) remove container
     client = docker.from_env()
     try:
-        c = client.containers.get(f"cookies-{container_uuid}")
+        c = client.containers.get(f"schoco-cookies-{container_uuid}")
     except (docker.errors.NotFound, docker.errors.APIError) as e:
         print(e)
         print(traceback.format_exc())
@@ -269,10 +271,6 @@ def kill_n_create(container_uuid: str):
 
     # refill newContainers
     refillNewContainersQueue()
-
-# TODO Disable Networking on Container after start execution
-# or use following command to enable Security Manager -> disable Networking, file access, ...:
-# java -Djava.security.manager=default my.main.Class
 
 
 def prepare_execute(project_uuid: str, user_id: int):
@@ -308,13 +306,12 @@ def prepare_execute(project_uuid: str, user_id: int):
 
 
 def start_execute(uuid: str, port: int, computation_time: int):
-    print("start execute at port: " + str(port))
 
     # pycurl to cookies-java-server "/execute"
     buffer = BytesIO()
     c = pycurl.Curl()
     if settings.PRODUCTION:
-        host = f"cookies-{uuid}:8080"
+        host = f"schoco-cookies-{uuid}:8080"
     else:
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/execute")
@@ -343,14 +340,13 @@ def start_execute(uuid: str, port: int, computation_time: int):
 
 
 def start_test(uuid: str, port: int, computation_time: int):
-    print("start test at port: " + str(port))
 
     # pycurl to cookies-java-server "/test"
     buffer = BytesIO()
     c = pycurl.Curl()
 
     if settings.PRODUCTION:
-        host = f"cookies-{uuid}:8080"
+        host = f"schoco-cookies-{uuid}:8080"
     else:
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/test")
