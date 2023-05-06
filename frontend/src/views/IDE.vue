@@ -557,7 +557,7 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
         results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die untere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
       }
       else {
-        let percent = (response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100
+        let percent = Math.round((response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100 * 10) / 10
         results.value += `Du hast ${percent}% der Tests bestanden. Vielleicht hilft dir die untere Ausgabe, um die restlichen Tests auch noch zu bestehen 🤗`
       }
 

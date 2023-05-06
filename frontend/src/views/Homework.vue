@@ -34,14 +34,14 @@ onBeforeMount(() => {
 
 function calc_result(input_string) {
     let input = JSON.parse(input_string)
-    return input.passed_tests / (input.passed_tests + input.failed_tests) * 100
+    return Math.round(input.passed_tests / (input.passed_tests + input.failed_tests) * 100 * 10) / 10
 }
 
 function calc_result_color(input_string) {
     let result = calc_result(input_string)
     if (result <= 30)
         return 1
-    if (result <= 75)
+    if (result <= 90)
         return 2
     return 3
 }
