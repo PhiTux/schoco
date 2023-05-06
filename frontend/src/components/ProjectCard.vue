@@ -1,7 +1,13 @@
 <script setup>
+import { onMounted, onUpdated, reactive } from "vue";
 import CourseBadge from "./CourseBadge.vue"
+import TextClamp from "vue3-text-clamp";
 
-defineProps({
+let state = reactive({
+    showToggle: false
+})
+
+const props = defineProps({
     name: String,
     description: String,
     deadline: String,
@@ -20,6 +26,20 @@ defineProps({
     lastEdited: String,
     evaluation: Number
 });
+
+onMounted(() => {
+    if (props.isHomework) {
+        let e = document.getElementById("description-" + props.id)
+        if (e.innerText != props.description) {
+            state.showToggle = true
+        }
+    } else {
+        let e = document.getElementById("description-" + props.uuid)
+        if (e.innerText != props.description) {
+            state.showToggle = true
+        }
+    }
+})
 
 </script>
 
@@ -58,9 +78,15 @@ defineProps({
                 </ul>
             </div>
 
-            <p class="card-text">
-                {{ description }}
-            </p>
+            <text-clamp :id="props.isHomework ? 'description-' + props.id : 'description-' + props.uuid" class="text-clamp"
+                :text="description" :max-lines="2">
+                <template #after="{ toggle, clamped }">
+                    <a v-if="state.showToggle" class="description-toggle" @click="toggle">
+                        {{ clamped == true ? "mehr" : "weniger" }}
+                    </a>
+                </template>
+            </text-clamp>
+
             <!-- :href="'#/startHomework/' + id" -->
             <div class="d-flex align-items-center">
                 <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
@@ -84,6 +110,18 @@ defineProps({
 </template>
 
 <style scoped>
+.text-clamp {
+    white-space: pre-line;
+}
+
+
+.description-toggle {
+    margin-left: 0.5rem;
+    color: #5d5fea;
+    cursor: pointer;
+}
+
+
 .dropdown-item {
     cursor: pointer;
 }
@@ -117,9 +155,11 @@ defineProps({
     border-color: yellow;
 }
 
+
 .card {
     width: 48%;
-    transition: ease 0.3s;
+    transition: all 0.3s ease;
+    /* transition: height 0.3s; */
 }
 
 .card:hover {
