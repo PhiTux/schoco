@@ -69,9 +69,12 @@ onMounted(() => {
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('duplicateProject', uuid)"><font-awesome-icon icon="fa-solid fa-copy"
                                 fixed-width /> Duplizieren</a></li>
-                    <li v-if="isHomework"><a class="dropdown-item"
+                    <li v-if="isHomework && isTeacher"><a class="dropdown-item"
                             @click.prevent="$emit('deleteHomework', id, name)"><font-awesome-icon icon="fa-solid fa-trash"
                                 fixed-width /> Löschen</a></li>
+                    <li v-else-if="isHomework && !isTeacher"><a class="dropdown-item"
+                            @click.prevent="$emit('deleteHomeworkBranch', uuid, branch, name)"><font-awesome-icon
+                                icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
                     <li v-else><a class="dropdown-item"
                             @click.prevent="$emit('deleteProject', uuid, branch, name)"><font-awesome-icon
                                 icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>

@@ -107,6 +107,14 @@ function askDeleteHomework(id, name) {
   modal.show()
 }
 
+function askDeleteHomeworkBranch(uuid, user_id, name) {
+  state.deleteUuid = uuid
+  state.deleteUserId = user_id
+  state.deleteName = name
+  const modal = new Modal(document.getElementById("deleteHomeworkBranchModal"))
+  modal.show()
+}
+
 function askDeleteProject(uuid, user_id, name) {
   state.deleteUuid = uuid
   state.deleteUserId = user_id
@@ -551,7 +559,7 @@ function duplicateProject(uuid) {
       <!-- else -->
       <ProjectCard v-else v-for="h in state.new_homework" isHomework @startHomework="startHomework"
         :isEditing="h.is_editing" :name="h.name" :description="h.description" :uuid="h.uuid" :branch="h.branch" :id="h.id"
-        :deadline="h.deadline" @deleteHomework="askDeleteHomework" />
+        :deadline="h.deadline" @deleteHomeworkBranch="askDeleteHomeworkBranch" />
     </div>
 
     <h1 v-if="state.old_homework.length">Frühere Hausaufgaben</h1>
@@ -565,7 +573,7 @@ function duplicateProject(uuid) {
       <!-- else -->
       <ProjectCard v-else v-for="h in state.old_homework" isHomework isOld @startHomework="startHomework"
         :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid" :description="h.description" :branch="h.branch" :id="h.id"
-        :deadline="h.deadline" @deleteHomework="askDeleteHomework" />
+        :deadline="h.deadline" @deleteHomeworkBranch="askDeleteHomeworkBranch" />
     </div>
 
     <h1 v-if="state.myProjects.length">Meine Projekte
