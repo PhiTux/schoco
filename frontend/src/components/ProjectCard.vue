@@ -91,7 +91,7 @@ onMounted(() => {
             </text-clamp>
 
             <!-- :href="'#/startHomework/' + id" -->
-            <div class="d-flex align-items-center">
+            <div class="mt-2 d-flex align-items-center">
                 <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
                     class="btn btn-primary">🌟Hausaufgabe
                     beginnen</a>
