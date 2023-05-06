@@ -490,9 +490,15 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
   CodeService.startExecute(ip, port, uuid, project_uuid, user_id).then(
     (response) => {
       console.log("stopped executing")
+      if (state.receivedWS == false) {
+        results.value = "Programm wurde (erfolgreich) beendet! ✔";
+      }
       state.isExecuting = false;
     },
     (error) => {
+      if (state.receivedWS == false) {
+        results.value = "Programm wurde (vermutlich fehlerhaft) beendet! ❌";
+      }
       state.isExecuting = false;
       console.log(error.response);
     }
@@ -1251,9 +1257,9 @@ function exit() {
               <ul class="nav nav-tabs pt-2">
                 <li class="nav-item" v-for="f in state.openFiles">
                   <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                      active: f.tab == state.activeTab,
-                      changed: state.tabsWithChanges.includes(f.tab),
-                    }">
+                    active: f.tab == state.activeTab,
+                    changed: state.tabsWithChanges.includes(f.tab),
+                  }">
                     {{ f.path }}
                   </div>
                 </li>
