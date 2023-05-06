@@ -1,19 +1,85 @@
 <script setup>
+import { reactive } from "vue";
 import NavBar from "./components/NavBar.vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+
 const route = useRoute();
+const router = useRouter();
+
+let state = reactive({
+  transitionName: "fade",
+});
+
+//check if route changes from login to home or vice versa
+router.afterEach((to, from) => {
+  if (to.name === "login") {
+    state.transitionName = "slide-left-in";
+  } else if (from.name === "login") {
+    state.transitionName = "slide-right-in";
+  } else {
+    state.transitionName = "fade";
+  }
+});
+
 </script>
 
 <template>
   <div class="app d-flex flex-column">
     <NavBar v-if="route.name !== 'ide'" />
     <div :class="{ main: route.name !== 'ide' }">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <Transition :name="state.transitionName" mode="out-in" appear>
+          <component :is="Component" :key="$route.path" />
+        </Transition>
+      </router-view>
     </div>
   </div>
 </template>
 
 <style>
+body {
+  overflow-x: hidden;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
+}
+
+.slide-right-in-leave-active,
+.slide-left-in-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-right-in-enter-active,
+.slide-left-in-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.slide-right-in-enter-from,
+.slide-left-in-leave-to {
+  transform: translateX(5%);
+  opacity: 0;
+}
+
+
+.slide-right-in-leave-to,
+.slide-left-in-enter-from {
+  transform: translateX(-5%);
+  opacity: 0;
+}
+
+
 :root {
   --green: #008e00;
   --green-hover: #007200;
@@ -36,14 +102,10 @@ body {
 
 <style scoped>
 .app {
-  /* width: 100vw;*/
-  /*height: 100%;*/
-  /*background: #383838;*/
   color: rgb(240, 240, 240);
 }
 
 .main {
   padding-top: 56px;
-  /* height: 100%; */
 }
 </style>

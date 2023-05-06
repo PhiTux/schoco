@@ -54,54 +54,56 @@ function newHelloWorld() {
 </script>
 
 <template>
-  <!-- Toasts -->
-  <div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNameEmpty" role="alert"
-      aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          Dein Projektname darf nicht leer sein.
+  <div>
+    <!-- Toasts -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNameEmpty" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Dein Projektname darf nicht leer sein.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNotCreated" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Das Projekt konnte leider nicht erstellt werden.
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNotCreated" role="alert"
-      aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body">
-          Das Projekt konnte leider nicht erstellt werden.
+    <div class="container">
+      <h1>Wähle dein Ausgangs-Projekt</h1>
+      <h2>1) Neues "leeres" Projekt</h2>
+
+      <div class="row">
+        <div class="col-md-4 col-sm-6">
+          <label for="HelloWorldName">Neuer Projektname</label>
+          <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
+            placeholder="Neuer Projektname" />
+        </div>
+        <div class="col-md-4 col-sm-6">
+          <label for="HelloWorldDescription">Projektbeschreibung</label>
+          <textarea id="HelloWorldDescription" class="form-control" v-model="state.helloWorldDescription"
+            placeholder="Projektbeschreibung" rows="3" />
+        </div>
+        <div class="col">
+          <button class="btn btn-outline-success my-3" type="submit" @click.prevent="newHelloWorld()"
+            :disabled="state.creatingProject">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+              v-if="state.creatingProject"></span>
+            Projekt erstellen
+          </button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="container">
-    <h1>Wähle dein Ausgangs-Projekt</h1>
-    <h2>1) Neues "leeres" Projekt</h2>
-
-    <div class="row">
-      <div class="col-md-4 col-sm-6">
-        <label for="HelloWorldName">Neuer Projektname</label>
-        <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
-          placeholder="Neuer Projektname" />
-      </div>
-      <div class="col-md-4 col-sm-6">
-        <label for="HelloWorldDescription">Projektbeschreibung</label>
-        <textarea id="HelloWorldDescription" class="form-control" v-model="state.helloWorldDescription"
-          placeholder="Projektbeschreibung" rows="3" />
-      </div>
-      <div class="col">
-        <button class="btn btn-outline-success my-3" type="submit" @click.prevent="newHelloWorld()"
-          :disabled="state.creatingProject">
-          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-            v-if="state.creatingProject"></span>
-          Projekt erstellen
-        </button>
-      </div>
-    </div>
-
-    <!-- <h2>2) Vorlage wählen</h2>
+      <!-- <h2>2) Vorlage wählen</h2>
     <h2>3) Zip hochladen</h2> -->
+    </div>
   </div>
 </template>
 

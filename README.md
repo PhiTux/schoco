@@ -28,10 +28,10 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 - No registration methods for pupils. Only teachers can register pupils who can be member of multiple courses.
 - Pupils directly see coding-homeworks when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
 - JUnit for automatic testing of the homework - the newest test-result of pupils is directly visible to the teacher.
-- Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity sending directories or files.
-- Pupils can only open their own project or homeworks - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
-- Use gitea on backend for storing all code.
-- Compilation and running of the programs works completely on the server. Done by [/cookies](/cookies) which stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Well, actually it's part of schoco and therefore the image + container are called schoco-cookies 🍪🤭.
+- Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity of sending directories or files.
+- Pupils can only open their own project or homework - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
+- Use gitea on backend for storing all code (each project / homework is a repo and each pupil has it's own branch in the homework-repo).
+- Compilation and running of the programs works completely on the server. Done by [/cookies](/cookies) which stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Well, actually it's part of schoco and therefore the image + container are called schoco-cookies 🍪🤭. It's a separate docker image, which is running parallel in multiple container-instances. For security-reasons each container gets replaced by a new one after a single action (compilation, execution or junit-testing).
 
 ## Architecture
 <img src="./schoco_architecture.svg">
@@ -40,7 +40,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 ## Progress
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
 
-**From now on, there are just a few more features missing (and polishing here and there of course...)**
+**From now on, there are just a few more features missing (and some polishing here and there of course...)**
 
 - [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
 - [x] Classroom-management (Creation of courses and assigning pupils to courses)

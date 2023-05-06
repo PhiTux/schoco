@@ -951,7 +951,8 @@ function exit() {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Du bearbeitest gerade die <u>Vorlage</u> einer Hausaufgabe! Wenn du Änderungen am <b>Code</b> durchführst und
+            Du bearbeitest gerade die <u>Vorlage</u> einer Hausaufgabe! Wenn du Änderungen am <b>Code</b> durchführst
+            und
             speicherst,
             dann kann dies zu Inkonsistenzen bei den verschiedenen SuS führen:
             <ul>
@@ -1011,7 +1012,8 @@ function exit() {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <span>⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig abgeschlossen sein, <b>bevor</b>
+            <span>⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig abgeschlossen sein,
+              <b>bevor</b>
               du daraus eine Hausaufgabe erstellst. Nach diesem Schritt sollten Änderungen vermieden werden, da die
               Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.</span>
             <hr>
@@ -1050,7 +1052,8 @@ function exit() {
                 <VueDatePicker v-model="homework.deadlineDate" placeholder="Start Typing ..." text-input auto-apply
                   :min-date="new Date()" prevent-min-max-navigation locale="de" format="E dd.MM.yyyy, HH:mm" />
                 UTC: <em>{{ homework.deadlineDate.toISOString() }}</em><br>
-                Bearbeitungszeit: <em v-if="homework.deadlineDate > new Date()"><b>{{ Math.floor((homework.deadlineDate -
+                Bearbeitungszeit: <em v-if="homework.deadlineDate > new Date()"><b>{{ Math.floor((homework.deadlineDate
+                  -
                   new
                     Date()) / (1000 * 3600 * 24)) }} Tage,
                     {{ Math.floor((homework.deadlineDate - new Date()) / (1000 * 3600) % 24) }} Stunden</b></em>
@@ -1293,6 +1296,24 @@ function exit() {
 </template>
 
 <style scoped>
+/* .zoom-enter-active {
+  animation: zoom-in 0.3s;
+}
+
+.zoom-leave-active {
+  animation: zoom-in 0.3s reverse;
+}
+
+@keyframes zoom-in {
+  0% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+} */
+
 #inputMessage:disabled {
   background-color: white;
 }
