@@ -39,15 +39,15 @@ origins = [
 ]
 
 app.add_middleware(CORSMiddleware, allow_origins=origins,
-                   allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+                   allow_credentials=True, allow_methods=["*"], allow_headers=["*"], expose_headers=["content-disposition"])
 
 
 lock = Lock()
 firstRun = True
 
 
-@app.on_event("startup")
-@repeat_every(seconds=60)
+@ app.on_event("startup")
+@ repeat_every(seconds=60)
 def startup_event():
     global firstRun
     if firstRun:

@@ -119,6 +119,10 @@ class CodeService {
     duplicateProject(uuid) {
         return axiosAuth.post(`duplicateProject/${uuid}`)
     }
+
+    downloadProject(uuid) {
+        return axiosAuth.get(`downloadProject/${uuid}`, { responseType: 'blob' })
+    }
 }
 
 export default new CodeService()

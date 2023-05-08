@@ -69,6 +69,9 @@ onMounted(() => {
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('duplicateProject', uuid)"><font-awesome-icon icon="fa-solid fa-copy"
                                 fixed-width /> Duplizieren</a></li>
+                    <li v-if="!isHomework"><a class="dropdown-item"
+                            @click="$emit('downloadProject', uuid)"><font-awesome-icon icon="fa-solid fa-download"
+                                fixed-width /> Download</a></li>
                     <li v-if="isHomework && isTeacher"><a class="dropdown-item"
                             @click.prevent="$emit('deleteHomework', id, name)"><font-awesome-icon icon="fa-solid fa-trash"
                                 fixed-width /> Löschen</a></li>
@@ -90,7 +93,6 @@ onMounted(() => {
                 </template>
             </text-clamp>
 
-            <!-- :href="'#/startHomework/' + id" -->
             <div class="mt-2 d-flex align-items-center">
                 <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
                     class="btn btn-primary">🌟Hausaufgabe
@@ -100,13 +102,6 @@ onMounted(() => {
                     bearbeiten</a>
                 <a v-else-if="isTeacher && isHomework" :href="'#/homework/' + id" class="btn btn-primary">Details zeigen</a>
                 <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
-
-                <!-- add a button to delete a project -->
-                <!-- <a v-if="isTeacher && isHomework" @click.prevent="$emit('deleteHomework', id, name)"
-                    class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a>
-                <a v-else-if="(isTeacher && !isHomework) || (!isTeacher && !(isHomework && !isEditing))"
-                    @click.prevent="$emit('deleteProject', uuid, branch, name)"
-                    class="deleteButton ms-auto"><font-awesome-icon icon="fa-trash" /></a> -->
             </div>
         </div>
     </div>

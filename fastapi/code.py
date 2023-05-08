@@ -1,4 +1,8 @@
+from io import BytesIO
+import json
+import zipfile
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path
+from fastapi.responses import StreamingResponse
 import auth
 import database_config
 import models_and_schemas
@@ -99,6 +103,7 @@ results = []
 
 def recursively_download_all_files(project_uuid: str, id: int, path: str):
     global results
+    results = []
 
     root = git.load_all_meta_content(
         project_uuid=project_uuid, id=id, path=path)
@@ -625,3 +630,43 @@ def duplicateProject(project_uuid: str = Path(), db: Session = Depends(database_
         return False
 
     return {'success': True}
+
+
+@code.get('/downloadProject/{uuid}', dependencies=[Depends(auth.oauth2_scheme)])
+def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    user = crud.get_user_by_username(db=db, username=username)
+    if user == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: User not found.")
+
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=uuid)
+    if project == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Project not found.")
+
+    if project.owner_id != user.id:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: User is not owner of project.")
+
+    # download all files
+    res = recursively_download_all_files(
+        project_uuid=uuid, id=0, path="/")
+    print(res)
+
+    # download project info
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=uuid)
+    meta = {"name": project.name, "description": project.description}
+
+    # create zip file
+    zip_bytes_io = BytesIO()
+    with zipfile.ZipFile(zip_bytes_io, 'w', zipfile.ZIP_DEFLATED) as zipped:
+        for f in res:
+            zipped.writestr(os.path.join("code", f['path']), f['content'])
+        zipped.writestr("meta.json", json.dumps(meta))
+
+    response = StreamingResponse(
+        iter([zip_bytes_io.getvalue()]), media_type="application/x-zip-compressed", headers={"Content-Disposition": f"attachment;filename={project.name}.zip", "Content-Length": str(zip_bytes_io.getbuffer().nbytes)})
+
+    return response
