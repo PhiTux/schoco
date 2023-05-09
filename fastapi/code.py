@@ -103,7 +103,6 @@ results = []
 
 def recursively_download_all_files(project_uuid: str, id: int, path: str):
     global results
-    results = []
 
     root = git.load_all_meta_content(
         project_uuid=project_uuid, id=id, path=path)
@@ -649,10 +648,12 @@ def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.ge
         raise HTTPException(
             status_code=400, detail="Wrong input: User is not owner of project.")
 
+    global results
+    results = []
+
     # download all files
     res = recursively_download_all_files(
         project_uuid=uuid, id=0, path="/")
-    print(res)
 
     # download project info
     project = crud.get_project_by_project_uuid(
