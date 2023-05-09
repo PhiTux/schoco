@@ -1,8 +1,10 @@
 <script setup>
-import { reactive } from "vue";
+import { reactive, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { Toast } from "bootstrap";
 import CodeService from "../services/code.service.js";
+/* import DropArea from "../components/DropArea.vue"; */
+import FileUpload from 'vue-upload-component'
 
 const router = useRouter();
 
@@ -10,7 +12,39 @@ let state = reactive({
   helloWorldName: "",
   helloWorldDescription: "",
   creatingProject: false,
+  files: [],
 });
+
+onMounted(() => {
+  // set cursor to pointer for upload-label
+  let elem = document.getElementById("droparea");
+  let children = elem.childNodes;
+  // get element which is label
+  children.forEach((e) => {
+    if (e.nodeName == "LABEL") {
+      e.style = "cursor: pointer;"
+    }
+  })
+})
+
+watch(() => state.files, (files) => {
+  for (let i = files.length - 1; i >= 0; i--) {
+    let file = files[i];
+    if (!file.name.endsWith(".zip")) {
+      const toast = new Toast(
+        document.getElementById("toastFileNotZip")
+      );
+      toast.show();
+      state.files.splice(i, 1);
+    } else if (file.size > 5000000) {
+      const toast = new Toast(
+        document.getElementById("toastFileTooLarge")
+      );
+      toast.show();
+      state.files.splice(i, 1);
+    }
+  }
+})
 
 function newHelloWorld() {
   if (state.helloWorldName.trim() === "") {
@@ -51,6 +85,10 @@ function newHelloWorld() {
     }
   );
 }
+
+function removeFile(index) {
+  state.files.splice(index, 1);
+}
 </script>
 
 <template>
@@ -71,6 +109,24 @@ function newHelloWorld() {
         <div class="d-flex">
           <div class="toast-body">
             Das Projekt konnte leider nicht erstellt werden.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastFileNotZip" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Nur Zip-Dateien erlaubt.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastFileTooLarge" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Eine ausgewählte Datei ist zu groß (> 5 MB).
           </div>
         </div>
       </div>
@@ -101,14 +157,104 @@ function newHelloWorld() {
         </div>
       </div>
 
-      <!-- <h2>2) Vorlage wählen</h2>
-    <h2>3) Zip hochladen</h2> -->
+      <!-- <h2>2) Vorlage wählen</h2> -->
+
+      <h2>2) Zip hochladen</h2>
+      Lade zuvor exportierte Projekte hoch. Es können mehrere Projekte auf einmal hochgeladen werden.
+      <div class="example-drag d-flex justify-content-center my-3">
+        <!-- <div class=""> -->
+        <file-upload class="d-flex justify-content-center align-items-center droparea" id="droparea"
+          post-action="/upload/post" accept="application/zip" :multiple="true" :drop="true" extensions="zip"
+          v-model="state.files" ref="upload">
+          <!-- <i class="fa fa-plus"></i> -->
+          <font-awesome-icon icon="fa-solid fa-upload"></font-awesome-icon>
+        </file-upload>
+        <!-- </div> -->
+        <div v-show="$refs.upload && $refs.upload.dropActive" class="drop-active">
+          <h3>Dateien zum Hochladen ablegen</h3>
+        </div>
+      </div>
+
+      <div v-if="state.files.length">
+        <h5>Ausgewählte Dateien:</h5>
+        <ul>
+          <li v-for="(file, index) in state.files" :key="file.name" class="d-flex align-items-center">
+            {{ file.name }} ({{ file.size / 1000 }} kB)
+            <a class="mx-2 btn-remove d-flex align-items-center" @click="removeFile(index)">
+              <font-awesome-layers class="fa-lg">
+                <font-awesome-icon icon="fa-circle" style="color: var(--bs-danger)" />
+                <div style="color: var(--bs-light)">
+                  <font-awesome-icon icon="fa-xmark" transform="shrink-6" />
+                </div>
+              </font-awesome-layers>
+            </a>
+          </li>
+        </ul>
+        <button class="btn btn-outline-success my-3" type="submit" @click.prevent="uploadFiles()"
+          :disabled="state.uploadingFiles">
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+            v-if="state.uploadingFiles"></span>
+          Hochladen
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.input-label {
-  color: var(--bs-dark);
+.btn-remove {
+  cursor: pointer;
+}
+
+.example-drag label.btn {
+  margin-bottom: 0;
+  margin-right: 1rem;
+}
+
+.droparea:hover .fa-upload {
+  scale: 4.5;
+}
+
+.fa-upload {
+  scale: 4;
+  box-shadow: 0 0 10px black;
+  padding: 7px;
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+
+.example-drag .drop-active {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  position: fixed;
+  z-index: 9999;
+  opacity: .6;
+  text-align: center;
+  background: #000;
+}
+
+.example-drag .drop-active h3 {
+  margin: -.5em 0 0;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  font-size: 40px;
+  color: #fff;
+  padding: 0;
+}
+
+.droparea {
+  border: 4px dashed #000;
+  border-radius: 25px;
+  width: 90%;
+  height: 200px;
+  color: grey;
 }
 </style>
