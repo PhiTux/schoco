@@ -324,6 +324,7 @@ function duplicateProject(uuid) {
   )
 }
 
+/* 🛑 This function also exists at ../IDE.vue 🛑 */
 function downloadProject(uuid) {
   CodeService.downloadProject(uuid).then(
     (response) => {

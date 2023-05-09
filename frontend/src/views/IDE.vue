@@ -843,6 +843,35 @@ function exit() {
 
 }
 
+/* 🛑 This function also exists at ../Home.vue 🛑 */
+function downloadProject(uuid) {
+  console.log(uuid)
+  CodeService.downloadProject(uuid).then(
+    (response) => {
+      console.log(response.headers["content-disposition"])
+      let filename = response.headers["content-disposition"].split("filename=")[1]
+
+      let fileUrl = window.URL.createObjectURL(response.data);
+      let fileLink = document.createElement('a');
+
+      fileLink.href = fileUrl;
+      fileLink.setAttribute('download', filename);
+      document.body.appendChild(fileLink)
+
+      fileLink.click();
+
+      // remove link from DOM
+      document.body.removeChild(fileLink)
+    },
+    error => {
+      console.log(error.response)
+      const toast = new Toast(
+        document.getElementById("toastDownloadProjectError")
+      );
+      toast.show();
+    }
+  )
+}
 
 </script>
 
@@ -855,6 +884,15 @@ function exit() {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Laden des Projekts. Bitte zurück oder neu laden.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastDownloadProjectError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Download des Projekts.
           </div>
         </div>
       </div>
@@ -1113,6 +1151,13 @@ function exit() {
                 <li>
                   <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
                     löschen (ohne Funktion)</a>
+                </li>
+                <li class="dropdown-divider"></li>
+                <li>
+                  <a class="dropdown-item" href="#"
+                    @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
+                      icon="fa-solid fa-download" /> Projekt
+                    herunterladen</a>
                 </li>
               </ul>
             </li>
