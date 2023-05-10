@@ -123,6 +123,12 @@ class CodeService {
     downloadProject(uuid) {
         return axiosAuth.get(`downloadProject/${uuid}`, { responseType: 'blob' })
     }
+
+    uploadProject(file, config) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return axiosAuth.postForm('uploadProject', file, config)
+    }
 }
 
 export default new CodeService()

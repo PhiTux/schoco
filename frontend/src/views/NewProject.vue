@@ -13,6 +13,10 @@ let state = reactive({
   helloWorldDescription: "",
   creatingProject: false,
   files: [],
+  uploadIndexes: [],
+  successIndexes: [],
+  errorIndexes: [],
+  uploadFinished: false,
 });
 
 onMounted(() => {
@@ -89,6 +93,81 @@ function newHelloWorld() {
 function removeFile(index) {
   state.files.splice(index, 1);
 }
+
+function uploadFiles() {
+
+  state.uploadIndexes = [];
+  state.successIndexes = [];
+  state.errorIndexes = [];
+
+  for (let i = 0; i < state.files.length; i++) {
+    let file = state.files[i]
+    state.uploadIndexes.push(i);
+
+    CodeService.uploadProject(file, {
+      // TODO: check if this is needed
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        console.log(percentCompleted);
+      }
+    }).then(
+      (response) => {
+
+        const index = state.uploadIndexes.indexOf(i);
+        if (index > -1) {
+          state.uploadIndexes.splice(index, 1);
+        }
+
+        if (response.data) {
+          state.successIndexes.push(i);
+        } else {
+          state.errorIndexes.push(i);
+        }
+
+        checkUploadFinished();
+      },
+      (error) => {
+        const index = state.uploadIndexes.indexOf(i);
+        if (index > -1) {
+          state.uploadIndexes.splice(index, 1);
+        }
+        state.errorIndexes.push(i);
+
+        checkUploadFinished();
+        console.log(error.response);
+      }
+    );
+  }
+}
+
+function checkUploadFinished() {
+  if (state.uploadIndexes.length === 0) {
+    state.uploadFinished = true;
+
+    if (state.errorIndexes.length > 0) {
+      const toast = new Toast(
+        document.getElementById("toastUploadError")
+      );
+      toast.show();
+    } else {
+      const toast = new Toast(
+        document.getElementById("toastUploadSuccess")
+      );
+      toast.show();
+    }
+
+  }
+}
+
+function resetFileList() {
+  state.files = [];
+  state.uploadIndexes = [];
+  state.successIndexes = [];
+  state.errorIndexes = [];
+  state.uploadFinished = false;
+}
 </script>
 
 <template>
@@ -127,6 +206,24 @@ function removeFile(index) {
         <div class="d-flex">
           <div class="toast-body">
             Eine ausgewählte Datei ist zu groß (> 5 MB).
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastUploadError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Nicht alle Projekte konnten importiert werden!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastUploadSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Alle Projekte wurden importiert!
           </div>
         </div>
       </div>
@@ -179,8 +276,20 @@ function removeFile(index) {
         <h5>Ausgewählte Dateien:</h5>
         <ul>
           <li v-for="(file, index) in state.files" :key="file.name" class="d-flex align-items-center">
-            {{ file.name }} ({{ file.size / 1000 }} kB)
-            <a class="mx-2 btn-remove d-flex align-items-center" @click="removeFile(index)">
+            <font-awesome-icon v-if="state.successIndexes.includes(index)" icon="fa-circle-check" class="greenLabel" />
+            <font-awesome-icon v-else-if="state.errorIndexes.includes(index)" icon="fa-triangle-exclamation"
+              class="redLabel" />
+            <div v-else-if="state.uploadIndexes.includes(index)" class="spinner-border spinner-border-sm text-warning"
+              role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <font-awesome-icon v-else icon="fa-list-ul" />
+
+            <span class="mx-2"><b :class="{ redLabel: state.errorIndexes.includes(index) }"><u>{{ file.name }}</u></b> ({{
+              file.size / 1000 }} kB)</span>
+
+            <a v-if="state.uploadIndexes.length + state.successIndexes.length + state.errorIndexes.length == 0"
+              class="btn-remove d-flex align-items-center" @click="removeFile(index)">
               <font-awesome-layers class="fa-lg">
                 <font-awesome-icon icon="fa-circle" style="color: var(--bs-danger)" />
                 <div style="color: var(--bs-light)">
@@ -190,11 +299,14 @@ function removeFile(index) {
             </a>
           </li>
         </ul>
-        <button class="btn btn-outline-success my-3" type="submit" @click.prevent="uploadFiles()"
-          :disabled="state.uploadingFiles">
+        <button v-if="!state.uploadFinished" class="btn btn-outline-success my-3" type="submit"
+          @click.prevent="uploadFiles()">
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-            v-if="state.uploadingFiles"></span>
+            v-if="state.uploadIndexes.length"></span>
           Hochladen
+        </button>
+        <button v-else class="btn btn-outline-success my-3" type="submit" @click.prevent="resetFileList()">
+          Datei-Liste zurücksetzen
         </button>
       </div>
     </div>
@@ -202,6 +314,14 @@ function removeFile(index) {
 </template>
 
 <style scoped>
+.greenLabel {
+  color: var(--bs-success);
+}
+
+.redLabel {
+  color: var(--bs-danger);
+}
+
 .btn-remove {
   cursor: pointer;
 }

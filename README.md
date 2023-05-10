@@ -54,8 +54,8 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
     - [x] JUnit-Testing
 - [x] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [x] Save amount of compilations, executions,... per project and make them visible
+- [x] Import/export projects/templates as zip
 - [ ] Mark projects as templates (when being a teacher)
-- [ ] Import/export projects/templates as zip
 
 # Start developing
 

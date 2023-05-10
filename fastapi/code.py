@@ -1,7 +1,7 @@
 from io import BytesIO
 import json
 import zipfile
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Path, UploadFile
 from fastapi.responses import StreamingResponse
 import auth
 import database_config
@@ -660,6 +660,9 @@ def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.ge
         db=db, project_uuid=uuid)
     meta = {"name": project.name, "description": project.description}
 
+    if user.role == "teacher":
+        meta["computation_time"] = project.computation_time
+
     # create zip file
     zip_bytes_io = BytesIO()
     with zipfile.ZipFile(zip_bytes_io, 'w', zipfile.ZIP_DEFLATED) as zipped:
@@ -671,3 +674,43 @@ def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.ge
         iter([zip_bytes_io.getvalue()]), media_type="application/x-zip-compressed", headers={"Content-Disposition": f"attachment;filename={project.name}.zip", "Content-Length": str(zip_bytes_io.getbuffer().nbytes)})
 
     return response
+
+
+@code.post('/uploadProject', dependencies=[Depends(auth.oauth2_scheme)])
+async def uploadProject(file: UploadFile, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    user = crud.get_user_by_username(db=db, username=username)
+
+    # create git repo
+    project_uuid = str(uuid.uuid4())
+    if not git.create_repo(project_uuid):
+        return False
+
+    # upload content from zip file
+    zip_bytes_io = BytesIO(await file.read())
+    try:
+        with zipfile.ZipFile(zip_bytes_io, 'r', zipfile.ZIP_DEFLATED) as zipped:
+            for f in zipped.infolist():
+                if f.filename[-1] == "/" or not f.filename.startswith("code/"):
+                    continue
+                if not git.add_file(project_uuid, f.filename.split("/", 1)[1], zipped.read(f.filename)):
+                    git.remove_repo(project_uuid)
+                    return False
+
+            # create db project entry
+            meta = json.loads(zipped.read("meta.json"))
+            if user.role == "pupil":
+                new_project = models_and_schemas.Project(uuid=project_uuid, name=meta["name"],
+                                                         description=meta["description"], owner_id=user.id)
+            else:
+                new_project = models_and_schemas.Project(uuid=project_uuid, name=meta.get("name", "__no_title__"),
+                                                         description=meta.get("description", ""), owner_id=user.id, computation_time=meta.get("computation_time", 10))
+
+            if not crud.create_project(db=db, project=new_project):
+                # delete git repo
+                git.remove_repo(project_uuid=project_uuid)
+                return False
+    except:
+        git.remove_repo(project_uuid=project_uuid)
+        return False
+
+    return True
