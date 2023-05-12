@@ -4,7 +4,7 @@
 - [What is schoco? {🍫}](#what-is-schoco-)
   - [Main-features](#main-features)
 - [Installation](#installation)
-- [Architecture](#architecture-1)
+- [Architecture](#architecture)
   - [How it works under the hood](#how-it-works-under-the-hood)
   - [Progress](#progress)
   - [FAQ](#faq)
