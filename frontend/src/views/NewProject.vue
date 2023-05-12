@@ -40,7 +40,7 @@ watch(() => state.files, (files) => {
       );
       toast.show();
       state.files.splice(i, 1);
-    } else if (file.size > 5000000) {
+    } else if (file.size > 20000000) {
       const toast = new Toast(
         document.getElementById("toastFileTooLarge")
       );
@@ -256,7 +256,7 @@ function resetFileList() {
 
       <!-- <h2>2) Vorlage wählen</h2> -->
 
-      <h2>2) Zip hochladen</h2>
+      <h2>2) ZIPs hochladen</h2>
       Lade zuvor exportierte Projekte hoch. Es können mehrere Projekte auf einmal hochgeladen werden.
       <div class="example-drag d-flex justify-content-center my-3">
         <!-- <div class=""> -->

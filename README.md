@@ -5,6 +5,8 @@
   - [Main-features](#main-features)
   - [Architecture](#architecture)
   - [Progress](#progress)
+- [Installation](#installation)
+- [Architecture](#architecture-1)
 - [Start developing](#start-developing)
 - [Build and run schoco locally](#build-and-run-schoco-locally)
 
@@ -25,17 +27,127 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 ---
 
 ## Main-features
-- No registration methods for pupils. Only teachers can register pupils who can be member of multiple courses.
+- Web-based IDE for Java-Programming (Java 8), which is fully functional to Java <ins>except</ins> UIs (obviously), writing files to disk, accessing the internet and a few others. The restricted are needed for security reasons and are provided by Java's security manager.
+- Each user can create private projects and teachers can convert them to homeworks, which are then editable by the pupils of the selected course.
 - Pupils directly see coding-homeworks when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
-- JUnit for automatic testing of the homework - the newest test-result of pupils is directly visible to the teacher.
+- JUnit for automatic testing of the homework - the newest test-result (percent of how many JUnit-Tests passed successfully) of pupils is directly visible to the teacher.
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity of sending directories or files.
 - Pupils can only open their own project or homework - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
-- Use gitea on backend for storing all code (each project / homework is a repo and each pupil has it's own branch in the homework-repo).
-- Compilation and running of the programs works completely on the server. Done by [/cookies](/cookies) which stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Well, actually it's part of schoco and therefore the image + container are called schoco-cookies 🍪🤭. It's a separate docker image, which is running parallel in multiple container-instances. For security-reasons each container gets replaced by a new one after a single action (compilation, execution or junit-testing).
+- No registration methods for pupils. Only teachers can register pupils who can be member of multiple courses.
 
-## Architecture
+
+## Installation
+🛑 At the moment there are first pre-release docker images available (tag-numbers below 1.0.0). See [docker-nginx](https://hub.docker.com/r/phitux/schoco-nginx/tags) and [docker-backend](https://hub.docker.com/r/phitux/schoco-backend/tags) for the newest tags.
+
+They already work quite well and support ALL main-features of schoco (see [Progress](#progress))
+
+  1. You need `docker` and `docker-compose` installed
+  2. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
+  3. Create the data-forder `data` where you want to store the DB and temporary code. This step must be done BEFORE starting up the docker containers.
+     
+     ❗ YOU must be the owner of this folder - not root (don't use sudo). If you created another user in step 2: Make sure he is the owner of this folder ❗
+  4. Adapt the following `docker-compose.yml` to your needs and run `docker compose up -d`:
+  
+```yaml
+version: "3"
+
+networks:
+  schoco:
+    name: schoco
+
+services:
+  schoco-backend:
+    image: phitux/schoco-backend:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
+    container_name: schoco-backend
+    restart: always
+    user: "1000:1000" # find out your user-id (uid) and group-id (gid) with 'id' in your bash
+    group_add:
+      - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+    environment:
+      - FULL_DATA_PATH=/path/to/my/data 
+      # same as (left part of) first volume - but here as FULL PATH!!!
+
+      - MAX_CONTAINERS=4 
+      # sets the amount of java-workers
+
+      - SECRET_KEY=secret 
+      # used for session token
+
+      - TEACHER_KEY=teacherkey 
+      # this is the 'password' that is used to create new teacher-accounts. It must only be known to the teachers.
+
+      - COOKIES_TAG=1.0.0 (not yet implemented) 
+      # can be left away right now
+
+      - GITEA_USERNAME=schoco 
+      # this is the username of the gitea-user (see last image in this yaml-file) 
+
+      - GITEA_PASSWORD=schoco1234 
+      # and that is the password of the gitea-user. 
+      # Actually both username and password can stay like this, if you use the gitea-image from this yaml-file and if gitea is not made public (default)!
+
+      - GITEA_HOST=http://schoco-gitea:3000
+      # stays like this, if you use the gitea-image from this yaml-file and if gitea is not made public (default)!
+      # change it to your domain, if you use a public gitea-instance
+    networks:
+      - schoco
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  schoco-nginx:
+    image: phitux/schoco-nginx:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-nginx/tags
+    container_name: schoco-nginx
+    restart: always
+    group_add:
+      - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+    networks:
+      - schoco
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "80:8080" # adapt the left host-port to your needs
+
+  schoco-gitea:
+    image: gitea/gitea:1.17.3 # you could probably use a newer version, but API-changes might break something...
+    container_name: schoco-gitea
+    restart: always
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__security__INSTALL_LOCK=true
+    networks:
+      - schoco
+    volumes:
+      - ./gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+```
+
+# Architecture
 <img src="./schoco_architecture.svg">
 
+## How it works under the hood
+- The logical Core is the API, which is build with [Python Fastapi](https://fastapi.tiangolo.com/). The frontend is build with [Vite 4](https://vitejs.dev/) and [Vue 3](https://v3.vuejs.org/).
+- The API is communicating with [Gitea](https://gitea.io/), SQLite and the workers [schoco-cookies](./cookies/)
+- The 'cookies' in 'schoco-cookies' stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Since it's part of schoco it's of course called 'schoco-cookies' 🍪🤭. They are docker-containers, that are running parallely at a configurable amount. They are doing the actual 'work' with the Java-code and are used for compiling, executing and testing all the code. Each container is only used for a single action and is then replaced by a new one. This is done for security-reasons, so that no code of a user can be executed in the same container as the code of other users. 
+- Gitea (a git repo, by default running as separate docker-container) is used to store the code. Each project has an own repository with an UUID as name, which is also visible in the browser-URL when opening a project. When editing a homework as pupil, each pupil gets it's own branch.
+- SQLite (a single-file DB) is used to store everything that is NOT code, like the users, courses, and meta-information about projects and homeworks.
+- Nginx is included as mandatory gateway. Since the websocket-connection (to view the live-output of the code) connects to the Docker Socket (Docker-API), this whould be a major security issue. Therefore, the websocket-connection is proxied by Nginx, which only allows websocket-connections to Docker.
+
+## FAQ
+
+- What happens after a homework deadline has passed? 
+> At the moment the pupil can continue using schoco just as before (edit, save, run, test,...). It's planned to implement a button for teachers to see the latest version BEFORE deadline.
+- Can I code everything in Java? 
+> No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, homeworks can have a higher limit).
+- Code execution and testing is quite fast, how does it come?
+> Each action get's executed by an individual docker container. The trick is, that these containers are already created and running in the background, waiting for a job. The code is then just written to the folder which is mounted to the container and the job inside the container is started via a very reduced Java-API.
+- Can I use schoco for other programming languages than Java?
+> No, not at the moment. Since we don't need it for the german school-curriculum, it won't be implemented in the near future. But supporting multiple languages should not be too dificult. Feel free to fork and contribute 😉
+- It works with git underneath - so can I use git-features and git-commands?
+> Not really! It uses git under the hood, since this design-decision makes sense when handling a lot of code. Schoco uses several git-features like branches and the commit-history, but there is no direct access to git by the user.
 
 ## Progress
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
@@ -54,7 +166,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
     - [x] JUnit-Testing
 - [x] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [x] Save amount of compilations, executions,... per project and make them visible
-- [x] Import/export projects/templates as zip
+- [x] Import/export projects as zip
 - [ ] Mark projects as templates (when being a teacher)
 
 # Start developing
