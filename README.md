@@ -3,10 +3,11 @@
 # Chapters
 - [What is schoco? {🍫}](#what-is-schoco-)
   - [Main-features](#main-features)
-  - [Architecture](#architecture)
-  - [Progress](#progress)
 - [Installation](#installation)
 - [Architecture](#architecture-1)
+  - [How it works under the hood](#how-it-works-under-the-hood)
+  - [Progress](#progress)
+  - [FAQ](#faq)
 - [Start developing](#start-developing)
 - [Build and run schoco locally](#build-and-run-schoco-locally)
 
@@ -36,7 +37,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 - No registration methods for pupils. Only teachers can register pupils who can be member of multiple courses.
 
 
-## Installation
+# Installation
 🛑 At the moment there are first pre-release docker images available (tag-numbers below 1.0.0). See [docker-nginx](https://hub.docker.com/r/phitux/schoco-nginx/tags) and [docker-backend](https://hub.docker.com/r/phitux/schoco-backend/tags) for the newest tags.
 
 They already work quite well and support ALL main-features of schoco (see [Progress](#progress))
