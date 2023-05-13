@@ -668,7 +668,7 @@ def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.ge
     with zipfile.ZipFile(zip_bytes_io, 'w', zipfile.ZIP_DEFLATED) as zipped:
         for f in res:
             zipped.writestr(os.path.join("code", f['path']), f['content'])
-        zipped.writestr("meta.json", json.dumps(meta))
+        zipped.writestr("meta.json", json.dumps(meta, ensure_ascii=False))
 
     response = StreamingResponse(
         iter([zip_bytes_io.getvalue()]), media_type="application/x-zip-compressed", headers={"Content-Disposition": f"attachment;filename={project.name}.zip", "Content-Length": str(zip_bytes_io.getbuffer().nbytes)})
