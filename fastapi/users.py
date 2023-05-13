@@ -133,11 +133,6 @@ def get_courses(db: Session = Depends(database_config.get_db)):
     return courses
 
 
-@users.post('/loggedin', dependencies=[Depends(auth.oauth2_scheme)])
-def get_secured(db: Session = Depends(database_config.get_db)):
-    return "secured"
-
-
 @users.post('/changeName', dependencies=[Depends(auth.check_teacher)])
 def change_name(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
     return crud.change_name(db=db, user_id=changeName.user_id, name=changeName.name.strip())

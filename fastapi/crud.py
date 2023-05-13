@@ -115,6 +115,8 @@ def remove_user(db: Session, user: models_and_schemas.User):
             for p in projects:
                 homework = db.exec(select(models_and_schemas.Homework).where(
                     models_and_schemas.Homework.template_project_id == p.id)).first()
+                if homework is None:
+                    continue
                 # remove editingHomeworks of homework
                 editingHomeworks = db.exec(select(models_and_schemas.EditingHomework).where(
                     models_and_schemas.EditingHomework.homework_id == homework.id)).all()
