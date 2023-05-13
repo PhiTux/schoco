@@ -42,12 +42,47 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 They already work quite well and support ALL main-features of schoco (see [Progress](#progress))
 
-  1. You need `docker` and `docker-compose` installed
-  2. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
-  3. Create the data-forder `data` where you want to store the DB and temporary code. This step must be done BEFORE starting up the docker containers.
+Installation requires a few more steps than your average docker-service, but it's still pretty straight-forward, and only requires a few minutes.
+
+  1. You need `docker` and `docker-compose` installed.
+  2. Make sure, that your normal user (not root / sudo) is member of the docker-group!
+  3. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
+  4. Create the data-forder `data` where you want to store the DB and temporary code. This step must be done BEFORE starting up the docker containers.
      
-     ❗ YOU must be the owner of this folder - not root (don't use sudo). If you created another user in step 2: Make sure he is the owner of this folder ❗
-  4. Adapt the following `docker-compose.yml` to your needs and run `docker compose up -d`:
+     ❗ <ins>YOU</ins> must be the owner of this folder - not root (don't use sudo). If you created another user in the previous step: Make sure he is the owner of this folder ❗
+  5. Prepare your Web-Server / Reverse-Proxy to forward requests to schoco. It requires special care for the websocket-connection to work! Here are two example configurations for Apache2 and NGINX (both assuming, that schoco is running on port 1234):
+     - NGINX
+      ```nginx
+      location /containers {
+          proxy_pass http://localhost:1234;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "Upgrade";
+          proxy_set_header Host $host;
+      }
+
+      location / {
+          proxy_pass http://localhost:1234;
+      }
+      ```
+
+     - Apache2  
+      ```apache
+      RewriteEngine on
+      RewriteCond ${HTTP:Upgrade} websocket [NC]
+      RewriteCond ${HTTP:Connection} upgrade [NC]
+      RewriteRule .* "ws://localhost:1234/$1" [P,L]
+
+      ProxyPreserveHost On
+      ProxyRequests off
+      AllowEncodedSlashes NoDecode
+      ProxyPass /containers ws://localhost:1234/containers
+      ProxyPassReverse /containers ws://localhost:1234/containers
+      ProxyPass / http://localhost:1234/ nocanon
+      ProxyPassReverse / http://localhost:1234/
+      ```
+
+  6. Adapt the following `docker-compose.yml` to your needs and run `docker compose up -d`:
   
 ```yaml
 version: "3"
@@ -58,12 +93,15 @@ networks:
 
 services:
   schoco-backend:
-    image: phitux/schoco-backend:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
+    image: phitux/schoco-backend:<tag> 
+    # use the newest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
     container_name: schoco-backend
     restart: always
-    user: "1000:1000" # find out your user-id (uid) and group-id (gid) with 'id' in your bash
+    user: "1000:1000" 
+    # find out your user-id (uid) and group-id (gid) with 'id' in your bash. Must be the same user as the owner of the data-folder!
     group_add:
-      - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      - ${DOCKER_GROUP_ID} 
+      # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
     environment:
       - FULL_DATA_PATH=/path/to/my/data 
       # same as (left part of) first volume - but here as FULL PATH!!!
@@ -72,7 +110,7 @@ services:
       # sets the amount of java-workers
 
       - SECRET_KEY=secret 
-      # used for session token
+      # used for session token - run 'openssl rand -base64 32' to generate a random key. Changing it and restarting the backend will log out all users!
 
       - TEACHER_KEY=teacherkey 
       # this is the 'password' that is used to create new teacher-accounts. It must only be known to the teachers.
@@ -140,15 +178,17 @@ services:
 ## FAQ
 
 - What happens after a homework deadline has passed? 
-> At the moment the pupil can continue using schoco just as before (edit, save, run, test,...). It's planned to implement a button for teachers to see the latest version BEFORE deadline.
-- Can I code everything in Java? 
+> At the moment the pupils can continue using schoco just as before (edit, save, run, test,...). It's planned to implement a button for teachers to see the latest version BEFORE deadline.
+- Can I code everything that's normally possible in Java? 
 > No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, homeworks can have a higher limit).
 - Code execution and testing is quite fast, how does it come?
 > Each action get's executed by an individual docker container. The trick is, that these containers are already created and running in the background, waiting for a job. The code is then just written to the folder which is mounted to the container and the job inside the container is started via a very reduced Java-API.
 - Can I use schoco for other programming languages than Java?
 > No, not at the moment. Since we don't need it for the german school-curriculum, it won't be implemented in the near future. But supporting multiple languages should not be too dificult. Feel free to fork and contribute 😉
 - It works with git underneath - so can I use git-features and git-commands?
-> Not really! It uses git under the hood, since this design-decision makes sense when handling a lot of code. Schoco uses several git-features like branches and the commit-history, but there is no direct access to git by the user.
+> No! It uses git under the hood, since this design-decision makes sense when handling a lot of code. Schoco uses several git-features like branches and the commit-history, but there is no direct access to git by the user.
+- Can I run/install/develop schoco without docker?
+> No, absolutely not! It requires docker to run the 'schoco-cookies' (the Java-workers) - it's an intended security-feature.
 
 ## Progress
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
