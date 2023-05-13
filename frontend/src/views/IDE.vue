@@ -1305,9 +1305,9 @@ function downloadProject(uuid) {
               <ul class="nav nav-tabs pt-2">
                 <li class="nav-item" v-for="f in state.openFiles">
                   <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                    active: f.tab == state.activeTab,
-                    changed: state.tabsWithChanges.includes(f.tab),
-                  }">
+                      active: f.tab == state.activeTab,
+                      changed: state.tabsWithChanges.includes(f.tab),
+                    }">
                     {{ f.path }}
                   </div>
                 </li>
@@ -1384,6 +1384,7 @@ function downloadProject(uuid) {
 }
 
 .edit-description {
+  font-family: monospace;
   height: 100%;
 }
 
@@ -1408,6 +1409,7 @@ function downloadProject(uuid) {
 }
 
 .description {
+  font-family: monospace;
   white-space: pre-line;
   overflow-y: auto;
   display: block;
