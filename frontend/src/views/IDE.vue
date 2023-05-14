@@ -1266,11 +1266,11 @@ function downloadProject(uuid) {
                 </pane>
                 <!-- Description -->
                 <pane min-size="10" size="50" max-size="60" style="background-color: #383838">
-                  <div v-if="!state.editingDescription" class="position-relative description p-1">
-                    <span>
+                  <div v-if="!state.editingDescription" class="description p-1">
+                    <div class="description-content">
                       {{ state.projectDescription }}
-                    </span>
-                    <div v-if="route.params.user_id == 0" class="position-absolute bottom-0 end-0">
+                    </div>
+                    <div v-if="route.params.user_id == 0" class="description-button bottom-0 end-0">
                       <a @click.prevent="editDescription()" class="btn btn-overlay btn-outline-secondary">
                         <div>
                           <font-awesome-icon icon="fa-pencil" />
@@ -1278,6 +1278,7 @@ function downloadProject(uuid) {
                       </a>
                     </div>
                   </div>
+
                   <div v-if="state.editingDescription" class="position-relative edit-description">
                     <textarea class="textarea-description" v-model="state.newProjectDescription" />
                     <div class="position-absolute bottom-0 end-0">
@@ -1341,24 +1342,6 @@ function downloadProject(uuid) {
 </template>
 
 <style scoped>
-/* .zoom-enter-active {
-  animation: zoom-in 0.3s;
-}
-
-.zoom-leave-active {
-  animation: zoom-in 0.3s reverse;
-}
-
-@keyframes zoom-in {
-  0% {
-    transform: scale(1.2);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-} */
-
 #inputMessage:disabled {
   background-color: white;
 }
@@ -1411,9 +1394,20 @@ function downloadProject(uuid) {
 .description {
   font-family: monospace;
   white-space: pre-line;
-  overflow-y: auto;
   display: block;
   height: 100%;
+  position: relative;
+}
+
+.description-content {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.description-button {
+  position: absolute;
 }
 
 .bottom {
