@@ -15,8 +15,8 @@ users = APIRouter(prefix="/api")
 def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database_config.get_db)):
     if teacherkey != settings.TEACHER_KEY:
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
-    if len(password) < 8:
-        raise HTTPException(status_code=400, detail="Password too short")
+    if not check_password(password):
+        raise HTTPException(status_code=400, detail="Password invalid")
     user = models_and_schemas.UserSchema(
         username=username, full_name=full_name, role="teacher", password=password)
     db_user = crud.create_user(db=db, user=user)
@@ -29,11 +29,12 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     accounts_created = 0
     accounts_received = 0
     for i in newPupils.newPupils:
-        if i.fullname == "" and i.username == "" and i.password == "":
+        if i.fullname.strip() == "" and i.username.strip() == "" and i.password.strip() == "":
             continue
-        elif i.fullname == "" or i.username == "" or len(i.password) < 8:
+        elif i.fullname.strip() == "" or i.username.strip() == "" or not check_password(i.password):
             accounts_received += 1
             username_errors.append(i.fullname + " (" + i.username + ")")
+            continue
         accounts_received += 1
         pupil = models_and_schemas.UserSchema(
             username=i.username, full_name=i.fullname, role="pupil", password=i.password)
@@ -47,8 +48,41 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received}
 
 
+def check_password(password: str):
+    if len(password) < 8:
+        return False
+    
+    # must fulfill at least 2 of the following 3 criteria
+    criteria_fulfilled = 0
+    # check if password contains at least one number
+    for i in password:
+        if i.isdigit():
+            criteria_fulfilled += 1
+            break
+    
+    # check if password contains at least one letter
+    for i in password:
+        if i.isalpha():
+            criteria_fulfilled += 1
+            break
+
+    # check if password contains at least one special character
+    for i in password:
+        if not i.isdigit() and not i.isalpha():
+            criteria_fulfilled += 1
+            break
+
+    if criteria_fulfilled >= 2:
+        return True
+    
+    return False
+
+
 @users.post('/setNewPassword', dependencies=[Depends(auth.check_teacher)])
 async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Session = Depends(database_config.get_db)):
+    if not check_password(setPassword.password):
+        raise HTTPException(
+            status_code=400, detail="Password invalid")
     if not crud.change_password_by_username(setPassword.username, setPassword.password, db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")

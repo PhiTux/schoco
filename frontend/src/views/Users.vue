@@ -237,11 +237,19 @@ function changePassword() {
       }
     },
     (error) => {
-      console.log(error);
-      const toast = new Toast(
-        document.getElementById("toastPasswordChangeError")
-      );
-      toast.show();
+      console.log(error.response);
+
+      if (error.response.status == 400) {
+        const toast = new Toast(
+          document.getElementById("toastPasswordChangeInvalid")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastPasswordChangeError")
+        );
+        toast.show();
+      }
     }
   );
 }
@@ -579,6 +587,28 @@ function openModalRemoveCourse(id) {
         </div>
       </div>
 
+      <div class="toast align-items-center text-bg-danger border-0" id="toastPasswordChangeInvalid" role="alert"
+        aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="d-flex">
+          <div class="toast-body">
+            Neues Passwort ungültig!
+            <div class="border-top mb-1"></div>
+            Stelle sicher, dass das Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
+            der drei folgenden Kriterien erfüllt:
+            <ul>
+              <li>Enthält einen Buchstabe</li>
+              <li>Enthält eine Zahl</li>
+              <li>Enthält ein Sonderzeichen</li>
+            </ul>
+            <div class="mt-2 pt-2 border-top">
+              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="toast align-items-center text-bg-danger border-0" id="toastUsernameChangeError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -673,6 +703,14 @@ function openModalRemoveCourse(id) {
           sie bereits?<br />
           <ul>
             <li v-for="u in state.username_errors">{{ u }}</li>
+          </ul>
+          <div class="border-top mb-1"></div>
+          Stelle außerdem sicher, dass das Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
+          der drei folgenden Kriterien erfüllt:
+          <ul>
+            <li>Enthält einen Buchstabe</li>
+            <li>Enthält eine Zahl</li>
+            <li>Enthält ein Sonderzeichen</li>
           </ul>
           <div class="mt-2 pt-2 border-top">
             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
@@ -813,7 +851,7 @@ function openModalRemoveCourse(id) {
                 Schließen
               </button>
               <button type="button" class="btn btn-primary" @click.prevent="changePassword()" :disabled="state.changePasswordLoading || state.newPassword.length < 8
-                ">
+                  ">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                   v-if="state.changePasswordLoading"></span>
                 Neues Passwort speichern
