@@ -28,7 +28,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 ---
 
 ## Main-features
-- Web-based IDE for Java-Programming (Java 8), which is fully functional to Java <ins>except</ins> UIs (obviously), writing files to disk, accessing the internet and a few others. The restricted are needed for security reasons and are provided by Java's security manager.
+- Web-based IDE for Java-Programming (Java 8), which is fully functional to Java <ins>except</ins> UIs (obviously), writing files to disk, accessing the internet and a few others. The restrictions are needed for security reasons and are provided by Java's security manager.
 - Each user can create private projects and teachers can convert them to homeworks, which are then editable by the pupils of the selected course.
 - Pupils directly see coding-homeworks when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
 - JUnit for automatic testing of the homework - the newest test-result (percent of how many JUnit-Tests passed successfully) of pupils is directly visible to the teacher.
@@ -38,7 +38,7 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 
 # Installation
-🛑 At the moment there are first pre-release docker images available (tag-numbers below 1.0.0). See [docker-nginx](https://hub.docker.com/r/phitux/schoco-nginx/tags) and [docker-backend](https://hub.docker.com/r/phitux/schoco-backend/tags) for the newest tags.
+🛑 At the moment there are first pre-release docker images available (tag-numbers below 1.0.0). See [schoco-nginx](https://hub.docker.com/r/phitux/schoco-nginx/tags) and [schoco-backend](https://hub.docker.com/r/phitux/schoco-backend/tags) for the newest tags.
 
 They already work quite well and support ALL main-features of schoco (see [Progress](#progress))
 
