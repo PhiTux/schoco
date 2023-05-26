@@ -181,6 +181,8 @@ services:
 > At the moment the pupils can continue using schoco just as before (edit, save, run, test,...). It's planned to implement a button for teachers to see the latest version BEFORE deadline.
 - Can I code everything that's normally possible in Java? 
 > No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, homeworks can have a higher limit).
+- A teacher can change passwords of other teachers. Is this intended?
+> Yes! Since there is no mail-service included to send a password-reset-link, you need another possibility to login as teacher in case you lost your password. Since schoco will probably always be hosted individually for each educational institution, there is hopefully no hostility between colleagues.
 - Code execution and testing is quite fast, how does it come?
 > Each action get's executed by an individual docker container. The trick is, that these containers are already created and running in the background, waiting for a job. The code is then just written to the folder which is mounted to the container and the job inside the container is started via a very reduced Java-API.
 - Can I use schoco for other programming languages than Java?
