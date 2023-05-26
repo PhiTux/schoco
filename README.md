@@ -49,7 +49,7 @@ Installation requires a few more steps than your average docker-service, but it'
   3. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
   4. Create the data-forder `data` where you want to store the DB and temporary code. This step must be done BEFORE starting up the docker containers.
      
-     ❗ <ins>YOU</ins> must be the owner of this folder - not root (don't use sudo). If you created another user in the previous step: Make sure he is the owner of this folder ❗
+     ❗ <ins>YOU</ins> (or the user from step 3) must be the owner of this folder - not root (don't use sudo). ❗
   5. Prepare your Web-Server / Reverse-Proxy to forward requests to schoco. It requires special care for the websocket-connection to work! Here are two example configurations for Apache2 and NGINX (both assuming, that schoco is running on port 1234):
      - NGINX
       ```nginx
