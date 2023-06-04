@@ -41,6 +41,7 @@ let state = reactive({
   changingUsername: false,
   removeCourseId: 0,
   removeCourseName: "",
+  newPupilsToCourses: []
 });
 
 function selectUser(user) {
@@ -57,6 +58,7 @@ function preparePupilModal() {
   state.showUnifiedPasswordMissing = false;
   state.showUniquePasswordMissing = false;
   state.showPasswordTooShort = false;
+  while (state.newPupilsToCourses.length) state.newPupilsToCourses.pop();
 }
 
 function addPupilToList() {
@@ -103,7 +105,13 @@ function createPupilAccounts() {
     }
   }
 
-  UserService.registerPupils(newPupils).then(
+  // create array of course-ids to add the new pupils
+  var courseIDs = []
+  for (let i = 0; i < state.newPupilsToCourses.length; i++) {
+    courseIDs.push(state.newPupilsToCourses[i].id)
+  }
+
+  UserService.registerPupils(newPupils, courseIDs).then(
     (response) => {
       getAllUsers();
 
@@ -129,6 +137,13 @@ function createPupilAccounts() {
         state.username_errors = response.data.username_errors;
         const toast = new Toast(
           document.getElementById("toastErrorAccountsCreated")
+        );
+        toast.show();
+      }
+
+      if (response.data.course_error) {
+        const toast = new Toast(
+          document.getElementById("toastErrorAccountsCreatedCourses")
         );
         toast.show();
       }
@@ -559,6 +574,32 @@ function openModalRemoveCourse(id) {
   const modal = new Modal(document.getElementById("removeCourseModal"));
   modal.show();
 }
+
+function addCourseToNewPupils(id) {
+  // check if course already selected
+  for (const e of state.newPupilsToCourses) {
+    if (e.id == id) {
+      console.log("Course already selected...");
+      return;
+    }
+  }
+
+  for (let i = 0; i < allCourses.value.length; i++) {
+    if (allCourses.value[i].id == id) {
+      state.newPupilsToCourses.push(allCourses.value[i]);
+      break
+    }
+  }
+}
+
+function removeCourseFromNewPupils(id) {
+  for (let i = 0; i < state.newPupilsToCourses.length; i++) {
+    if (state.newPupilsToCourses[i].id == id) {
+      state.newPupilsToCourses.splice(i, 1)
+      break
+    }
+  }
+}
 </script>
 
 <template>
@@ -719,7 +760,21 @@ function openModalRemoveCourse(id) {
           </div>
         </div>
       </div>
+
+      <div class="toast text-bg-danger" id="toastErrorAccountsCreatedCourses" role="alert" aria-live="assertive"
+        aria-atomic="true" data-bs-autohide="false">
+        <div class="toast-body">
+          Es gab Fehler bei der Zuordnung von Schülern zu Kursen. Bitte überprüfe die Zuordnung manuell.
+          <div class="mt-2 pt-2 border-top">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
+              Schließen
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+
+    
 
     <div class="modal fade" id="removeCourseModal" tabindex="-1" aria-labelledby="removeCourseModalLabel"
       aria-hidden="true">
@@ -851,7 +906,7 @@ function openModalRemoveCourse(id) {
                 Schließen
               </button>
               <button type="button" class="btn btn-primary" @click.prevent="changePassword()" :disabled="state.changePasswordLoading || state.newPassword.length < 8
-                  ">
+                ">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                   v-if="state.changePasswordLoading"></span>
                 Neues Passwort speichern
@@ -902,23 +957,18 @@ function openModalRemoveCourse(id) {
           </div>
           <div class="modal-body">
             <div class="container">
-              <div class="row mt-2">
-                <label class="col-4 col-form-label" for="useUnifiedPassword">Dasselbe Passwort für alle Accounts</label>
-                <div class="col-1">
-                  <div class="form-switch form-check pt-2 mb-5">
-                    <input class="form-check-input" type="checkbox" role="switch" id="useUnifiedPassword"
-                      v-model="state.useUnifiedPassword" checked />
-                  </div>
+              <div class="d-flex flex-row align-items-center my-2">
+                <label for="useUnifiedPassword">Dasselbe Passwort für alle Accounts</label>
+                <div class="mx-2 form-switch form-check">
+                  <input class="form-check-input" type="checkbox" role="switch" id="useUnifiedPassword"
+                    v-model="state.useUnifiedPassword" checked />
                 </div>
-                <div class="col-5">
-                  <div class="form-floating" v-if="state.useUnifiedPassword">
-                    <input v-model="state.unifiedPassword" type="text" class="form-control"
-                      placeholder="Einheitliches Passwort für alle Accounts" id="unifiedPasswordLabel" />
-                    <label for="unifiedPasswordLabel">Einheitliches Passwort für alle Accounts</label>
-                  </div>
+                <div class="flex-fill form-floating"
+                  :style="{ visibility: state.useUnifiedPassword ? 'visible' : 'hidden' }">
+                  <input v-model="state.unifiedPassword" type="text" class="form-control"
+                    placeholder="Einheitliches Passwort für alle Accounts" id="unifiedPasswordLabel" />
+                  <label for="unifiedPasswordLabel">Einheitliches Passwort für alle Accounts</label>
                 </div>
-
-                <div class="col-4"></div>
               </div>
             </div>
 
@@ -986,6 +1036,34 @@ function openModalRemoveCourse(id) {
                 <font-awesome-icon icon="fa-check" transform="shrink-5" style="color: white" />
               </font-awesome-layers></span>
             werden berücksichtigt!
+          </div>
+
+          <div class="container">
+            <div class="d-flex flex-row align-items-center mb-2">
+              <label class="me-2" for="">
+                <b>Optional:</b> Schüler direkt folgenden Gruppen zuweisen:
+              </label>
+
+              <CourseBadge v-for="c in state.newPupilsToCourses" :color="c.color" :font-dark="c.fontDark" :name="c.name"
+                :is-deletable="true" @remove="removeCourseFromNewPupils(c.id)" />
+              <div class="btn-group">
+                <a class="btn-round btn" data-bs-toggle="dropdown">
+                  <font-awesome-layers class="fa-lg">
+                    <font-awesome-icon icon="fa-circle" style="color: var(--bs-secondary)" />
+                    <div style="color: var(--bs-light)">
+                      <font-awesome-icon icon="fa-plus" transform="shrink-6" />
+                    </div>
+                  </font-awesome-layers>
+                </a>
+                <ul class="dropdown-menu">
+                  <li v-for="c in allCourses">
+                    <a class="dropdown-item btn" @click.prevent="addCourseToNewPupils(c.id)">
+                      <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer">

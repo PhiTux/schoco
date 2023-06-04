@@ -28,6 +28,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     username_errors = []
     accounts_created = 0
     accounts_received = 0
+    course_error = False
     for i in newPupils.newPupils:
         if i.fullname.strip() == "" and i.username.strip() == "" and i.password.strip() == "":
             continue
@@ -45,7 +46,14 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
         else:
             username_errors.append(i.fullname + " (" + i.username + ")")
 
-    return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received}
+        user = crud.get_user_by_username(db=db, username=i.username)
+        for c in newPupils.courseIDs:
+            courseUserLink = models_and_schemas.UserCourseLink(
+                user_id=user.id, course_id=c)
+            if not crud.create_UserCourseLink(db=db, link=courseUserLink):
+                course_error = True
+
+    return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received, 'course_error': course_error}
 
 
 def check_password(password: str):

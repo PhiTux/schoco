@@ -107,6 +107,7 @@ class newPupil(BaseModel):
 
 class pupilsList(BaseModel):
     newPupils: List[newPupil]
+    courseIDs: List[int]
 
 
 class setPassword(BaseModel):

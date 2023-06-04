@@ -38,8 +38,8 @@ class UserService {
         return axios.post(API_URL + 'registerTeacher', bodyFormData)
     }
 
-    registerPupils(newPupils) {
-        return axiosAuth.post('registerPupils', { 'newPupils': newPupils })
+    registerPupils(newPupils, courseIDs) {
+        return axiosAuth.post('registerPupils', { 'newPupils': newPupils, 'courseIDs': courseIDs })
     }
 
     setNewPassword(username, password) {
