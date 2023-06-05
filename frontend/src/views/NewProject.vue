@@ -29,6 +29,8 @@ onMounted(() => {
       e.style = "cursor: pointer;"
     }
   })
+
+  document.title = "Neues Projekt"
 })
 
 watch(() => state.files, (files) => {

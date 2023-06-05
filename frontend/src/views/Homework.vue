@@ -25,9 +25,12 @@ onBeforeMount(() => {
             state.course_font_dark = response.data.course_font_dark;
             state.pupils = response.data.pupils_results;
             state.uuid = response.data.uuid;
+
+            document.title = state.name
         },
         error => {
             console.log(error.response)
+            document.title = "Hausaufgabe"
         }
     )
 })

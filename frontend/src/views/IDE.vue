@@ -14,7 +14,7 @@ import "ace-builds/src-min-noconflict/mode-java";
 import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css'
+import '@vuepic/vue-datepicker/dist/main.css';
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -159,9 +159,12 @@ onBeforeMount(() => {
           }
         }
       }
+
+      document.title = state.projectName
     },
     (error) => {
       console.log(error);
+      document.title = "Projekt"
     }
   );
 

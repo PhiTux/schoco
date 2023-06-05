@@ -39,6 +39,8 @@ onMounted(() => {
     toast.show();
   }
   router.replace({ query: {} });
+
+  document.title = "Login"
 })
 
 async function loginUser() {

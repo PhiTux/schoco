@@ -30,6 +30,8 @@ onBeforeMount(() => {
   } else {
     getProjectsAsPupil()
   }
+
+  document.title = "Home"
 });
 
 function getProjectsAsTeacher() {
@@ -584,7 +586,7 @@ function downloadProject(uuid) {
 
 
     <div class="container main">
-      <a class="btn btn-outline-success my-3" type="submit" href="/#/newProject">
+      <a class="btn btn-outline-success my-3 sticky-content" type="submit" href="/#/newProject">
         Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
       </a>
       <h1 v-if="state.new_homework.length">Aktuelle Hausaufgaben</h1>
@@ -633,6 +635,11 @@ function downloadProject(uuid) {
 <style scoped>
 .main {
   overflow-y: hidden;
+}
+
+.sticky-content {
+  position: sticky;
+  top: 0;
 }
 
 .dark-text {

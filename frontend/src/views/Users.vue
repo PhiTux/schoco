@@ -471,6 +471,8 @@ watch(newPupils, () => {
 onMounted(() => {
   getAllUsers();
   getAllCourses();
+
+  document.title = "Benutzerverwaltung"
 });
 
 function calculateFontDark(color) {
