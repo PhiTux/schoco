@@ -20,6 +20,9 @@ const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
+const ZOOMMIN = 12
+const ZOOMMAX = 28
+
 let state = reactive({
   projectName: "",
   newProjectName: "",
@@ -47,6 +50,7 @@ let state = reactive({
   renameFilePath: "",
   renameFileNewName: "",
   isRenamingFile: false,
+  editorZoom: 16
 });
 
 let homework = reactive({
@@ -62,10 +66,18 @@ let results = ref("");
 
 let ws;
 
+var isMac = /mac/i.test(navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform);
+
 window.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.key === 's') {
+  if ((isMac ? e.metaKey : e.ctrlKey) && e.key === 's') {
     e.preventDefault()
     saveAll()
+  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '+') {
+    e.preventDefault()
+    zoomPlus()
+  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '-') {
+    e.preventDefault()
+    zoomMinus()
   }
 })
 
@@ -876,6 +888,33 @@ function downloadProject(uuid) {
   )
 }
 
+function zoom(zoom) {
+  let newZoom
+  if (zoom < ZOOMMIN) {
+    newZoom = ZOOMMIN
+  } else if (zoom > ZOOMMAX) {
+    newZoom = ZOOMMAX
+  } else {
+    newZoom = zoom
+  }
+  
+  state.editorZoom = parseInt(newZoom)
+  document.getElementById('editor').style.fontSize=newZoom + 'px';
+}
+
+function zoomPlus() {
+  if (state.editorZoom + 1 <= ZOOMMAX) {
+    state.editorZoom++;
+    zoom(state.editorZoom)
+  }
+}
+
+function zoomMinus() {
+  if (state.editorZoom - 1 >= ZOOMMIN) {
+    state.editorZoom--;
+    zoom(state.editorZoom)
+  }
+}
 </script>
 
 <template>
@@ -1306,17 +1345,25 @@ function downloadProject(uuid) {
               </splitpanes>
             </pane>
             <pane>
-              <ul class="nav nav-tabs pt-2">
-                <li class="nav-item" v-for="f in state.openFiles">
-                  <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                      active: f.tab == state.activeTab,
-                      changed: state.tabsWithChanges.includes(f.tab),
-                    }">
-                    {{ f.path }}
-                  </div>
-                </li>
-              </ul>
-              <v-ace-editor id="editor" value="" @init="editorInit" lang="java" theme="monokai" />
+              <div class="editor-relative">
+                <ul class="nav nav-tabs pt-2">
+                  <li class="nav-item" v-for="f in state.openFiles">
+                    <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
+                        active: f.tab == state.activeTab,
+                        changed: state.tabsWithChanges.includes(f.tab),
+                      }">
+                      {{ f.path }}
+                    </div>
+                  </li>
+                </ul>
+                <v-ace-editor id="editor" value="" @init="editorInit" lang="java" theme="monokai" />
+                <div class="zoom-overlay bottom-0 end-0">
+                  <input id="zoomInput" :value="state.editorZoom" @input="event => zoom(event.target.value)"
+                  type="number" :min="ZOOMMIN" :max="ZOOMMAX" step="1" />
+                  <input :value="state.editorZoom" @input="event => zoom(event.target.value)" 
+                    type="range" class="form-range" :min="ZOOMMIN" :max="ZOOMMAX">
+                </div>
+              </div>
             </pane>
 
           </splitpanes>
@@ -1345,6 +1392,22 @@ function downloadProject(uuid) {
 </template>
 
 <style scoped>
+#zoomInput {
+  float: right;
+}
+
+.editor-relative {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.zoom-overlay {
+  position: absolute;
+  z-index: 10;
+  padding: 5px;
+}
+
 #inputMessage:disabled {
   background-color: white;
 }
@@ -1459,6 +1522,7 @@ ul.nav-tabs {
 }
 
 #editor {
+  position: relative;
   width: 100%;
   height: 100%;
 }
