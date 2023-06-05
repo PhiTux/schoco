@@ -28,7 +28,6 @@ let state = reactive({
   showPasswordTooShort: false,
   newCourseColor: "#ff8000",
   newCourseName: "",
-  newCourseFontDark: false,
   deleteUserFullname: "",
   deleteUserUsername: "",
   deleteUserId: 0,
@@ -275,7 +274,7 @@ function addNewCourse() {
   UserService.addNewCourse(
     state.newCourseName,
     state.newCourseColor,
-    state.newCourseFontDark
+    newCourseFontDark.value
   ).then(
     (response) => {
       if (response.data.success) {
@@ -410,6 +409,17 @@ watch(newPupils, () => {
 onMounted(() => {
   getAllUsers();
   getAllCourses();
+});
+
+let newCourseFontDark = computed(() => {
+  let r = state.newCourseColor.slice(1,3)
+  let g = state.newCourseColor.slice(3,5)
+  let b = state.newCourseColor.slice(5,7)
+
+  if (parseInt(r, 16)*0.299 + parseInt(g, 16)*0.587 + parseInt(b, 16)*0.114 > 156) 
+    return true
+  
+  return false
 });
 
 let allUsersFiltered = computed(() => {
@@ -823,29 +833,13 @@ function removeCourseFromNewPupils(id) {
                   v-model="state.newCourseColor" title="Farbe wählen" />
               </div>
             </div>
-            <div class="mb-3 row">
-              <label for="coursefontcolor" class="col-sm-4 col-form-label">
-                Schriftfarbe
-              </label>
-              <div class="col-sm-8" style="margin-top: auto; margin-bottom: auto">
-                <div class="d-flex">
-                  <label class="form-check-label" for="flexSwitchCheckDefault">hell</label>
-                  <div class="form-check form-switch" style="padding-left: inherit; padding: 0 5px 0 5px">
-                    <input class="form-check-input" type="checkbox" role="switch" style="margin-left: inherit"
-                      id="flexSwitchCheckDefault" v-model="state.newCourseFontDark" />
-                  </div>
-                  <label class="form-check-label" for="flexSwitchCheckDefault">
-                    dunkel</label>
-                </div>
-              </div>
-            </div>
-
+            
             <hr />
 
             <div class="mb-3 row">
               <label for="coursepreview" class="col-sm-4 col-form-label"><b>Vorschau</b></label>
               <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
-                <CourseBadge :color="state.newCourseColor" :font-dark="state.newCourseFontDark"
+                <CourseBadge :color="state.newCourseColor" :font-dark="newCourseFontDark"
                   :name="state.newCourseName" />
               </div>
             </div>
