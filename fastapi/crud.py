@@ -573,3 +573,21 @@ def rename_project(db: Session, uuid: str, new_name: str):
         db.rollback()
         return False
     return True
+
+
+def edit_course(db: Session, course: models_and_schemas.Course):
+
+    course_to_edit = db.exec(select(models_and_schemas.Course).where(
+        models_and_schemas.Course.id == course.id)).first()
+    course_to_edit.name = course.name
+    course_to_edit.color = course.color
+    course_to_edit.fontDark = course.fontDark
+
+    try:
+        db.add(course_to_edit)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True

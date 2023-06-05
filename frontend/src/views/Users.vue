@@ -40,7 +40,12 @@ let state = reactive({
   changingUsername: false,
   removeCourseId: 0,
   removeCourseName: "",
-  newPupilsToCourses: []
+  newPupilsToCourses: [],
+  editCourseID: 0,
+  editCourseColor: "",
+  editCourseName: "",
+  oldCourseName: "",
+  courseLoading: false
 });
 
 function selectUser(user) {
@@ -49,6 +54,10 @@ function selectUser(user) {
 
 function unselectUser() {
   state.selectedUser = false
+}
+
+function prepareAddCoursesModal() {
+  state.courseLoading = false;
 }
 
 function preparePupilModal() {
@@ -268,8 +277,62 @@ function changePassword() {
   );
 }
 
+function editCourse() {
+  if (state.editCourseColor == "" || state.editCourseName.length < 2 || state.editCourseName.length > 30) return;
+
+  state.courseLoading = true
+
+  UserService.editCourse(
+    state.editCourseID,
+    state.editCourseName, 
+    state.editCourseColor, 
+    editCourseFontDark.value
+  ).then(
+    (response) => {
+      state.courseLoading = false
+
+      //close modal #editCourseModal
+      var elem = document.getElementById("editCourseModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        const toast = new Toast(
+          document.getElementById("toastSuccessCourseEdited")
+        );
+        toast.show();
+
+        getAllCourses();
+        getAllUsers();
+      } else {
+        const toast = new Toast(
+        document.getElementById("toastErrorCourseEdited")
+        );
+        toast.show();
+      }
+    }, 
+    (error) => {
+      console.log(error.response)
+
+      state.courseLoading = false
+
+      //close modal #editCourseModal
+      var elem = document.getElementById("editCourseModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      const toast = new Toast(
+        document.getElementById("toastErrorCourseEdited")
+      );
+      toast.show();
+    }
+  )
+}
+
 function addNewCourse() {
-  if (state.newCourseColor == "" || state.newCourseName == "") return;
+  if (state.newCourseColor == "" || state.newCourseName.length < 2 || state.newCourseName.length > 30) return;
+
+  state.courseLoading = true
 
   UserService.addNewCourse(
     state.newCourseName,
@@ -277,16 +340,18 @@ function addNewCourse() {
     newCourseFontDark.value
   ).then(
     (response) => {
+      state.courseLoading = false
+
+      //close modal #addCoursesModal
+      var elem = document.getElementById("addCoursesModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
       if (response.data.success) {
         const toast = new Toast(
           document.getElementById("toastSuccessCourseCreated")
         );
         toast.show();
-
-        //close modal #addCoursesModal
-        var elem = document.getElementById("addCoursesModal");
-        var modal = Modal.getInstance(elem);
-        modal.hide();
 
         getAllCourses();
       } else {
@@ -295,15 +360,12 @@ function addNewCourse() {
         );
         toast.show();
 
-        //close modal #addCoursesModal
-        var elem = document.getElementById("addCoursesModal");
-        var modal = Modal.getInstance(elem);
-        modal.hide();
-
         console.log(response.data);
       }
     },
     (error) => {
+      state.courseLoading = false
+
       const toast = new Toast(
         document.getElementById("toastErrorCourseCreated")
       );
@@ -411,16 +473,24 @@ onMounted(() => {
   getAllCourses();
 });
 
-let newCourseFontDark = computed(() => {
-  let r = state.newCourseColor.slice(1,3)
-  let g = state.newCourseColor.slice(3,5)
-  let b = state.newCourseColor.slice(5,7)
+function calculateFontDark(color) {
+  let r = color.slice(1, 3)
+  let g = color.slice(3, 5)
+  let b = color.slice(5, 7)
 
-  if (parseInt(r, 16)*0.299 + parseInt(g, 16)*0.587 + parseInt(b, 16)*0.114 > 156) 
+  if (parseInt(r, 16) * 0.299 + parseInt(g, 16) * 0.587 + parseInt(b, 16) * 0.114 > 156)
     return true
-  
+
   return false
+}
+
+let newCourseFontDark = computed(() => {
+  return calculateFontDark(state.newCourseColor)
 });
+
+let editCourseFontDark = computed(() => {
+  return calculateFontDark(state.editCourseColor)
+})
 
 let allUsersFiltered = computed(() => {
   if (allUsers.value.length == 0) {
@@ -585,6 +655,22 @@ function openModalRemoveCourse(id) {
   modal.show();
 }
 
+function openModalEditCourse(id) {
+  state.courseLoading = false
+
+  state.editCourseID = id
+  for (let i = 0; i < allCourses.value.length; i++) {
+    if (allCourses.value[i].id == id) {
+      state.oldCourseName = allCourses.value[i].name
+      state.editCourseName = allCourses.value[i].name
+      state.editCourseColor = allCourses.value[i].color
+    }
+  }
+
+  const modal = new Modal(document.getElementById("editCourseModal"));
+  modal.show();
+}
+
 function addCourseToNewPupils(id) {
   // check if course already selected
   for (const e of state.newPupilsToCourses) {
@@ -696,6 +782,32 @@ function removeCourseFromNewPupils(id) {
         </div>
       </div>
 
+      <div class="toast align-items-center text-bg-danger border-0" id="toastErrorCourseCreated" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Erstellen des Kurses. Vielleicht existiert der Kursname
+            bereits?
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseEdited" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">Kurs wurde bearbeitet.</div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastErrorCourseEdited" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Bearbeiten des Kurses.
+          </div>
+        </div>
+      </div>
+
       <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseRemoved" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -712,15 +824,7 @@ function removeCourseFromNewPupils(id) {
         </div>
       </div>
 
-      <div class="toast align-items-center text-bg-danger border-0" id="toastErrorCourseCreated" role="alert"
-        aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            Fehler beim Erstellen des Kurses. Vielleicht existiert der Kursname
-            bereits?
-          </div>
-        </div>
-      </div>
+      
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastErrorAddUserToCourse" role="alert"
         aria-live="assertive" aria-atomic="true">
@@ -784,7 +888,7 @@ function removeCourseFromNewPupils(id) {
       </div>
     </div>
 
-    
+
 
     <div class="modal fade" id="removeCourseModal" tabindex="-1" aria-labelledby="removeCourseModalLabel"
       aria-hidden="true">
@@ -820,9 +924,9 @@ function removeCourseFromNewPupils(id) {
           </div>
           <div class="modal-body">
             <div class="mb-3 row">
-              <label for="coursename" class="col-sm-4 col-form-label">Kursname</label>
+              <label for="addCoursename" class="col-sm-4 col-form-label">Kursname</label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="coursename" placeholder="Kursname"
+                <input type="text" class="form-control" id="addCoursename" placeholder="Kursname"
                   v-model="state.newCourseName" />
               </div>
             </div>
@@ -833,14 +937,13 @@ function removeCourseFromNewPupils(id) {
                   v-model="state.newCourseColor" title="Farbe wählen" />
               </div>
             </div>
-            
+
             <hr />
 
             <div class="mb-3 row">
               <label for="coursepreview" class="col-sm-4 col-form-label"><b>Vorschau</b></label>
               <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
-                <CourseBadge :color="state.newCourseColor" :font-dark="newCourseFontDark"
-                  :name="state.newCourseName" />
+                <CourseBadge :color="state.newCourseColor" :font-dark="newCourseFontDark" :name="state.newCourseName" />
               </div>
             </div>
 
@@ -849,10 +952,59 @@ function removeCourseFromNewPupils(id) {
                 Schließen
               </button>
               <button type="button" class="btn btn-primary" @click.prevent="addNewCourse()"
-                :disabled="state.newCourseName.length < 2">
+                :disabled="state.newCourseName.length < 2 || state.newCourseName.length > 30">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
-                  v-if="state.changePasswordLoading"></span>
+                  v-if="state.courseLoading"></span>
                 Neuen Kurs erstellen
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="editCourseModal" tabindex="-1" aria-labelledby="editCourseModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content dark-text">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">Kurs <b>{{ state.oldCourseName }}</b> bearbeiten</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3 row">
+              <label for="coursename" class="col-sm-4 col-form-label">Kursname</label>
+              <div class="col-sm-8">
+                <input type="text" class="form-control" id="coursename" placeholder="Kursname"
+                  v-model="state.editCourseName" />
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="coursebackgroundcolor" class="col-sm-4 col-form-label">Hintergrundfarbe</label>
+              <div class="col-sm-8">
+                <input type="color" class="form-control form-control-color" id="coursebackgroundcolor"
+                  v-model="state.editCourseColor" title="Farbe wählen" />
+              </div>
+            </div>
+
+            <hr />
+
+            <div class="mb-3 row">
+              <label for="coursepreview" class="col-sm-4 col-form-label"><b>Vorschau</b></label>
+              <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
+                <CourseBadge :color="state.editCourseColor" :font-dark="editCourseFontDark"
+                  :name="state.editCourseName" />
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Schließen
+              </button>
+              <button type="button" class="btn btn-primary" @click.prevent="editCourse()"
+                :disabled="state.editCourseName.length < 2 || state.editCourseName > 30">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                  v-if="state.courseLoading"></span>
+                Änderungen speichern
               </button>
             </div>
           </div>
@@ -1077,7 +1229,8 @@ function removeCourseFromNewPupils(id) {
 
     <h1 class="text-center">Benutzerverwaltung</h1>
     <div class="btn-group non-flex text-center m-4" role="group">
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCoursesModal">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCoursesModal"
+        @click="prepareAddCoursesModal()">
         Kurse erstellen
         <font-awesome-icon icon="fa-solid fa-users" />
       </button>
@@ -1093,7 +1246,8 @@ function removeCourseFromNewPupils(id) {
         Kurse:
         <div class="col">
           <CourseBadge v-for="c in allCourses" :color="c.color" :font-dark="c.fontDark" :name="c.name"
-            :is-deletable="true" @remove="openModalRemoveCourse(c.id)" />
+            :is-deletable="true" :is-editable="true" @remove="openModalRemoveCourse(c.id)"
+            @edit="openModalEditCourse(c.id)" />
         </div>
       </div>
       <div class="row">

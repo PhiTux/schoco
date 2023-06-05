@@ -99,10 +99,23 @@ async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Sessio
 
 @users.post('/addNewCourse', dependencies=[Depends(auth.check_teacher)])
 async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depends(database_config.get_db)):
+    if len(newCourse.name) < 2 or len(newCourse.name) > 30:
+        raise HTTPException(status_code=403, detail="Course name length must be between 2 to 30.")
     success = crud.create_course(db=db, course=newCourse)
     if not success:
         raise HTTPException(
             status_code=500, detail="Course creation not successful")
+
+    return {'success': True}
+
+
+@users.post('/editCourse', dependencies=[Depends(auth.check_teacher)])
+async def editCourse(editCourse: models_and_schemas.Course, db: Session = Depends(database_config.get_db)):
+    if len(editCourse.name) < 2 or len(editCourse.name) > 30:
+        raise HTTPException(status_code=403, detail="Course name length must be between 2 to 30.")
+    if not crud.edit_course(db=db, course=editCourse):
+        raise HTTPException(
+            status_code=500, detail="Course edit not successful")
 
     return {'success': True}
 
