@@ -237,9 +237,9 @@ function resetFileList() {
 
       <div class="row">
         <div class="col-md-4 col-sm-6">
-          <label for="HelloWorldName">Neuer Projektname</label>
+          <label for="HelloWorldName">Projektname*</label>
           <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
-            placeholder="Neuer Projektname" />
+            placeholder="Projektname" />
         </div>
         <div class="col-md-4 col-sm-6">
           <label for="HelloWorldDescription">Projektbeschreibung</label>
@@ -257,6 +257,7 @@ function resetFileList() {
       </div>
 
       <!-- <h2>2) Vorlage wählen</h2> -->
+      <div class="or">ODER</div>
 
       <h2>2) ZIPs hochladen</h2>
       Lade zuvor exportierte Projekte hoch. Es können mehrere Projekte auf einmal hochgeladen werden.
@@ -316,6 +317,14 @@ function resetFileList() {
 </template>
 
 <style scoped>
+.or {
+  font-size: 20px;
+  font-style: italic;
+  text-decoration: underline;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 .greenLabel {
   color: var(--bs-success);
 }
