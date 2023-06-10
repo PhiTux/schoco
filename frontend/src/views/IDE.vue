@@ -1287,7 +1287,7 @@ function closeTab(tabID) {
             </li>
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
               <button @click.prevent="undo()" type="button" class="btn btn-outline-secondary">
-                <font-awesome-icon icon="fa-solid fa-arrow-left-long" />
+                <font-awesome-icon icon="fa-solid fa-arrow-rotate-left" />
               </button>
               <button @click.prevent="redo()" type="button" class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
