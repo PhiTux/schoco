@@ -50,7 +50,10 @@ let state = reactive({
   renameFilePath: "",
   renameFileNewName: "",
   isRenamingFile: false,
-  editorZoom: 16
+  editorZoom: 16,
+  closeTabAfterSaving: false,
+  closeIDEAfterSaving: false,
+  closeTabID: 0,
 });
 
 let homework = reactive({
@@ -328,8 +331,21 @@ function saveAll() {
       //editorChange()
       updateTabsWithChanges();
       ace.edit("editor").focus();
+
+      if (state.closeIDEAfterSaving) {
+        exit();
+        return;
+      } else if (state.closeTabAfterSaving) {
+        closeTab(state.closeTabID)
+      }
     },
     (error) => {
+      // toast error
+      const toast = new Toast(
+        document.getElementById("toastSavingError")
+      );
+      toast.show();
+
       state.isSaving = false;
       console.log(error);
     }
@@ -837,33 +853,34 @@ function renameFile() {
     })
 }
 
-function exit() {
-  //include some way to ask, if editor should really get closed if there are unsaved changes...
+function checkExit() {
+  if (state.tabsWithChanges.length) {
+    state.closeIDEAfterSaving = true
 
-  /* if (state.tabsWithChanges.length !== 0) {
-    var elem = document.getElementById("exitModal");
-    var modal = Modal.getInstance(elem);
+    // open Modal
+    var modal = new Modal(document.getElementById("saveBeforeCloseModal"));
     modal.show();
-    return
-  } */
+  } else {
+    exit()
+  }
+}
+
+function exit() {
 
   // if (pupil) OR (teacher and !homework): go to /home
   if (!authStore.isTeacher() || (authStore.isTeacher() && !state.isHomework)) {
     router.push({
       name: "home"
     });
-  } else { // else: teacher
+  } else { // else: teacher viewing homework
     router.go(-1)
   }
-
 }
 
-/* 🛑 This function also exists at ../Home.vue 🛑 */
+/* 🛑 This function also exists at ./Home.vue 🛑 */
 function downloadProject(uuid) {
-  console.log(uuid)
   CodeService.downloadProject(uuid).then(
     (response) => {
-      console.log(response.headers["content-disposition"])
       let filename = response.headers["content-disposition"].split("filename=")[1]
 
       let fileUrl = window.URL.createObjectURL(response.data);
@@ -897,9 +914,9 @@ function zoom(zoom) {
   } else {
     newZoom = zoom
   }
-  
+
   state.editorZoom = parseInt(newZoom)
-  document.getElementById('editor').style.fontSize=newZoom + 'px';
+  document.getElementById('editor').style.fontSize = newZoom + 'px';
 }
 
 function zoomPlus() {
@@ -913,6 +930,41 @@ function zoomMinus() {
   if (state.editorZoom - 1 >= ZOOMMIN) {
     state.editorZoom--;
     zoom(state.editorZoom)
+  }
+}
+
+function checkCloseTab(tabID) {
+  console.log(tabID)
+
+  if (state.tabsWithChanges.includes(tabID)) {
+    state.closeTabID = tabID
+    state.closeTabAfterSaving = true
+
+    // open Modal
+    var modal = new Modal(document.getElementById("saveBeforeCloseModal"));
+    modal.show();
+  } else {
+    closeTab(tabID)
+  }
+}
+
+function closeTab(tabID) {
+  // remove from tabsWithChanges
+  for (let i = 0; i < state.tabsWithChanges.length; i++) {
+    if (state.tabsWithChanges[i] === tabID) {
+      state.tabsWithChanges.splice(i, 1)
+      break;
+    }
+  }
+
+  for (let i = 0; i < state.openFiles.length; i++) {
+    if (state.openFiles[i].tab === tabID) {       
+      state.openFiles.splice(i, 1);
+      
+      // open first tab
+      openFile(state.openFiles[0].path)
+      break;
+    }
   }
 }
 </script>
@@ -935,6 +987,15 @@ function zoomMinus() {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Download des Projekts.
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastSavingError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Speichern!
           </div>
         </div>
       </div>
@@ -1046,6 +1107,27 @@ function zoomMinus() {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="saveBeforeCloseModal" tabindex="-1" aria-labelledby="saveBeforeCloseModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content dark-text">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Änderungen speichern?</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Möchtest du die Änderungen vor dem Schließen speichern?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click.prevent="state.closeIDEAfterSaving ? exit() : (state.closeTabAfterSaving && closeTab(state.closeTabID))">Nicht speichern</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click.prevent="saveAll()">
+              Speichern
+            </button>
           </div>
         </div>
       </div>
@@ -1255,7 +1337,7 @@ function zoomMinus() {
                     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
                   }) }}</span></div>
           </ul>
-          <a class="ms-auto btn btn-primary" @click.prevent="exit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
+          <a class="ms-auto btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
               size="xl" /></a>
         </div>
       </div>
@@ -1349,19 +1431,28 @@ function zoomMinus() {
                 <ul class="nav nav-tabs pt-2">
                   <li class="nav-item" v-for="f in state.openFiles">
                     <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
-                        active: f.tab == state.activeTab,
-                        changed: state.tabsWithChanges.includes(f.tab),
-                      }">
-                      {{ f.path }}
+                      active: f.tab == state.activeTab,
+                    }">
+                      <div class="d-inline me-1" :class="{ changed: state.tabsWithChanges.includes(f.tab) }">
+                        {{ f.path }}
+                      </div>
+                      <a v-if="f.path !== 'Schoco.java'" @click.stop="checkCloseTab(f.tab)">
+                        <font-awesome-layers class="closeTabBtn">
+                          <font-awesome-icon id="background" icon="fa-circle" />
+                          <div style="color: var(--bs-light)">
+                            <font-awesome-icon icon="fa-xmark" style="color: var(--bs-light)" transform="shrink-1" />
+                          </div>
+                        </font-awesome-layers>
+                      </a>
                     </div>
                   </li>
                 </ul>
                 <v-ace-editor id="editor" value="" @init="editorInit" lang="java" theme="monokai" />
                 <div class="zoom-overlay bottom-0 end-0">
-                  <input id="zoomInput" :value="state.editorZoom" @input="event => zoom(event.target.value)"
-                  type="number" :min="ZOOMMIN" :max="ZOOMMAX" step="1" />
-                  <input :value="state.editorZoom" @input="event => zoom(event.target.value)" 
-                    type="range" class="form-range" :min="ZOOMMIN" :max="ZOOMMAX">
+                  <input id="zoomInput" :value="state.editorZoom" @input="event => zoom(event.target.value)" type="number"
+                    :min="ZOOMMIN" :max="ZOOMMAX" step="1" />
+                  <input :value="state.editorZoom" @input="event => zoom(event.target.value)" type="range"
+                    class="form-range" :min="ZOOMMIN" :max="ZOOMMAX">
                 </div>
               </div>
             </pane>
@@ -1392,6 +1483,15 @@ function zoomMinus() {
 </template>
 
 <style scoped>
+.closeTabBtn {
+  color: grey;
+  transition: 0.3s;
+}
+
+.closeTabBtn:hover {
+  color: red;
+}
+
 #zoomInput {
   float: right;
 }
