@@ -200,3 +200,8 @@ class RenameFile(BaseModel):
 class RenameHomework(BaseModel):
     id: int
     new_name: str
+
+
+class ChangePassword(BaseModel):
+    oldPassword: str
+    newPassword: str

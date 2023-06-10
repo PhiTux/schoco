@@ -15,7 +15,7 @@ users = APIRouter(prefix="/api")
 def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database_config.get_db)):
     if teacherkey != settings.TEACHER_KEY:
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
-    if not check_password(password):
+    if not check_password_criteria(password):
         raise HTTPException(status_code=400, detail="Password invalid")
     user = models_and_schemas.UserSchema(
         username=username, full_name=full_name, role="teacher", password=password)
@@ -32,7 +32,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     for i in newPupils.newPupils:
         if i.fullname.strip() == "" and i.username.strip() == "" and i.password.strip() == "":
             continue
-        elif i.fullname.strip() == "" or i.username.strip() == "" or not check_password(i.password):
+        elif i.fullname.strip() == "" or i.username.strip() == "" or not check_password_criteria(i.password):
             accounts_received += 1
             username_errors.append(i.fullname + " (" + i.username + ")")
             continue
@@ -56,7 +56,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     return {'accounts_created': accounts_created, 'username_errors': username_errors, 'accounts_received': accounts_received, 'course_error': course_error}
 
 
-def check_password(password: str):
+def check_password_criteria(password: str):
     if len(password) < 8:
         return False
     
@@ -88,12 +88,30 @@ def check_password(password: str):
 
 @users.post('/setNewPassword', dependencies=[Depends(auth.check_teacher)])
 async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Session = Depends(database_config.get_db)):
-    if not check_password(setPassword.password):
+    if not check_password_criteria(setPassword.password):
         raise HTTPException(
             status_code=400, detail="Password invalid")
     if not crud.change_password_by_username(setPassword.username, setPassword.password, db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")
+    return {'success': True}
+
+
+@users.post('/changePassword', dependencies=[Depends(auth.oauth2_scheme)])
+async def changePassword(changePassword: models_and_schemas.ChangePassword, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    db_user = crud.get_user_by_username(db=db, username=username)
+    if not db_user:
+        raise HTTPException(status_code=401, detail="Bad username or password")
+    if not auth.verify_password(changePassword.oldPassword, db_user.hashed_password):
+        raise HTTPException(status_code=401, detail="Bad username or password")
+
+    if not check_password_criteria(changePassword.newPassword):
+        raise HTTPException(status_code=401, detail="Bad username or password")
+    
+    if not crud.change_password_by_username(username=username, password=changePassword.newPassword, db=db):
+        raise HTTPException(
+            status_code=500, detail="Password change not successful")
+    
     return {'success': True}
 
 

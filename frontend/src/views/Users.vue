@@ -1014,7 +1014,7 @@ function removeCourseFromNewPupils(id) {
       </div>
     </div>
 
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+    <div class="modal fade" id="changeUserPasswordModal" tabindex="-1" aria-labelledby="changeUserPasswordModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content dark-text">
@@ -1343,7 +1343,7 @@ function removeCourseFromNewPupils(id) {
             </td>
             <td><span v-if="x.role === 'teacher'">👨‍🏫</span><!--<span v-else>📚</span>--> {{ x.role }}</td>
             <td>
-              <a class="btn-round btn" data-bs-toggle="modal" data-bs-target="#changePasswordModal"
+              <a class="btn-round btn" data-bs-toggle="modal" data-bs-target="#changeUserPasswordModal"
                 @click.prevent="openModalChangePassword(x.id)">
                 <font-awesome-layers class="fa-lg">
                   <font-awesome-icon icon="fa-circle" style="color: var(--bs-warning)" />

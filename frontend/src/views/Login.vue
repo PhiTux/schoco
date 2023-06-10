@@ -176,7 +176,7 @@ const registerPasswordTooShort = computed(() => {
                           <font-awesome-icon icon="fa-solid fa-user" fixed-width /></span>
                         <div class="form-floating">
                           <input type="text" id="floatingInputLogin" class="form-control" v-model="login.username"
-                            placeholder="Username" />
+                            placeholder="Username" autofocus />
                           <label for="floatingInputLogin">Username</label>
                         </div>
                       </div>
