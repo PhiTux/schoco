@@ -522,7 +522,7 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
     (response) => {
       console.log("stopped executing")
       if (state.receivedWS == false) {
-        results.value = "Programm wurde (erfolgreich) beendet! ✔";
+        results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
       }
       state.isExecuting = false;
     },

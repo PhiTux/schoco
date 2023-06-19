@@ -25,6 +25,10 @@ async function logout() {
 }
 
 function openPasswordModal() {
+  state.oldPassword = "";
+  state.newPassword1 = "";
+  state.newPassword2 = "";
+
   // open Modal
   var modal = new Modal(document.getElementById("changePasswordModal"));
   modal.show();

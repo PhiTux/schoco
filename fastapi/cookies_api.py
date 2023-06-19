@@ -273,6 +273,12 @@ def kill_n_create(container_uuid: str):
     refillNewContainersQueue()
 
 
+def put_container_back_in_new_queue(c: dict):
+    """Puts a container from runningContainers back in the newContainers queue."""
+    c = runningContainers.get_and_remove_by_uuid(c['uuid'])
+    newContainers.put(c)
+
+
 def prepare_execute(project_uuid: str, user_id: int):
     # grab and prepare new container and place it inside runningContainers
     try:
@@ -284,6 +290,9 @@ def prepare_execute(project_uuid: str, user_id: int):
 
     # copy .class files to container-mount
     sourcepath = os.path.join(data_path, f"{project_uuid}_{user_id}")
+    if not os.path.exists(sourcepath):
+        put_container_back_in_new_queue(c)
+        return {'executable': False}
     sourcefiles = os.listdir(sourcepath)
     destinationpath = os.path.join(data_path, str(c['uuid']))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
@@ -297,9 +306,7 @@ def prepare_execute(project_uuid: str, user_id: int):
 
     # if no .class files existed, then return container to newContainers-Queue
     if not filesExist:
-        c = runningContainers.get_and_remove_by_uuid(c['uuid'])
-        newContainers.append(c)
-
+        put_container_back_in_new_queue(c)
         return {'executable': False}
 
     return c
