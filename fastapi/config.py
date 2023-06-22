@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     JWT_EXP_DAYS: int = 15
     FULL_DATA_PATH: str = "/app/data"
     COOKIES_TAG: str = "1.0.0"
-    BACKEND_VER: str = "0.0.3"
+    BACKEND_VER: str = "0.0.4"
 
 
 settings = Settings()
