@@ -1,4 +1,4 @@
-> 🛠️️ This project sucessfully finished beta-testing and is under heavy development! It can already be used safely and will be 'finished' by ~September 2023 (only a few more convinience functions are missing)
+> 🛠️️ This project sucessfully finished beta-testing and is under heavy development! It can already be used safely and will be 'finished' by ~September 2023 (only a few more convenience functions are missing)
 
 # Chapters
 - [What is schoco? {🍫}](#what-is-schoco-)
