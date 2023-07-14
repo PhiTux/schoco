@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUpdated, reactive } from "vue";
+import { onMounted, reactive } from "vue";
 import CourseBadge from "./CourseBadge.vue"
 import TextClamp from "vue3-text-clamp";
 
