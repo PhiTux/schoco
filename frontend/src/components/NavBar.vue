@@ -4,6 +4,8 @@ import { useRoute } from "vue-router";
 import { Modal, Toast } from "bootstrap";
 import { reactive, computed, onMounted } from "vue";
 import UserService from "../services/user.service.js"
+import PasswordInput from "./PasswordInput.vue";
+import PasswordInfo from "./PasswordInfo.vue";
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -12,9 +14,6 @@ let state = reactive({
   oldPassword: "",
   newPassword1: "",
   newPassword2: "",
-  showOldPassword: false,
-  showNewPassword1: false,
-  showNewPassword2: false,
   isChangingPassword: false,
   passwordInvalidResponse: false,
 })
@@ -35,33 +34,17 @@ function openPasswordModal() {
 }
 
 const passwordInvalid = computed(() => {
-  return state.oldPassword.length < 8
-    || state.newPassword1.length < 8 || state.newPassword1 !== state.newPassword2
+  return state.newPassword1.length < 8
+    || !passwordsEqual.value
 })
 
-function showOldPassword() {
-  state.showOldPassword = true;
-}
+const passwordTooShort = computed(() => {
+  return state.newPassword1.length > 0 && state.newPassword1.length < 8
+})
 
-function hideOldPassword() {
-  state.showOldPassword = false;
-}
-
-function showNewPassword1() {
-  state.showNewPassword1 = true;
-}
-
-function hideNewPassword1() {
-  state.showNewPassword1 = false;
-}
-
-function showNewPassword2() {
-  state.showNewPassword2 = true;
-}
-
-function hideNewPassword2() {
-  state.showNewPassword2 = false;
-}
+const passwordsEqual = computed(() => {
+  return state.newPassword1 === state.newPassword2
+})
 
 function changePassword() {
   if (passwordInvalid.value || state.isChangingPassword) return;
@@ -105,12 +88,6 @@ function changePassword() {
   )
 }
 
-onMounted(() => {
-  document.getElementById('changePasswordModal').addEventListener('shown.bs.modal', function () {
-    document.getElementById('floatingOldPassword').focus()
-  })
-})
-
 
 
 </script>
@@ -146,56 +123,20 @@ onMounted(() => {
         </div>
         <div class="modal-body">
 
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
-            <div class="form-floating">
-              <input :type="[state.showOldPassword ? 'text' : 'password']" id="floatingOldPassword" class="form-control"
-                v-model="state.oldPassword" placeholder="Altes Password" @keyup.enter="changePassword()" />
-              <label for="floatingOldPassword">Altes Password</label>
-            </div>
-            <span class="input-group-text" id="basic-addon1">
-              <a class="greyButton" @mousedown="showOldPassword()" @mouseup="hideOldPassword()"
-                @mouseleave="hideOldPassword()"><font-awesome-icon v-if="!state.showOldPassword"
-                  icon="fa-solid fa-eye-slash" fixed-width /><font-awesome-icon v-else icon="fa-solid fa-eye"
-                  fixed-width /></a></span>
+          <PasswordInput v-model="state.oldPassword" description="Altes Passwort" focus />
+
+          <PasswordInfo />
+
+          <PasswordInput v-model="state.newPassword1" description="Neues Passwort" />
+
+          <PasswordInput v-model="state.newPassword2" description="Neues Passwort" />
+
+          <div v-if="passwordTooShort" class="alert alert-danger" role="alert">
+            Passwort muss mindestens 8 Zeichen enthalten.
           </div>
 
-          <div class="alert alert-info" role="alert">
-            Stelle sicher, dass das neue Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
-            der drei folgenden Kriterien erfüllt:
-            <ul>
-              <li>Enthält einen Buchstabe</li>
-              <li>Enthält eine Zahl</li>
-              <li>Enthält ein Sonderzeichen</li>
-            </ul>
-          </div>
-
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
-            <div class="form-floating">
-              <input :type="[state.showNewPassword1 ? 'text' : 'password']" id="floatingNewPassword1" class="form-control"
-                v-model="state.newPassword1" placeholder="Neues Password" @keyup.enter="changePassword()" />
-              <label for="floatingNewPassword1">Neues Password</label>
-            </div>
-            <span class="input-group-text" id="basic-addon1">
-              <a class="greyButton" @mousedown="showNewPassword1()" @mouseup="hideNewPassword1()"
-                @mouseleave="hideNewPassword1()"><font-awesome-icon v-if="!state.showNewPassword1"
-                  icon="fa-solid fa-eye-slash" fixed-width /><font-awesome-icon v-else icon="fa-solid fa-eye"
-                  fixed-width /></a></span>
-          </div>
-
-          <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
-            <div class="form-floating">
-              <input :type="[state.showNewPassword2 ? 'text' : 'password']" id="floatingNewPassword2" class="form-control"
-                v-model="state.newPassword2" placeholder="Neues Password bestätigen" @keyup.enter="changePassword()" />
-              <label for="floatingNewPassword2">Neues Password bestätigen</label>
-            </div>
-            <span class="input-group-text" id="basic-addon1">
-              <a class="greyButton" @mousedown="showNewPassword2()" @mouseup="hideNewPassword2()"
-                @mouseleave="hideNewPassword2()"><font-awesome-icon v-if="!state.showNewPassword2"
-                  icon="fa-solid fa-eye-slash" fixed-width /><font-awesome-icon v-else icon="fa-solid fa-eye"
-                  fixed-width /></a></span>
+          <div v-if="!passwordsEqual" class="alert alert-danger" role="alert">
+            Passwörter nicht identisch.
           </div>
 
           <div v-if="state.passwordInvalidResponse" class="alert alert-danger" role="alert">
