@@ -284,8 +284,8 @@ function editCourse() {
 
   UserService.editCourse(
     state.editCourseID,
-    state.editCourseName, 
-    state.editCourseColor, 
+    state.editCourseName,
+    state.editCourseColor,
     editCourseFontDark.value
   ).then(
     (response) => {
@@ -306,11 +306,11 @@ function editCourse() {
         getAllUsers();
       } else {
         const toast = new Toast(
-        document.getElementById("toastErrorCourseEdited")
+          document.getElementById("toastErrorCourseEdited")
         );
         toast.show();
       }
-    }, 
+    },
     (error) => {
       console.log(error.response)
 
@@ -500,11 +500,11 @@ let allUsersFiltered = computed(() => {
   }
   return allUsers.value.filter((user) => {
     if (state.searchName == "") return true;
-    else
-      return (
-        user.username.toLowerCase().includes(state.searchName.toLowerCase()) ||
-        user.full_name.toLowerCase().includes(state.searchName.toLowerCase())
-      );
+
+    return (
+      user.username.toLowerCase().includes(state.searchName.toLowerCase()) ||
+      user.full_name.toLowerCase().includes(state.searchName.toLowerCase())
+    );
   });
 });
 
@@ -826,7 +826,7 @@ function removeCourseFromNewPupils(id) {
         </div>
       </div>
 
-      
+
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastErrorAddUserToCourse" role="alert"
         aria-live="assertive" aria-atomic="true">

@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive } from "vue";
+import { computed, getCurrentInstance, onBeforeMount, reactive } from "vue";
 import CodeService from "../services/code.service.js";
 import ProjectCard from "../components/ProjectCard.vue"
 import { useAuthStore } from "../stores/auth.store.js";
@@ -22,6 +22,7 @@ let state = reactive({
   renameNameNew: "",
   isRenaming: false,
   isDeleting: false,
+  searchProject: "",
 });
 
 onBeforeMount(() => {
@@ -33,6 +34,26 @@ onBeforeMount(() => {
 
   document.title = "Home"
 });
+
+
+const myProjectsFiltered = computed(() => {
+  return state.myProjects.filter(
+    (project) => {
+      if (!state.searchProject.length) return true
+
+      return (project.name.toLowerCase().includes(state.searchProject.toLowerCase()) || project.description.toLowerCase().includes(state.searchProject.toLowerCase()))
+    })
+})
+
+const newHomeworkFiltered = computed(() => {
+  return state.new_homework.filter(
+    (project) => {
+      if (!state.searchProject.length) return true
+
+      return (project.name.toLowerCase().includes(state.searchProject.toLowerCase()) || project.description.toLowerCase().includes(state.searchProject.toLowerCase()))
+    })
+})
+
 
 function getProjectsAsTeacher() {
   CodeService.getProjectsAsTeacher().then(
@@ -586,9 +607,28 @@ function downloadProject(uuid) {
 
 
     <div class="container main">
-      <a class="btn btn-outline-success my-3 sticky-content" type="submit" href="/#/newProject">
-        Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
-      </a>
+      <div class="d-flex flex-row flex-wrap align-items-center">
+        <a class="btn btn-outline-success my-3 sticky-content" type="submit" href="/#/newProject">
+          Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
+        </a>
+        <div class="input-group searchProject">
+          <span class="round-left input-group-text" id="basic-addon1">
+            <font-awesome-icon icon="fa-solid fa-search" /></span>
+          <div class="form-floating">
+            <input type="text" id="floatingInputSearchProject" class="form-control" v-model="state.searchProject"
+              placeholder="Projektsuche" />
+            <label class="input-label" for="floatingInputSearchProject">Projektsuche</label>
+          </div>
+          <span :class="{ grey: !state.searchProject.length }" class="round-right input-group-text resetSearchProject"
+            @click.prevent="state.searchProject = ''">
+            <font-awesome-icon icon="fa-solid fa-xmark" />
+          </span>
+        </div>
+
+      </div>
+
+
+
       <h1 v-if="state.new_homework.length">Aktuelle Hausaufgaben</h1>
       <div class="d-flex align-content-start flex-wrap">
         <!-- if teacher: -->
@@ -624,7 +664,7 @@ function downloadProject(uuid) {
 
       </h1>
       <div class="d-flex align-content-start flex-wrap">
-        <ProjectCard v-for="p in state.myProjects" :name="p.name" :description="p.description" :uuid="p.uuid"
+        <ProjectCard v-for="(p, index) in myProjectsFiltered" :name="p.name" :description="p.description" :uuid="p.uuid" :key="index"
           @renameProject="askRenameProject" @duplicateProject="duplicateProject" @downloadProject="downloadProject"
           @deleteProject="askDeleteProject" />
       </div>
@@ -633,6 +673,34 @@ function downloadProject(uuid) {
 </template>
 
 <style scoped>
+.searchProject {
+  width: inherit !important;
+}
+
+.input-label {
+  color: var(--bs-dark);
+}
+
+.round-left {
+  border-top-left-radius: var(--bs-border-radius-pill);
+  border-bottom-left-radius: var(--bs-border-radius-pill);
+}
+
+.round-right {
+  border-top-right-radius: var(--bs-border-radius-pill);
+  border-bottom-right-radius: var(--bs-border-radius-pill);
+}
+
+.resetSearchProject {
+  cursor: pointer;
+}
+
+.grey {
+  cursor: auto !important;
+  ;
+  color: grey;
+}
+
 .main {
   overflow-y: hidden;
 }
