@@ -59,7 +59,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
 def check_password_criteria(password: str):
     if len(password) < 8:
         return False
-    
+
     # must fulfill at least 2 of the following 3 criteria
     criteria_fulfilled = 0
     # check if password contains at least one number
@@ -67,7 +67,7 @@ def check_password_criteria(password: str):
         if i.isdigit():
             criteria_fulfilled += 1
             break
-    
+
     # check if password contains at least one letter
     for i in password:
         if i.isalpha():
@@ -82,7 +82,7 @@ def check_password_criteria(password: str):
 
     if criteria_fulfilled >= 2:
         return True
-    
+
     return False
 
 
@@ -107,18 +107,19 @@ async def changePassword(changePassword: models_and_schemas.ChangePassword, db: 
 
     if not check_password_criteria(changePassword.newPassword):
         raise HTTPException(status_code=401, detail="Bad username or password")
-    
+
     if not crud.change_password_by_username(username=username, password=changePassword.newPassword, db=db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")
-    
+
     return {'success': True}
 
 
 @users.post('/addNewCourse', dependencies=[Depends(auth.check_teacher)])
 async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depends(database_config.get_db)):
     if len(newCourse.name) < 2 or len(newCourse.name) > 30:
-        raise HTTPException(status_code=403, detail="Course name length must be between 2 to 30.")
+        raise HTTPException(
+            status_code=403, detail="Course name length must be between 2 to 30.")
     success = crud.create_course(db=db, course=newCourse)
     if not success:
         raise HTTPException(
@@ -130,7 +131,8 @@ async def addNewCourse(newCourse: models_and_schemas.Course, db: Session = Depen
 @users.post('/editCourse', dependencies=[Depends(auth.check_teacher)])
 async def editCourse(editCourse: models_and_schemas.Course, db: Session = Depends(database_config.get_db)):
     if len(editCourse.name) < 2 or len(editCourse.name) > 30:
-        raise HTTPException(status_code=403, detail="Course name length must be between 2 to 30.")
+        raise HTTPException(
+            status_code=403, detail="Course name length must be between 2 to 30.")
     if not crud.edit_course(db=db, course=editCourse):
         raise HTTPException(
             status_code=500, detail="Course edit not successful")
@@ -214,3 +216,8 @@ def change_name(changeName: models_and_schemas.changeName, db: Session = Depends
 @users.post('/changeUsername', dependencies=[Depends(auth.check_teacher)])
 def change_username(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
     return crud.change_username(db=db, user_id=changeName.user_id, name=changeName.name.strip())
+
+
+@users.get('/getVersion')
+def get_version():
+    return settings.BACKEND_VER

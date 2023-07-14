@@ -522,7 +522,7 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
     (response) => {
       console.log("stopped executing")
       if (state.receivedWS == false) {
-        results.value = "Programm wurde (erfolgreich) beendet! ✔";
+        results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
       }
       state.isExecuting = false;
     },
@@ -958,9 +958,9 @@ function closeTab(tabID) {
   }
 
   for (let i = 0; i < state.openFiles.length; i++) {
-    if (state.openFiles[i].tab === tabID) {       
+    if (state.openFiles[i].tab === tabID) {
       state.openFiles.splice(i, 1);
-      
+
       // open first tab
       openFile(state.openFiles[0].path)
       break;
@@ -1124,7 +1124,9 @@ function closeTab(tabID) {
             Möchtest du die Änderungen vor dem Schließen speichern?
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click.prevent="state.closeIDEAfterSaving ? exit() : (state.closeTabAfterSaving && closeTab(state.closeTabID))">Nicht speichern</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+              @click.prevent="state.closeIDEAfterSaving ? exit() : (state.closeTabAfterSaving && closeTab(state.closeTabID))">Nicht
+              speichern</button>
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click.prevent="saveAll()">
               Speichern
             </button>
@@ -1337,8 +1339,8 @@ function closeTab(tabID) {
                     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
                   }) }}</span></div>
           </ul>
-          <a class="ms-auto btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
-              size="xl" /></a>
+          <a class="ms-auto btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon
+              icon="fa-solid fa-xmark" size="xl" /></a>
         </div>
       </div>
     </nav>
@@ -1494,6 +1496,7 @@ function closeTab(tabID) {
 
 #zoomInput {
   float: right;
+  width: 60px;
 }
 
 .editor-relative {
@@ -1506,6 +1509,7 @@ function closeTab(tabID) {
   position: absolute;
   z-index: 10;
   padding: 5px;
+  width: 200px;
 }
 
 #inputMessage:disabled {

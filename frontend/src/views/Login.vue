@@ -1,9 +1,10 @@
 <script setup>
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed, onMounted, onBeforeMount } from "vue";
 import { useAuthStore } from "../stores/auth.store.js";
 import UserService from "../services/user.service.js";
 import { useRoute, useRouter } from "vue-router";
 import { Toast } from "bootstrap";
+import { version } from "../../package.json"
 
 const router = useRouter();
 
@@ -15,6 +16,7 @@ const state = reactive({
   registerIncomplete: false,
   showLoginError: false,
   showRegistrationSuccess: false,
+  backendVersion: "",
 });
 
 const login = reactive({
@@ -28,6 +30,17 @@ const register = reactive({
   username: "",
   password1: "",
   password2: "",
+})
+
+onBeforeMount(() => {
+  UserService.getVersion().then(
+    (response) => {
+      state.backendVersion = response.data
+    }, (error) => {
+      console.log(error.response)
+      state.backendVersion = "unknown"
+    }
+  )
 })
 
 onMounted(() => {
@@ -154,8 +167,9 @@ const registerPasswordTooShort = computed(() => {
         <div class="w-100 row text-center align-items-center">
           <div class="col-6">
             <div class="container-lg">
-              {🍫}<br />SCHOCO<br />
-              SCHool Online COding
+              <div class="schoco-icon">{🍫}</div>
+              SCHOCO<br />
+              <b><u>SCH</u></b>ool <b><u>O</u></b>nline <b><u>CO</u></b>ding
             </div>
           </div>
           <div class="col-6 col-xxl-4">
@@ -323,6 +337,10 @@ const registerPasswordTooShort = computed(() => {
             </div>
           </div>
         </div>
+        <div class="position-absolute bottom-0 end-0">
+          <a href="https://hub.docker.com/r/phitux/schoco-backend/tags">Backend: {{ state.backendVersion }}</a><br />
+          <a href="https://hub.docker.com/r/phitux/schoco-nginx/tags">Frontend: {{ version }}</a>
+        </div>
       </div>
     </div>
   </div>
@@ -332,6 +350,10 @@ const registerPasswordTooShort = computed(() => {
 .greyButton {
   text-decoration: none;
   color: inherit;
+}
+
+.schoco-icon {
+  font-size: 80px;
 }
 
 .center-fix {

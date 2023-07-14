@@ -89,6 +89,10 @@ class UserService {
     changeUsername(user_id, username) {
         return axiosAuth.post('changeUsername', {'user_id': user_id, 'name': username})
     }
+
+    getVersion() {
+        return axios.get(API_URL + 'getVersion')
+    }
 }
 
 export default new UserService()

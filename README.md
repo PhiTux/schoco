@@ -1,4 +1,4 @@
-> 🛠️️ This project is close to alpha-testing (May 2023) and under heavy development! It's planned to have it 'finished' by ~September 2023
+> 🛠️️ This project sucessfully finished beta-testing and is under heavy development! It can already be used safely and will be 'finished' by ~September 2023 (only a few more convenience functions are missing)
 
 # Chapters
 - [What is schoco? {🍫}](#what-is-schoco-)
@@ -196,6 +196,16 @@ services:
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
 
 **From now on, there are just a few more features missing (and some polishing here and there of course...)**
+Especially the following things are planned to be adressed until September 2023
+- [ ] Add new Java-Files and folders to Project and rename them (renaming is already implemented)
+- [ ] Stop compilation/execution button
+- [ ] auto-combine execution/testing with saving and compilation if necessary AND add keyboard-shortcuts
+- [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
+- [ ] Mark projects as templates (when being a teacher)
+- [ ] Perhaps some possibility to link a teacher's solution to a previous homework after the deadline has passed?!
+- [ ] Perhaps some possibility to view pupil's private projects as teacher?!
+
+**Below are the things, that are already working**
 
 - [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
 - [x] Classroom-management (Creation of courses and assigning pupils to courses)
@@ -210,7 +220,7 @@ services:
 - [x] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [x] Save amount of compilations, executions,... per project and make them visible
 - [x] Import/export projects as zip
-- [ ] Mark projects as templates (when being a teacher)
+
 
 # Start developing
 
