@@ -38,7 +38,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
             continue
         accounts_received += 1
         pupil = models_and_schemas.UserSchema(
-            username=i.username, full_name=i.fullname, role="pupil", password=i.password)
+            username=i.username.strip(), full_name=i.fullname.strip(), role="pupil", password=i.password)
 
         success = crud.create_user(db=db, user=pupil)
         if success:
@@ -46,7 +46,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
         else:
             username_errors.append(i.fullname + " (" + i.username + ")")
 
-        user = crud.get_user_by_username(db=db, username=i.username)
+        user = crud.get_user_by_username(db=db, username=i.username.strip())
         for c in newPupils.courseIDs:
             courseUserLink = models_and_schemas.UserCourseLink(
                 user_id=user.id, course_id=c)

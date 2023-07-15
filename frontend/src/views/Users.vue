@@ -4,6 +4,8 @@ import UserService from "../services/user.service.js";
 import { Modal, Toast } from "bootstrap";
 import { useAuthStore } from "../stores/auth.store.js";
 import CourseBadge from "../components/CourseBadge.vue";
+import PasswordInput from "../components/PasswordInput.vue";
+import PasswordInfo from "../components/PasswordInfo.vue";
 
 let allUsers = ref([]);
 
@@ -23,9 +25,9 @@ let state = reactive({
   changePasswordFullname: "",
   changePasswordUsername: "",
   newPassword: "",
-  showNewPassword: false,
   changePasswordLoading: false,
   showPasswordTooShort: false,
+  showPasswordInvalid: false,
   newCourseColor: "#ff8000",
   newCourseName: "",
   deleteUserFullname: "",
@@ -83,16 +85,17 @@ function createPupilAccounts() {
       return;
     }
   }
-  if (!state.useUnifiedPassword) {
+  else {
     for (const p of newPupils) {
-      if (p.username != "") {
-        if (p.password == "") {
-          state.showUniquePasswordMissing = true;
-          return;
-        } else if (p.password.length < 8) {
-          state.showPasswordTooShort = true;
-          return;
-        }
+      if (p.username === "")
+        continue;
+
+      if (p.password === "") {
+        state.showUniquePasswordMissing = true;
+        return;
+      } else if (p.password.length < 8) {
+        state.showPasswordTooShort = true;
+        return;
       }
     }
   }
@@ -108,7 +111,7 @@ function createPupilAccounts() {
 
   //remove all pupils that don't have a fullname or username (password was already checked above)
   for (let i = newPupils.length - 1; i >= 0; i--) {
-    if (newPupils[i].fullname == "" || newPupils[i].username == "") {
+    if (newPupils[i].fullname.trim() == "" || newPupils[i].username.trim() == "") {
       newPupils.splice(i, 1);
     }
   }
@@ -211,9 +214,12 @@ function deleteUser() {
   );
 }
 
+const showChangePasswordTooShort = computed(() => {
+  return state.newPassword.length > 0 && state.newPassword.length < 8
+})
+
 function openModalChangePassword(id) {
   state.newPassword = "";
-  state.showNewPassword = false;
   state.changePasswordLoading = false;
   state.showPasswordTooShort = false;
 
@@ -243,7 +249,7 @@ function changePassword() {
     (response) => {
       state.changePasswordLoading = false;
 
-      var elem = document.getElementById("changePasswordModal");
+      var elem = document.getElementById("changeUserPasswordModal");
       var modal = Modal.getInstance(elem);
       modal.hide();
 
@@ -261,12 +267,10 @@ function changePassword() {
     },
     (error) => {
       console.log(error.response);
+      state.changePasswordLoading = false;
 
       if (error.response.status == 400) {
-        const toast = new Toast(
-          document.getElementById("toastPasswordChangeInvalid")
-        );
-        toast.show();
+        state.showPasswordInvalid = true;
       } else {
         const toast = new Toast(
           document.getElementById("toastPasswordChangeError")
@@ -515,14 +519,6 @@ let allUsersFilteredSorted = computed(() => {
   return allUsersFiltered.value;
 });
 
-function showNewPassword() {
-  state.showNewPassword = true;
-}
-
-function hideNewPassword() {
-  state.showNewPassword = false;
-}
-
 function edit_user(id, property, content) {
   state.edit_user_id = id;
   state.edit_user_property = property;
@@ -723,28 +719,6 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">Fehler beim Ändern des Passworts.</div>
-        </div>
-      </div>
-
-      <div class="toast align-items-center text-bg-danger border-0" id="toastPasswordChangeInvalid" role="alert"
-        aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
-        <div class="d-flex">
-          <div class="toast-body">
-            Neues Passwort ungültig!
-            <div class="border-top mb-1"></div>
-            Stelle sicher, dass das Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
-            der drei folgenden Kriterien erfüllt:
-            <ul>
-              <li>Enthält einen Buchstabe</li>
-              <li>Enthält eine Zahl</li>
-              <li>Enthält ein Sonderzeichen</li>
-            </ul>
-            <div class="mt-2 pt-2 border-top">
-              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
-                Schließen
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -1029,24 +1003,19 @@ function removeCourseFromNewPupils(id) {
               }})
             </h4>
 
-            <div class="input-group mb-3">
-              <span class="input-group-text" id="basic-addon1"><font-awesome-icon icon="fa-solid fa-key" /></span>
-              <div class="form-floating">
-                <input :type="[state.showNewPassword ? 'text' : 'password']" id="floatingNewPassword" class="form-control"
-                  v-model="state.newPassword" placeholder="Neues Password" @keyup.enter="changePassword()" />
-                <label for="floatingNewPassword">Neues Password</label>
-              </div>
-              <span class="input-group-text" id="basic-addon1">
-                <a class="greyButton" @mousedown="showNewPassword()" @mouseup="hideNewPassword()"
-                  @mouseleave="hideNewPassword()"><font-awesome-icon v-if="!state.showNewPassword"
-                    icon="fa-solid fa-eye-slash" fixed-width /><font-awesome-icon v-else icon="fa-solid fa-eye"
-                    fixed-width /></a></span>
+            <form @submit.prevent="changePassword()">
+              <PasswordInput v-model="state.newPassword" description="Neues Passwort" />
+            </form>
+
+            <PasswordInfo />
+
+
+            <div v-if="showChangePasswordTooShort" class="alert alert-danger alert-dismissible" role="alert">
+              Passwort muss mindestens 8 Zeichen lang sein!
             </div>
 
-            <div v-if="state.showPasswordTooShort" class="alert alert-danger alert-dismissible" role="alert">
-              Passwort muss mindestens 8 Zeichen lang sein!
-              <button type="button" class="btn-close" aria-label="Close"
-                @click.prevent="state.showPasswordTooShort = false"></button>
+            <div v-if="state.showPasswordInvalid" class="alert alert-danger alert-dismissible" role="alert">
+              Das Password erfüllt nicht die oberen Kriterien.
             </div>
 
             <div class="modal-footer">
@@ -1105,6 +1074,8 @@ function removeCourseFromNewPupils(id) {
           </div>
           <div class="modal-body">
             <div class="container">
+              <PasswordInfo />
+
               <div class="d-flex flex-row align-items-center my-2">
                 <label for="useUnifiedPassword">Dasselbe Passwort für alle Accounts</label>
                 <div class="mx-2 form-switch form-check">
@@ -1127,8 +1098,8 @@ function removeCourseFromNewPupils(id) {
                   <span v-if="pupil.fullname != '' || pupil.username != ''">{{
                     index + 1
                   }}</span>&nbsp;
-                  <font-awesome-layers v-if="pupil.fullname != '' &&
-                      pupil.username != '' &&
+                  <font-awesome-layers v-if="pupil.fullname.trim() !== '' &&
+                      pupil.username.trim() !== '' &&
                       ((!state.useUnifiedPassword &&
                         pupil.password.length >= 8) ||
                         (state.useUnifiedPassword &&
