@@ -333,10 +333,13 @@ def startTest(startTest: models_and_schemas.startTest, background_tasks: Backgro
     result = cookies_api.start_test(
         startTest.container_uuid, startTest.port, computation_time)
 
+    print(result)
+
     if user_id != 0 and not ("status" in result and result["status"] == "security_error"):
         crud.increase_tests(db=db, uuid=project_uuid, user_id=user_id)
-        crud.save_test_result(db=db, uuid=project_uuid,
-                              user_id=user_id, result=result)
+        if not (result['passed_tests'] == 0 and result['failed_tests'] == 0):
+            crud.save_test_result(db=db, uuid=project_uuid,
+                                  user_id=user_id, result=result)
 
     background_tasks.add_task(
         cookies_api.kill_n_create, startTest.container_uuid)

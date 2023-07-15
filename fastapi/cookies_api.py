@@ -402,6 +402,4 @@ def start_test(uuid: str, port: int, computation_time: int):
         results['passed_tests'] = 0
         results['failed_tests'] = 0
 
-    # TODO: Save results in DB
-
     return results

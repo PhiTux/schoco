@@ -582,10 +582,15 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
         return
       }
 
-      if (response.data.failed_tests == 0) {
+      if (response.data.exitCode == 143) {
+        results.value = "Programm wurde frühzeitig beendet! ❌ Die Rechenzeit ist vermutlich abgelaufen. Hast du irgendwo eine Endlosschleife?"
+      }
+      else if (response.data.failed_tests == 0 && response.data.passed_tests > 0) {
         results.value += "Alle Tests bestanden 🎉🤩\n\nDu kannst nun höchstens noch versuchen, deinen Quellcode zu \"verschönern\" ;-)"
       } else if (response.data.passed_tests == 0) {
         results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die untere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
+      } else if (response.data.passed_tests == 0 && response.data.failed_tests == 0) {
+        results.value += "❌ Es gab beim Testen wohl irgendeinen Fehler. Überprüfe nochmals dein Programm."
       }
       else {
         let percent = Math.round((response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100 * 10) / 10
