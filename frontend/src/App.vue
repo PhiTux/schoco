@@ -36,7 +36,11 @@ router.afterEach((to, from) => {
   </div>
 </template>
 
-<style>
+<style lang="scss">
+.btn-round {
+  box-shadow: 0 0 white !important;
+}
+
 body {
   overflow-x: hidden;
 }
@@ -95,15 +99,15 @@ body {
   --indigo-disabled: #48017b;
 }
 
-body {
+/* body {
   background-color: #383838 !important;
-}
+} */
 </style>
 
 <style scoped>
-.app {
+/* .app {
   color: rgb(240, 240, 240);
-}
+} */
 
 .main {
   padding-top: 56px;

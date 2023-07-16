@@ -1,0 +1,11 @@
+
+$primary: #6427ea;
+
+@import "../../node_modules/bootstrap/scss/_functions";
+@import "../../node_modules/bootstrap/scss/_variables";
+
+$enable-dark-mode: true;
+$enable-shadows: true;
+
+//import bootstrap
+@import "../../node_modules/bootstrap/scss/bootstrap";

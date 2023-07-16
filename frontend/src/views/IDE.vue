@@ -15,6 +15,7 @@ import "ace-builds/src-min-noconflict/theme-monokai";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
+import ColorModeSwitch from "../components/ColorModeSwitch.vue";
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -1344,8 +1345,9 @@ function closeTab(tabID) {
                     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
                   }) }}</span></div>
           </ul>
-          <a class="ms-auto btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon
-              icon="fa-solid fa-xmark" size="xl" /></a>
+          <ColorModeSwitch class="ms-auto me-2" />
+          <a class=" btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
+              size="xl" /></a>
         </div>
       </div>
     </nav>

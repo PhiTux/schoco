@@ -1247,13 +1247,13 @@ function removeCourseFromNewPupils(id) {
             <div class="form-floating">
               <input type="text" id="floatingInputSearchPerson" class="form-control round-right"
                 v-model="state.searchName" placeholder="Personensuche" />
-              <label class="input-label" for="floatingInputSearchPerson">Personensuche</label>
+              <label for="floatingInputSearchPerson">Personensuche</label>
             </div>
           </div>
         </div>
       </div>
 
-      <table class="table table-dark table-striped table-hover align-middle">
+      <table class="table table-striped table-hover align-middle">
         <thead>
           <tr>
             <th scope="col">#id</th>
@@ -1356,7 +1356,7 @@ function removeCourseFromNewPupils(id) {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .greyButton {
   text-decoration: none;
   color: inherit;
@@ -1375,10 +1375,6 @@ function removeCourseFromNewPupils(id) {
 .round-right {
   border-top-right-radius: var(--bs-border-radius-pill);
   border-bottom-right-radius: var(--bs-border-radius-pill);
-}
-
-.input-label {
-  color: var(--bs-dark);
 }
 
 .btn-round {

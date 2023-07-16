@@ -6,6 +6,7 @@ import { reactive, computed, onMounted } from "vue";
 import UserService from "../services/user.service.js"
 import PasswordInput from "./PasswordInput.vue";
 import PasswordInfo from "./PasswordInfo.vue";
+import ColorModeSwitch from "./ColorModeSwitch.vue";
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -157,7 +158,7 @@ function changePassword() {
     </div>
   </div>
 
-  <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark">
+  <nav class="navbar fixed-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="/#/home">{🍫}</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -174,6 +175,8 @@ function changePassword() {
             <font-awesome-icon icon="fa-solid fa-users" /> Benutzerverwaltung
           </a>
         </ul>
+
+        <ColorModeSwitch class="me-2" />
 
         <div v-if="authStore.user" class="dropdown">
           <button class="dropdown-toggle btn btn-outline-secondary" href="#" role="button" data-bs-toggle="dropdown"
@@ -194,6 +197,8 @@ function changePassword() {
             </li>
           </ul>
         </div>
+
+
       </div>
     </div>
   </nav>
@@ -208,7 +213,7 @@ ul {
   margin-block-end: 0px !important;
 }
 
-.dark-text {
+/* .dark-text {
   color: var(--bs-dark);
-}
+} */
 </style>

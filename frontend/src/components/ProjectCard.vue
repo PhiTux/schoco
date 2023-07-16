@@ -44,7 +44,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="card text-bg-dark m-2" :class="{ homeworkBorder: isHomework, old_homework: isOld }">
+    <div class="card m-2" :class="{ homeworkBorder: isHomework, old_homework: isOld }">
         <div v-if="isHomework" class="card-header">HA | Abgabe bis <span class="deadline">{{ new
             Date(deadline).toLocaleString("default", {
                 weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
@@ -57,8 +57,7 @@ onMounted(() => {
                         :name="courseName"></CourseBadge>{{ name }}
                 </h5>
                 <!-- Menu -->
-                <a class="deleteButton ms-auto" data-bs-toggle="dropdown"><font-awesome-icon icon="fa-bars"
-                        fixed-width /></a>
+                <a class="menuButton ms-auto" data-bs-toggle="dropdown"><font-awesome-icon icon="fa-bars" fixed-width /></a>
                 <ul class="dropdown-menu">
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('renameProject', uuid, name)"><font-awesome-icon icon="fa-solid fa-pencil"
@@ -107,7 +106,7 @@ onMounted(() => {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .text-clamp {
     white-space: pre-line;
 }
@@ -115,7 +114,7 @@ onMounted(() => {
 
 .description-toggle {
     margin-left: 0.5rem;
-    color: #5d5fea;
+    color: $primary;
     cursor: pointer;
 }
 
@@ -124,20 +123,20 @@ onMounted(() => {
     cursor: pointer;
 }
 
-.card:hover .deleteButton {
-    color: #5d5fea;
+.card:hover .menuButton {
+    color: $primary;
 }
 
-.card .deleteButton {
+.card .menuButton {
     /* display: none; */
     cursor: pointer;
     color: rgb(54, 54, 54);
     transition: ease 0.3s;
 }
 
-.deleteButton:hover {
+/* .menuButton:hover {
     color: red;
-}
+} */
 
 .old_homework {
     border-color: darkorange !important;
