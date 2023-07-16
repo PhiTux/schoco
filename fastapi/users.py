@@ -32,7 +32,7 @@ def register_pupils(newPupils: models_and_schemas.pupilsList, db: Session = Depe
     for i in newPupils.newPupils:
         if i.fullname.strip() == "" and i.username.strip() == "" and i.password.strip() == "":
             continue
-        elif i.fullname.strip() == "" or i.username.strip() == "" or not check_password_criteria(i.password):
+        elif i.fullname.strip() == "" or i.username.strip() == "" or " " in i.username.strip() or not check_password_criteria(i.password):
             accounts_received += 1
             username_errors.append(i.fullname + " (" + i.username + ")")
             continue

@@ -28,6 +28,7 @@ let state = reactive({
   changePasswordLoading: false,
   showPasswordTooShort: false,
   showPasswordInvalid: false,
+  showUsernameWhitespaceWarning: false,
   newCourseColor: "#ff8000",
   newCourseName: "",
   deleteUserFullname: "",
@@ -68,6 +69,7 @@ function preparePupilModal() {
   state.showUnifiedPasswordMissing = false;
   state.showUniquePasswordMissing = false;
   state.showPasswordTooShort = false;
+  state.showUsernameWhitespaceWarning = false;
   while (state.newPupilsToCourses.length) state.newPupilsToCourses.pop();
 }
 
@@ -97,6 +99,14 @@ function createPupilAccounts() {
         state.showPasswordTooShort = true;
         return;
       }
+    }
+  }
+
+  // check if any username contains a space
+  for (const p of newPupils) {
+    if (p.username.trim().includes(" ")) {
+      state.showUsernameWhitespaceWarning = true;
+      return;
     }
   }
 
@@ -1147,7 +1157,13 @@ function removeCourseFromNewPupils(id) {
               <button type="button" class="btn-close" aria-label="Close"
                 @click.prevent="state.showPasswordTooShort = false"></button>
             </div>
+            <div v-if="state.showUsernameWhitespaceWarning" class="alert alert-danger alert-dismissible" role="alert">
+              Benutzernamen dürfen keine Leerzeichen enthalten!
+              <button type="button" class="btn-close" aria-label="Close"
+                @click.prevent="state.showUsernameWhitespaceWarning = false"></button>
+            </div>
           </div>
+
           <div class="alert alert-info text-center" role="alert">
             Nur Zeilen mit grünem Haken
             <span><font-awesome-layers>
