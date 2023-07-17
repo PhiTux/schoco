@@ -128,19 +128,15 @@ onMounted(() => {
 }
 
 .card .menuButton {
-    /* display: none; */
     cursor: pointer;
     color: rgb(54, 54, 54);
     transition: ease 0.3s;
 }
 
-/* .menuButton:hover {
-    color: red;
-} */
-
 .old_homework {
     border-color: darkorange !important;
-    color: lightgray !important;
+    color: darkgray !important;
+    box-shadow: none !important;
 }
 
 .deadline {
@@ -149,17 +145,30 @@ onMounted(() => {
 }
 
 .homeworkBorder {
-    border-color: yellow;
+    border-color: orange;
+    border-width: 1px;
+    box-shadow: 0 0 3px 2px yellow;
 }
 
 
 .card {
     width: 48%;
     transition: all 0.3s ease;
-    /* transition: height 0.3s; */
+
+    [data-bs-theme=light] & {
+        background-color: #fafafa;
+    }
+
+    [data-bs-theme=dark] & {
+        background-color: #292e33;
+    }
 }
 
+/* .card-body {
+    
+} */
+
 .card:hover {
-    box-shadow: 0 0 10px 3px #555;
+    box-shadow: 0 0 10px 3px #555 !important;
 }
 </style>

@@ -1259,7 +1259,7 @@ function closeTab(tabID) {
 
 
     <!-- Navbar -->
-    <nav class="navbar sticky-top navbar-expand-lg bg-dark navbar-dark">
+    <nav class="navbar sticky-top navbar-expand-lg">
       <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -1353,12 +1353,12 @@ function closeTab(tabID) {
     </nav>
 
     <div class="ide-main">
-      <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false">
+      <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false"> <!--  -->
         <pane>
           <splitpanes :push-other-panes="false">
             <pane min-size="15" size="20" max-size="30">
-              <splitpanes class="default-theme" horizontal :push-other-panes="false">
-                <pane style="background-color: #383838">
+              <splitpanes horizontal :push-other-panes="false"><!-- class="default-theme" -->
+                <pane> <!-- style="background-color: #383838" -->
                   <div class="projectName d-flex align-items-center justify-content-center position-relative">
                     <p class="placeholder-wave" v-if="state.projectName === ''">
                       <span class="placeholder col-12"></span>
@@ -1398,7 +1398,7 @@ function closeTab(tabID) {
                   <IDEFileTree :files="state.files" @openFile="openFile" @renameFile="renameFileModal" />
                 </pane>
                 <!-- Description -->
-                <pane min-size="10" size="50" max-size="60" style="background-color: #383838">
+                <pane min-size="10" size="50" max-size="60"> <!-- style="background-color: #383838" -->
                   <div v-if="!state.editingDescription" class="description p-1">
                     <div class="description-content">
                       {{ state.projectDescription }}
@@ -1491,7 +1491,36 @@ function closeTab(tabID) {
   </div>
 </template>
 
-<style scoped>
+
+<style scoped lang="scss">
+/* [data-bs-theme="light"] {
+  .splitpanes {
+    &--vertical>&__splitter {
+      background-color: red;
+    }
+  }
+} */
+
+/* .splitpanes__splitter {
+  background-color: red !important;
+} */
+
+.splitpanes {
+  &__pane {
+    box-shadow: 0 0 5px rgba(0, 0, 0, .2) inset;
+  }
+
+  &--vertical>&__splitter {
+    min-width: 7px;
+    background: black;
+  }
+
+  &--horizontal>&__splitter {
+    min-height: 7px;
+    background: black;
+  }
+}
+
 .closeTabBtn {
   color: grey;
   transition: 0.3s;
@@ -1590,7 +1619,7 @@ function closeTab(tabID) {
 .bottom {
   width: 100%;
   height: 100%;
-  background-color: #383838;
+  /* background-color: #383838; */
 }
 
 .input {
@@ -1600,7 +1629,7 @@ function closeTab(tabID) {
 .output {
   width: 100%;
   /* height: 100%; */
-  background-color: #383838;
+  /* background-color: #383838; */
   font-family: "Courier New", Courier, monospace;
   overflow-y: auto;
 }
@@ -1613,9 +1642,7 @@ function closeTab(tabID) {
   content: "*";
 }
 
-ul.nav-tabs {
-  background-color: #383838;
-}
+
 
 .tab:not(.active) {
   border-left: 1px solid #ccc;

@@ -59,7 +59,7 @@ function auto() {
             <font-awesome-icon icon="fa-solid fa-sun" fixed-width />/<font-awesome-icon icon="fa-solid fa-moon"
                 fixed-width />
         </button>
-        <ul class="dropdown-menu dropdown-menu-end">
+        <ul class="dropdown-menu dropdown-menu-end" data-bs-theme="light">
             <li>
                 <a class="dropdown-item" :class="{ active: mode === 'light' }" @click.prevent="manualLight()">
                     <font-awesome-icon icon="fa-solid fa-sun" fixed-width /> Light

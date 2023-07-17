@@ -72,7 +72,7 @@ function calc_result_color(input_string) {
         </div>
 
 
-        <table class="table table-dark table-striped table-hover align-middle">
+        <table class="table table-striped table-hover align-middle">
             <thead>
                 <tr>
                     <th scope="col">Name</th>

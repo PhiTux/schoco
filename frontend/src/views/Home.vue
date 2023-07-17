@@ -471,7 +471,7 @@ function downloadProject(uuid) {
     <div class="modal fade" id="renameHomeworkModal" tabindex="-1" aria-labelledby="renameHomeworkModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
               Hausaufgabe umbenennen
@@ -505,7 +505,7 @@ function downloadProject(uuid) {
     <div class="modal fade" id="renameProjectModal" tabindex="-1" aria-labelledby="renameProjectModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
               Projekt umbenennen
@@ -539,7 +539,7 @@ function downloadProject(uuid) {
     <div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-labelledby="deleteProjectModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
               Privates Projekt löschen?
@@ -568,7 +568,7 @@ function downloadProject(uuid) {
     <div class="modal fade" id="deleteHomeworkBranchModal" tabindex="-1" aria-labelledby="deleteHomeworkBranchModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
               Fortschritt löschen?
@@ -602,7 +602,7 @@ function downloadProject(uuid) {
     <div class="modal fade" id="deleteHomeworkModal" tabindex="-1" aria-labelledby="deleteHomeworkModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
               Hausaufgabe löschen?
@@ -641,7 +641,7 @@ function downloadProject(uuid) {
             <div class="form-floating">
               <input type="text" id="floatingInputSearchProject" class="form-control" v-model="state.searchProject"
                 placeholder="Projektsuche" />
-              <label class="input-label" for="floatingInputSearchProject">Projektsuche</label>
+              <label for="floatingInputSearchProject">Projektsuche</label>
             </div>
             <span :class="{ grey: !state.searchProject.length }" class="round-right input-group-text resetSearchProject"
               @click.prevent="state.searchProject = ''">
@@ -716,10 +716,6 @@ function downloadProject(uuid) {
   width: inherit !important;
 }
 
-.input-label {
-  color: var(--bs-dark);
-}
-
 .round-left {
   border-top-left-radius: var(--bs-border-radius-pill);
   border-bottom-left-radius: var(--bs-border-radius-pill);
@@ -746,10 +742,6 @@ function downloadProject(uuid) {
 .sticky-content {
   position: sticky;
   top: 0;
-}
-
-.dark-text {
-  color: var(--bs-dark);
 }
 
 .card-text {

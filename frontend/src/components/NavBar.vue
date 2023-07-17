@@ -2,7 +2,7 @@
 import { useAuthStore } from "../stores/auth.store.js";
 import { useRoute } from "vue-router";
 import { Modal, Toast } from "bootstrap";
-import { reactive, computed, onMounted } from "vue";
+import { reactive, computed } from "vue";
 import UserService from "../services/user.service.js"
 import PasswordInput from "./PasswordInput.vue";
 import PasswordInfo from "./PasswordInfo.vue";
@@ -117,7 +117,7 @@ function changePassword() {
   <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content dark-text">
+      <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Passwort ändern</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -183,7 +183,7 @@ function changePassword() {
             aria-expanded="false">
             {{ authStore.user.username }}
           </button>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end" data-bs-theme="light">
             <li>
               <a class="dropdown-item" @click.prevent="openPasswordModal()">
                 <font-awesome-icon icon="fa-solid fa-key" /> Passwort ändern
@@ -212,8 +212,4 @@ function changePassword() {
 ul {
   margin-block-end: 0px !important;
 }
-
-/* .dark-text {
-  color: var(--bs-dark);
-} */
 </style>
