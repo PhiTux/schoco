@@ -60,12 +60,13 @@ function toggleFolder(path, event) {
   <div class="tree">
     <ul id="root">
       <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue"
-        :path="newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile"></TreeNode>
+        :path="newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile">
+      </TreeNode>
     </ul>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 ul {
   list-style: none;
 }

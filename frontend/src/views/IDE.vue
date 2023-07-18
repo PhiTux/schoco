@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, watch, ref } from "vue";
+import { onBeforeMount, reactive, watch, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Toast, Popover, Modal } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
@@ -12,6 +12,7 @@ import CourseBadge from "../components/CourseBadge.vue"
 import "ace-builds";
 import "ace-builds/src-min-noconflict/mode-java";
 import "ace-builds/src-min-noconflict/theme-monokai";
+import "ace-builds/src-min-noconflict/theme-xcode";
 import "ace-builds/src-min-noconflict/ext-language_tools";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
@@ -156,7 +157,8 @@ onBeforeMount(() => {
         }
       }
     }
-  );
+  )
+
 
   CodeService.getProjectInfo(route.params.project_uuid, route.params.user_id).then(
     (response) => {
@@ -199,6 +201,32 @@ onBeforeMount(() => {
     );
   }
 });
+
+onMounted(() => {
+  //set light/dark mode of editor
+  if (localStorage.getItem("theme") == "light") {
+    setLight(true)
+  } else if (localStorage.getItem("theme") == "dark") {
+    setLight(false)
+  } else {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setLight(false)
+    } else {
+      setLight(true)
+    }
+  }
+})
+
+function setLight(light) {
+  if (document.getElementById('editor') == null) return
+
+  let editor = ace.edit("editor");
+  if (light) {
+    editor.setTheme('ace/theme/xcode')
+  } else {
+    editor.setTheme('ace/theme/monokai')
+  }
+}
 
 function openFile(inputPath) {
   let path = inputPath;
@@ -1203,7 +1231,7 @@ function closeTab(tabID) {
                     </div>
                   </font-awesome-layers>
                 </a>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu courseDropdown" data-bs-theme="light">
                   <li v-for="c in allCourses">
                     <a class="dropdown-item btn" @click.prevent="homework.selectedCourse = c">
                       <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
@@ -1240,8 +1268,9 @@ function closeTab(tabID) {
                   <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
                 </a></label>
               <div class="col-sm-8">
-                <input :value="homework.computationTime" @input="event => homework.computationTime = event.target.value"
-                  type="number" min="3" step="1" placeholder="Mindestens 3, Standard 10" />
+                <input class="hwTimeInput" :value="homework.computationTime"
+                  @input="event => homework.computationTime = event.target.value" type="number" min="3" step="1"
+                  placeholder="Mindestens 3, Standard 10" />
                 <br>
                 {{ homework.computationTime }} Sekunden
               </div>
@@ -1271,7 +1300,7 @@ function closeTab(tabID) {
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Projekt
               </a>
-              <ul class="dropdown-menu">
+              <ul class="dropdown-menu" data-bs-theme="light">
                 <li>
                   <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
                     Neue Datei (ohne Funktion)</a>
@@ -1345,7 +1374,7 @@ function closeTab(tabID) {
                     weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
                   }) }}</span></div>
           </ul>
-          <ColorModeSwitch class="ms-auto me-2" />
+          <ColorModeSwitch @setLight="setLight" class="ms-auto me-2" />
           <a class=" btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
               size="xl" /></a>
         </div>
@@ -1456,8 +1485,8 @@ function closeTab(tabID) {
                     </div>
                   </li>
                 </ul>
-                <v-ace-editor id="editor" value="" @init="editorInit" lang="java" theme="monokai" />
-                <div class="zoom-overlay bottom-0 end-0">
+                <v-ace-editor id="editor" value="" @init="editorInit" theme="monokai" lang="java" />
+                <div class="zoom-overlay bottom-0 end-0" data-bs-theme="light">
                   <input id="zoomInput" :value="state.editorZoom" @input="event => zoom(event.target.value)" type="number"
                     :min="ZOOMMIN" :max="ZOOMMAX" step="1" />
                   <input :value="state.editorZoom" @input="event => zoom(event.target.value)" type="range"
@@ -1493,32 +1522,27 @@ function closeTab(tabID) {
 
 
 <style scoped lang="scss">
-/* [data-bs-theme="light"] {
-  .splitpanes {
-    &--vertical>&__splitter {
-      background-color: red;
-    }
-  }
-} */
+.hwTimeInput {
+  background-color: white;
+  color: #333
+}
 
-/* .splitpanes__splitter {
-  background-color: red !important;
-} */
+.courseDropdown {
+  min-width: 0;
+}
 
-.splitpanes {
-  &__pane {
-    box-shadow: 0 0 5px rgba(0, 0, 0, .2) inset;
-  }
+[data-bs-theme=light] .navbar {
+  background-color: #f4f4f4;
+}
 
-  &--vertical>&__splitter {
-    min-width: 7px;
-    background: black;
+[data-bs-theme=dark] {
+  .navbar {
+    background-color: black;
   }
+}
 
-  &--horizontal>&__splitter {
-    min-height: 7px;
-    background: black;
-  }
+.splitpanes.default-theme .splitpanes__pane {
+  background-color: inherit;
 }
 
 .closeTabBtn {
@@ -1643,12 +1667,36 @@ function closeTab(tabID) {
 }
 
 
+[data-bs-theme=dark] {
+  .tab:not(.active) {
+    border-left: 1px solid #6a6a6a;
+    border-top: 1px solid #6a6a6a;
+    border-right: 1px solid #6a6a6a;
+    background-color: #6a6a6a;
+    color: lightgray;
+  }
 
-.tab:not(.active) {
-  border-left: 1px solid #ccc;
-  border-top: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-  background-color: #ddd;
+  .tab.active {
+    border-left: 2px solid $primary;
+    border-top: 2px solid $primary;
+    border-right: 2px solid $primary;
+  }
+}
+
+[data-bs-theme=light] {
+  .tab:not(.active) {
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    background-color: #eee;
+    color: gray;
+  }
+
+  .tab.active {
+    border-left: 2px solid $primary;
+    border-top: 2px solid $primary;
+    border-right: 2px solid $primary;
+  }
 }
 
 .tab:hover {

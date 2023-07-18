@@ -58,7 +58,7 @@ onMounted(() => {
                 </h5>
                 <!-- Menu -->
                 <a class="menuButton ms-auto" data-bs-toggle="dropdown"><font-awesome-icon icon="fa-bars" fixed-width /></a>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu" data-bs-theme="light">
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('renameProject', uuid, name)"><font-awesome-icon icon="fa-solid fa-pencil"
                                 fixed-width /> Umbenennen</a></li>

@@ -3,6 +3,8 @@ import { onBeforeMount, ref } from 'vue';
 
 let mode = ref('auto');
 
+const emit = defineEmits(['setLight'])
+
 onBeforeMount(() => {
     if (localStorage.getItem('theme') === 'dark') {
         setDark();
@@ -18,10 +20,12 @@ onBeforeMount(() => {
 
 function setLight() {
     document.documentElement.setAttribute('data-bs-theme', 'light')
+    emit('setLight', true)
 }
 
 function setDark() {
     document.documentElement.setAttribute('data-bs-theme', 'dark')
+    emit('setLight', false)
 }
 
 function manualLight() {

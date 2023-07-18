@@ -23,8 +23,9 @@ function renameFile(path) {
 
 <template>
     <li class="my-2">
-        <font-awesome-icon v-if="Object.keys(props.value).length !== 0" icon="fa-solid fa-folder-open" class="mx-1" />
-        <font-awesome-icon v-else icon="fa-solid fa-file" class="mx-1" />
+        <font-awesome-icon v-if="Object.keys(props.value).length !== 0" icon="fa-solid fa-folder-open"
+            class="mx-1 treeItem" />
+        <font-awesome-icon v-else icon="fa-solid fa-file" class="mx-1 treeItem" />
         <div class="btn-group">
             <a v-if="Object.keys(props.value).length === 0" @click="$emit('openFile', props.path)">
                 <div class="name px-1">{{ props.name }}</div>
@@ -49,7 +50,11 @@ function renameFile(path) {
     </ul>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+/* [data-bs-theme=light] .treeItem {
+    background-color: lightgray;
+} */
+
 .file-dropdown {
     border-radius: 5px;
     background-color: #444;
@@ -74,5 +79,9 @@ a {
     border-radius: 5px;
     background-color: #555;
     display: inherit;
+}
+
+[data-bs-theme=light] .name {
+    background-color: lightgray;
 }
 </style>

@@ -37,13 +37,10 @@ router.afterEach((to, from) => {
 </template>
 
 <style lang="scss">
-/* [data-bs-theme=dark] html {
-  background-color: #383838 !important;
-} */
 
-/* [data-bs-theme=light] html {
-  background-color: #e0e0e0;
-} */
+a {
+  cursor: pointer;
+}
 
 .btn-round {
   box-shadow: 0 0 white !important;

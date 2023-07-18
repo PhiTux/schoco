@@ -1319,7 +1319,7 @@ function removeCourseFromNewPupils(id) {
                     </div>
                   </font-awesome-layers>
                 </a>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu courseDropdown" data-bs-theme="light">
                   <li v-for="c in allCourses">
                     <a class="dropdown-item btn" @click.prevent="addCourseToUser(x.id, c.name)">
                       <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
@@ -1357,6 +1357,10 @@ function removeCourseFromNewPupils(id) {
 </template>
 
 <style scoped lang="scss">
+.courseDropdown {
+  min-width: 0;
+}
+
 .greyButton {
   text-decoration: none;
   color: inherit;
