@@ -56,6 +56,7 @@ let state = reactive({
   closeTabAfterSaving: false,
   closeIDEAfterSaving: false,
   closeTabID: 0,
+  actionGoal: ""
 });
 
 let homework = reactive({
@@ -76,7 +77,7 @@ var isMac = /mac/i.test(navigator.userAgentData ? navigator.userAgentData.platfo
 window.addEventListener('keydown', (e) => {
   if ((isMac ? e.metaKey : e.ctrlKey) && e.key === 's') {
     e.preventDefault()
-    saveAll()
+    saveAllBtn()
   } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '+') {
     e.preventDefault()
     zoomPlus()
@@ -313,6 +314,11 @@ function updateTabsWithChanges() {
   }
 }
 
+function saveAllBtn() {
+  state.actionGoal = "";
+  saveAll()
+}
+
 function saveAll() {
   if (state.isSaving || state.tabsWithChanges.length == 0) return;
   state.isSaving = true;
@@ -361,6 +367,10 @@ function saveAll() {
       updateTabsWithChanges();
       ace.edit("editor").focus();
 
+      if (state.actionGoal !== "") {
+        compile()
+      }
+
       if (state.closeIDEAfterSaving) {
         exit();
         return;
@@ -376,13 +386,26 @@ function saveAll() {
       toast.show();
 
       state.isSaving = false;
+      state.actionGoal = "";
+
       console.log(error);
     }
   );
 }
 
+function compileBtn() {
+  state.actionGoal = "compile"
+  compile()
+}
+
 function compile() {
   if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
+
+  // if something to save, then first save
+  if (state.tabsWithChanges.length) {
+    saveAll()
+    return
+  }
 
   state.isCompiling = true;
   state.receivedWS = false;
@@ -419,6 +442,7 @@ function compile() {
     },
     (error) => {
       state.isCompiling = false;
+      state.actionGoal = ""
       console.log(error.response);
     }
   );
@@ -428,17 +452,32 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
   CodeService.startCompile(ip, port, container_uuid, project_uuid, user_id).then(
     (response) => {
       state.isCompiling = false;
+
+      if (state.actionGoal === "compile") {
+        state.actionGoal = ""
+      }
+
       if (response.data.status === "connect_error") {
         results.value =
           'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
+        state.actionGoal = ""
       } else if (!state.websocket_open) {
         showWSError();
       } else if (response.data.exitCode == 0 && !state.receivedWS) {
         results.value = "Erfolgreich kompiliert 🎉";
+
+        if (state.actionGoal === "execute") {
+          execute(true)
+        } else if (state.actionGoal === "test") {
+          test(true)
+        }
+
       }
     },
     (error) => {
       state.isCompiling = false;
+      state.actionGoal = ""
+
       console.log(error.response);
     }
   );
@@ -512,8 +551,18 @@ function connectWebsocket(id) {
   };
 }
 
-function execute() {
+function executeBtn() {
+  state.actionGoal = "execute"
+  execute(false)
+}
+
+function execute(just_compiled) {
   if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
+
+  if (!just_compiled && state.tabsWithChanges.length) {
+    saveAll()
+    return
+  }
 
   state.isExecuting = true;
   state.receivedWS = false;
@@ -526,6 +575,7 @@ function execute() {
         results.value =
           "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
         state.isExecuting = false;
+        compile()
         return;
       }
 
@@ -540,6 +590,8 @@ function execute() {
       );
     },
     (error) => {
+      state.actionGoal = ""
+
       state.isExecuting = false;
       console.log(error.response);
     }
@@ -554,19 +606,31 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
         results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
       }
       state.isExecuting = false;
+      state.actionGoal = ""
     },
     (error) => {
       if (state.receivedWS == false) {
         results.value = "Programm wurde (vermutlich fehlerhaft) beendet! ❌";
       }
       state.isExecuting = false;
+      state.actionGoal = ""
       console.log(error.response);
     }
   );
 }
 
-function test() {
+function testBtn() {
+  state.actionGoal = "test"
+  test(false)
+}
+
+function test(just_compiled) {
   if (state.isSaving || state.isCompiling || state.isExecuting || state.isTesting) return;
+
+  if (!just_compiled && state.tabsWithChanges.length) {
+    saveAll()
+    return
+  }
 
   state.isTesting = true;
   state.receivedWS = false;
@@ -580,6 +644,7 @@ function test() {
         results.value =
           "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
         state.isTesting = false;
+        compile();
         return;
       }
 
@@ -593,6 +658,7 @@ function test() {
     },
     (error) => {
       state.isTesting = false;
+      state.actionGoal = "";
       console.log(error.response);
     }
   );
@@ -603,6 +669,7 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
   CodeService.startTest(ip, port, uuid, project_uuid, user_id).then(
     (response) => {
       state.isTesting = false;
+      state.actionGoal = "";
 
       results.value = ""
 
@@ -633,6 +700,7 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
     (error) => {
       results.value = "💥🙈 es gab wohl einen Fehler beim Testen deines Programms. Probiere es erneut!\nStelle zunächst sicher, dass dein Programm ausgeführt werden kann.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden."
       state.isTesting = false;
+      state.actionGoal = "";
       console.log(error.response);
     }
   );
@@ -1161,7 +1229,7 @@ function closeTab(tabID) {
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
               @click.prevent="state.closeIDEAfterSaving ? exit() : (state.closeTabAfterSaving && closeTab(state.closeTabID))">Nicht
               speichern</button>
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click.prevent="saveAll()">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click.prevent="saveAllBtn()">
               Speichern
             </button>
           </div>
@@ -1332,7 +1400,7 @@ function closeTab(tabID) {
             </div>
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button @click.prevent="saveAll()" type="button" class="btn btn-green"
+              <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
                 :disabled="state.tabsWithChanges.length == 0">
                 <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
@@ -1340,21 +1408,21 @@ function closeTab(tabID) {
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
                 Speichern
               </button>
-              <button @click.prevent="compile()" type="button" class="btn btn-yellow">
+              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow">
                 <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                 Kompilieren
               </button>
-              <button @click.prevent="execute()" type="button" class="btn btn-blue">
+              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue">
                 <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
                 Ausführen
               </button>
-              <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="test()" type="button"
+              <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
                 class="btn btn-indigo">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>

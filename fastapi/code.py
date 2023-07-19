@@ -182,6 +182,9 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uui
             success.append(
                 {'path': f.path, 'content': f.content, 'sha': res['sha']})
 
+    # remove .class files (they are now outdated)
+    cookies_api.remove_compilation_result(f"{project_uuid}_{user_id}")
+
     return success
 
 

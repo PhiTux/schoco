@@ -129,6 +129,12 @@ def save_compilation_result(container_uuid: str, project_uuid: str):
                         os.path.join(destinationpath, file))
 
 
+def remove_compilation_result(project_uuid: str):
+    destinationpath = os.path.join(data_path, str(project_uuid))
+    if os.path.exists(destinationpath):
+        shutil.rmtree(destinationpath)
+
+
 def createNewContainer():
     """Creates (and runs!) new container and returns the id, uuid, ip and port."""
     new_uuid = uuid.uuid4()
