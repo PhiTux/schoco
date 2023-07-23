@@ -220,7 +220,8 @@ Especially the following things are planned to be adressed until September 2023
 - [x] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [x] Save amount of compilations, executions,... per project and make them visible
 - [x] Import/export projects as zip
-
+- [x] Automatic saving and compilation (if necessary) before executing/testing
+- [x] Automatically switching to http-response (no live-output), if websocket-connection fails and back to WS if working again.
 
 # Start developing
 
