@@ -26,10 +26,37 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
+					String stdout = "";
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp/:/usr/share/java/junit.jar /app/tmp/*.java' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
-						Process p = new ProcessBuilder().inheritIO().command(command).start();
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'javac -cp /app/tmp/:/usr/share/java/junit.jar /app/tmp/*.java' " 
+						+ postData.get("timeout_cpu") 
+						+ " " 
+						+ postData.get("timeout_session") 
+						+ (postData.get("save_output").trim().equals("true") ? " && echo '\nschoco compilation finished SBsodjpFo43E5Y7d'" : "") 
+						+ "; exit" }; // random string to indicate end of execution
+
+						Process p;
+						
+						if (postData.get("save_output").trim().equals("true")) {
+							p = new ProcessBuilder().redirectErrorStream(true).command(command).start();
+
+							BufferedReader reader = 
+											new BufferedReader(new InputStreamReader(p.getInputStream()));
+							StringBuilder builder = new StringBuilder();
+							String line = null;
+						
+							while ((line = reader.readLine()) != null) {
+								if (line.equals("schoco compilation finished SBsodjpFo43E5Y7d")) break;
+								builder.append(line);
+								builder.append(System.getProperty("line.separator"));
+							}
+						
+							stdout = builder.toString();
+						} else {
+							p = new ProcessBuilder().inheritIO().command(command).start();
+						}
+
 						exitCode = p.waitFor();
 						System.out.flush();
 
@@ -49,7 +76,7 @@ public class Java_api {
 						return;
 					}
 					
-					String responseText = "{\"exitCode\":\"" + exitCode + "\"}";
+					String responseText = "{\"exitCode\":\"" + exitCode + (postData.get("save_output").trim().equals("true") ? ("\", \"stdout\":\"" + stdout.replaceAll("\"","\\\\\"")) : "") + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());
@@ -70,10 +97,37 @@ public class Java_api {
 					HashMap<String, String> postData = getRequestData(exchange.getRequestBody());
 					
 					int exitCode = 0;
+					String stdout = "";
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -Djava.security.manager=default -cp /app/tmp Schoco' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + "; exit" };
-						Process p = new ProcessBuilder().inheritIO().command(command).start();
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -Djava.security.manager=default -cp /app/tmp Schoco' " 
+						+ postData.get("timeout_cpu") 
+						+ " " 
+						+ postData.get("timeout_session") 
+						+ (postData.get("save_output").trim().equals("true") ? " && echo '\nschoco execution finished JVXjUq5wpdxDTki5'" : "")
+						+ "; exit" };
+
+						Process p; 
+						
+						if (postData.get("save_output").trim().equals("true")) {
+							p = new ProcessBuilder().redirectErrorStream(true).command(command).start();
+
+							BufferedReader reader = 
+											new BufferedReader(new InputStreamReader(p.getInputStream()));
+							StringBuilder builder = new StringBuilder();
+							String line = null;
+						
+							while ((line = reader.readLine()) != null) {
+								if (line.equals("schoco execution finished JVXjUq5wpdxDTki5")) break;
+								builder.append(line);
+								builder.append(System.getProperty("line.separator"));
+							}
+						
+							stdout = builder.toString();
+						} else {
+							p = new ProcessBuilder().inheritIO().command(command).start();
+						}
+						
 						exitCode = p.waitFor();
 						System.out.flush();
 
@@ -93,7 +147,7 @@ public class Java_api {
 						return;
 					}
 
-					String responseText = "{\"exitCode\":\"" + exitCode + "\"}";
+					String responseText = "{\"exitCode\":\"" + exitCode + (postData.get("save_output").trim().equals("true") ? ("\", \"stdout\":\"" + stdout.replaceAll("\"","\\\\\"")) : "") + "\"}";
 					exchange.sendResponseHeaders(200, responseText.getBytes().length);
 					OutputStream os = exchange.getResponseBody();
 					os.write(responseText.getBytes());

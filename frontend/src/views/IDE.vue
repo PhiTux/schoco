@@ -49,6 +49,7 @@ let state = reactive({
   fullUserName: "",
   deadline: "",
   websocket_open: false,
+  websocket_working: true,
   renameFilePath: "",
   renameFileNewName: "",
   isRenamingFile: false,
@@ -449,11 +450,11 @@ function compile() {
 }
 
 function startCompile(ip, port, container_uuid, project_uuid, user_id) {
-  CodeService.startCompile(ip, port, container_uuid, project_uuid, user_id).then(
+  CodeService.startCompile(ip, port, container_uuid, project_uuid, user_id, !state.websocket_working).then(
     (response) => {
       state.isCompiling = false;
 
-      if (state.actionGoal === "compile") {
+      if (state.actionGoal === "compile" || (state.websocket_working && state.receivedWS)) {
         state.actionGoal = ""
       }
 
@@ -461,17 +462,28 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
         results.value =
           'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
         state.actionGoal = ""
-      } else if (!state.websocket_open) {
-        showWSError();
-      } else if (response.data.exitCode == 0 && !state.receivedWS) {
-        results.value = "Erfolgreich kompiliert 🎉";
-
-        if (state.actionGoal === "execute") {
-          execute(true)
-        } else if (state.actionGoal === "test") {
-          test(true)
+        return;
+      }
+      else if (!state.websocket_working || response.data.stdout !== undefined) {
+        if (response.data.stdout === undefined) {
+          // restart compilation if from this last run no output was saved
+          compile()
+          return;
+        } else if (response.data.exitCode == 0 && (response.data.stdout === "" || response.data.stdout === "\n")) {
+          results.value = "Erfolgreich kompiliert 🎉";
+        } else {
+          results.value = response.data.stdout;
+          return;
         }
+      }
+      else if (response.data.exitCode == 0 && !state.receivedWS) {
+        results.value = "Erfolgreich kompiliert 🎉";
+      }
 
+      if (state.actionGoal === "execute") {
+        execute(true)
+      } else if (state.actionGoal === "test") {
+        test(true)
       }
     },
     (error) => {
@@ -522,7 +534,11 @@ function connectWebsocket(id) {
 
   ws.onerror = function (event) {
     state.websocket_open = false;
-    showWSError();
+    state.websocket_working = false;
+    if (state.isCompiling || state.isExecuting || state.isTesting) {
+      results.value = "Live-Ausgabe nicht möglich, Ergebnis folgt gleich..."
+    }
+
     if (state.isCompiling) {
       state.isCompiling = false;
     } else if (state.isExecuting) {
@@ -534,6 +550,7 @@ function connectWebsocket(id) {
 
   ws.onopen = function (event) {
     state.websocket_open = true;
+    state.websocket_working = true;
     if (state.isCompiling) {
       results.value = "Kompilierung gestartet... 🛠";
     } else if (state.isExecuting) {
@@ -570,7 +587,7 @@ function execute(just_compiled) {
   results.value = "";
 
   CodeService.prepareExecute(route.params.project_uuid, route.params.user_id).then(
-    (response) => {
+    async (response) => {
       if (response.data.executable == false) {
         results.value =
           "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
@@ -580,6 +597,22 @@ function execute(just_compiled) {
       }
 
       connectWebsocket(response.data.id);
+
+      // wait max. 250ms for websocket to open
+      await new Promise((resolve) => {
+        let timer = 0;
+        const intervalId = setInterval(() => {
+          if (state.websocket_open) {
+            clearInterval(intervalId);
+            resolve();
+          } else if (timer >= 250) {
+            state.websocket_working = false;
+            clearInterval(intervalId);
+            resolve();
+          }
+          timer += 50;
+        }, 50);
+      });
 
       startExecute(
         response.data.ip,
@@ -599,14 +632,35 @@ function execute(just_compiled) {
 }
 
 function startExecute(ip, port, uuid, project_uuid, user_id) {
-  CodeService.startExecute(ip, port, uuid, project_uuid, user_id).then(
+  CodeService.startExecute(ip, port, uuid, project_uuid, user_id, !state.websocket_working).then(
     (response) => {
-      console.log("stopped executing")
-      if (state.receivedWS == false) {
-        results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
-      }
+
       state.isExecuting = false;
       state.actionGoal = ""
+
+      if (state.websocket_working && state.receivedWS == false) {
+        results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
+      }
+
+      if (response.data.status === "connect_error") {
+        results.value =
+          'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
+        state.actionGoal = ""
+        return;
+      }
+      else if (!state.websocket_working || response.data.stdout !== undefined) {
+        if (response.data.stdout === undefined) {
+          // restart execution if from this last run no output was saved
+          execute()
+          return;
+        } else if (response.data.exitCode == 0 && (response.data.stdout === "" || response.data.stdout === "\n")) {
+          results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
+        } else {
+          results.value = response.data.stdout;
+          return;
+        }
+      }
+
     },
     (error) => {
       if (state.receivedWS == false) {

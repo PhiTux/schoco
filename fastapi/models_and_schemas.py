@@ -161,12 +161,14 @@ class startCompile(BaseModel):
     ip: str
     port: int
     container_uuid: str
+    save_output: bool
 
 
 class startExecute(BaseModel):
     ip: str
     port: int
     container_uuid: str
+    save_output: bool
 
 
 class startTest(BaseModel):

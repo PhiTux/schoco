@@ -150,13 +150,15 @@ def createNewContainer():
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=3700, hard=5000)
     new_container = client.containers.run(
-        f"phitux/schoco-cookies", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
+        f"phitux/schoco-cookies:1.1.0", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
     ip = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Networks']['schoco']['IPAddress']
     port = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
+    
+    print("created: " + str(new_uuid) + " with port: " + str(port))
 
     return {'id': new_container.id, 'uuid': str(new_uuid), 'ip': ip, 'port': port, 'in_use': False}
 
@@ -218,7 +220,7 @@ def prepareCompile(filesList: models_and_schemas.filesList):
     return c
 
 
-def startCompile(uuid: str, port: int, computation_time: int):
+def startCompile(uuid: str, port: int, computation_time: int, save_output: bool):
 
     # pycurl to cookies-java-server "/compile"
     buffer = BytesIO()
@@ -229,7 +231,8 @@ def startCompile(uuid: str, port: int, computation_time: int):
         host = f"localhost:{port}"
     c.setopt(c.URL, f"http://{host}/compile")
     post_data = {'timeout_cpu': computation_time,
-                 'timeout_session': computation_time}
+                 'timeout_session': computation_time,
+                 'save_output': save_output}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...
     tries = 7
@@ -318,7 +321,7 @@ def prepare_execute(project_uuid: str, user_id: int):
     return c
 
 
-def start_execute(uuid: str, port: int, computation_time: int):
+def start_execute(uuid: str, port: int, computation_time: int, save_output: bool):
 
     # pycurl to cookies-java-server "/execute"
     buffer = BytesIO()
@@ -330,7 +333,8 @@ def start_execute(uuid: str, port: int, computation_time: int):
     c.setopt(c.URL, f"http://{host}/execute")
 
     post_data = {'timeout_cpu': computation_time,
-                 'timeout_session': computation_time}
+                 'timeout_session': computation_time,
+                 'save_output': save_output}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...
     tries = 7

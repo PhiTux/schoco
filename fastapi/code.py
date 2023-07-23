@@ -279,7 +279,7 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
     computation_time = getComputationTime(db=db, project_uuid=project_uuid)
 
     result = cookies_api.startCompile(
-        startCompile.container_uuid, startCompile.port, computation_time)
+        startCompile.container_uuid, startCompile.port, computation_time, startCompile.save_output)
 
     if user_id != 0:
         crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
@@ -310,7 +310,7 @@ def startExecute(startExecute: models_and_schemas.startExecute, background_tasks
     computation_time = getComputationTime(db=db, project_uuid=project_uuid)
 
     result = cookies_api.start_execute(
-        startExecute.container_uuid, startExecute.port, computation_time)
+        startExecute.container_uuid, startExecute.port, computation_time, startExecute.save_output)
 
     if user_id != 0:
         crud.increase_runs(db=db, uuid=project_uuid, user_id=user_id)

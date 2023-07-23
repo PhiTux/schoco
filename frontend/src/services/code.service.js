@@ -64,16 +64,16 @@ class CodeService {
         return axiosAuth.post(`prepareCompile/${project_uuid}/${user_id}`, { 'files': projectFiles })
     }
 
-    startCompile(ip, port, container_uuid, project_uuid, user_id) {
-        return axiosAuth.post(`startCompile/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
+    startCompile(ip, port, container_uuid, project_uuid, user_id, save_output) {
+        return axiosAuth.post(`startCompile/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid, 'save_output': save_output })
     }
 
     prepareExecute(project_uuid, user_id) {
         return axiosAuth.get(`prepareExecute/${project_uuid}/${user_id}`)
     }
 
-    startExecute(ip, port, container_uuid, project_uuid, user_id) {
-        return axiosAuth.post(`startExecute/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
+    startExecute(ip, port, container_uuid, project_uuid, user_id, save_output) {
+        return axiosAuth.post(`startExecute/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid, 'save_output': save_output })
     }
 
     prepareTest(project_uuid, user_id) {
