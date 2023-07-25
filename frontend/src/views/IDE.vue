@@ -57,7 +57,12 @@ let state = reactive({
   closeTabAfterSaving: false,
   closeIDEAfterSaving: false,
   closeTabID: 0,
-  actionGoal: ""
+  actionGoal: "",
+  newFileName: "",
+  isAddingFile: false,
+  newFileNameInvalid: false,
+  deleteFilePath: "",
+  isDeletingFile: false,
 });
 
 let homework = reactive({
@@ -914,30 +919,41 @@ function prepareHomeworkModal() {
 }
 
 
-function renameFileModal(path) {
-  state.renameFilePath = String(path).replace(/\/$/g, "")
-  state.renameFileNewName = ""
-
-  var modal = new Modal(document.getElementById("renameFileModal"));
+function renameDirectoryModal() {
+  // show modal
+  var modal = new Modal(document.getElementById("renameDirectoryModal"));
   modal.show();
 }
 
-function renameFile() {
-  state.isRenamingFile = true;
 
-  if (state.renameFileNewName.trim() === "") {
-    const toast = new Toast(
-      document.getElementById("toastRenameFileEmpty")
-    );
-    toast.show();
+function deleteDirectoryModal() {
+  // show modal
+  var modal = new Modal(document.getElementById("deleteDirectoryModal"));
+  modal.show();
+}
+
+
+function renameFileModal(path) {
+  state.renameFilePath = String(path).replace(/\/$/g, "")
+  state.renameFileNewName = ""
+  state.newFileNameInvalid = false
+
+  var modal = new Modal(document.getElementById("renameFileModal"));
+  modal.show();
+
+  document.getElementById('renameFileModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("renameFilenameInput").focus();
+  })
+}
+
+function renameFile() {
+
+  if (state.renameFileNewName.trim() === "" || state.renameFileNewName.trim().includes(" ")) {
+    state.newFileNameInvalid = true
     return;
   }
 
-  // combine path and new name
-  let newPath = state.renameFilePath.split("/")
-  newPath.pop()
-  newPath.push(state.renameFileNewName)
-  newPath = newPath.join("/")
+  state.isRenamingFile = true;
 
   // get file content and sha
   let fileContent = ""
@@ -950,7 +966,7 @@ function renameFile() {
     }
   }
 
-  CodeService.renameFile(route.params.project_uuid, route.params.user_id, state.renameFilePath, newPath, fileContent, sha).then(
+  CodeService.renameFile(route.params.project_uuid, route.params.user_id, state.renameFilePath, state.renameFileNewName, fileContent, sha).then(
     (response) => {
       state.isRenamingFile = false;
 
@@ -968,7 +984,7 @@ function renameFile() {
         //update file list
         for (let i = 0; i < state.files.length; i++) {
           if (state.files[i]["path"] === state.renameFilePath) {
-            state.files[i]["path"] = newPath
+            state.files[i]["path"] = state.renameFileNewName
             break
           }
         }
@@ -976,7 +992,7 @@ function renameFile() {
         // update open file list
         for (let i = 0; i < state.openFiles.length; i++) {
           if (state.openFiles[i]["path"] === state.renameFilePath) {
-            state.openFiles[i]["path"] = newPath
+            state.openFiles[i]["path"] = state.renameFileNewName
             break
           }
         }
@@ -1123,6 +1139,172 @@ function closeTab(tabID) {
     }
   }
 }
+
+function prepareAddFileModal() {
+  state.newFileName = ""
+  state.isAddingFile = false
+  state.newFileNameInvalid = false
+
+  var modal = new Modal(document.getElementById("addFileModal"));
+  modal.show();
+
+  document.getElementById('addFileModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("addFilenameInput").focus();
+  })
+}
+
+function addFile() {
+  if (state.isAddingFile) return;
+
+  if (state.newFileName.trim() === "" || state.newFileName.trim().includes(" ")) {
+    state.newFileNameInvalid = true
+    return;
+  }
+
+  state.isAddingFile = true
+
+  CodeService.addEmptyFile(route.params.project_uuid, route.params.user_id, state.newFileName.trim()).then(
+    (response) => {
+      state.isAddingFile = false
+
+      if (response.data.success) {
+        // add to file list
+        state.files.push({
+          path: state.newFileName.trim(),
+          content: "",
+          sha: response.data.sha
+        })
+
+        // close modal
+        var elem = document.getElementById("addFileModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+
+        // show toast
+        const toast = new Toast(
+          document.getElementById("toastAddFileSuccess")
+        );
+        toast.show();
+
+      } else if (response.data.error === "filename_invalid") {
+        state.newFileNameInvalid = true
+      } else {
+        // close modal
+        var elem = document.getElementById("addFileModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+
+        // show error toast
+        const toast = new Toast(
+          document.getElementById("toastAddFileError")
+        );
+        toast.show();
+      }
+    }, (error) => {
+      state.isAddingFile = false
+      console.log(error.response)
+
+      // close modal
+      var elem = document.getElementById("addFileModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      // show error toast
+      const toast = new Toast(
+        document.getElementById("toastAddFileError")
+      );
+      toast.show();
+    })
+}
+
+function deleteFileModal(path) {
+  console.log(path)
+  state.deleteFilePath = String(path).replace(/\/$/g, "")
+
+  var modal = new Modal(document.getElementById("deleteFileModal"));
+  modal.show();
+}
+
+function deleteFile() {
+  if (state.isDeletingFile) return;
+
+  state.isDeletingFile = true
+
+  // get sha from files
+  let sha = ""
+  for (let i = 0; i < state.files.length; i++) {
+    if (state.files[i]["path"] === state.deleteFilePath) {
+      sha = state.files[i]["sha"]
+      break
+    }
+  }
+
+  CodeService.deleteFile(route.params.project_uuid, route.params.user_id, state.deleteFilePath, sha).then(
+    (response) => {
+      state.isDeletingFile = false
+
+      if (response.data.success) {
+
+        // remove from open file list
+        for (let i = 0; i < state.openFiles.length; i++) {
+          if (state.openFiles[i]["path"] === state.deleteFilePath) {
+            // remove from tabsWithChanges
+            for (let x = 0; x < state.tabsWithChanges.length; x++) {
+              if (state.tabsWithChanges[x] === state.openFiles[i]["tab"]) {
+                state.tabsWithChanges.splice(x, 1)
+                break;
+              }
+            }
+
+            state.openFiles.splice(i, 1)
+
+            // open first tab
+            openFile(state.openFiles[0].path)
+
+            break
+          }
+        }
+
+        // remove from file list
+        for (let i = 0; i < state.files.length; i++) {
+          if (state.files[i]["path"] === state.deleteFilePath) {
+            state.files.splice(i, 1)
+            break
+          }
+        }
+
+        // close modal
+        var elem = document.getElementById("deleteFileModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+      } else {
+        // close modal
+        var elem = document.getElementById("deleteFileModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+
+        // show error toast
+        const toast = new Toast(
+          document.getElementById("toastDeleteFileError")
+        );
+        toast.show();
+      }
+    }, (error) => {
+      state.isDeletingFile = false
+      console.log(error.response)
+
+      // close modal
+      var elem = document.getElementById("deleteFileModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      // show error toast
+      const toast = new Toast(
+        document.getElementById("toastDeleteFileError")
+      );
+      toast.show();
+    })
+}
 </script>
 
 <template>
@@ -1152,15 +1334,6 @@ function closeTab(tabID) {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Speichern!
-          </div>
-        </div>
-      </div>
-
-      <div class="toast align-items-center text-bg-danger border-0" id="toastRenameFileEmpty" role="alert"
-        aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body">
-            Dateiname darf nicht leer sein!
           </div>
         </div>
       </div>
@@ -1236,13 +1409,41 @@ function closeTab(tabID) {
           </div>
         </div>
       </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastAddFileSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Datei erfolgreich erstellt!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastAddFileError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Erstellen der Datei!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastDeleteFileError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Löschen der Datei!
+          </div>
+        </div>
+      </div>
     </div>
+
 
     <!-- Modals -->
     <div class="modal fade" id="templateWarningModal" tabindex="-1" aria-labelledby="templateWarningModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Änderung der Vorlage kann zu Inkonsistenzen führen!</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1271,7 +1472,7 @@ function closeTab(tabID) {
     <div class="modal fade" id="saveBeforeCloseModal" tabindex="-1" aria-labelledby="saveBeforeCloseModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Änderungen speichern?</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1292,9 +1493,124 @@ function closeTab(tabID) {
     </div>
 
 
+    <div class="modal fade" id="addFileModal" tabindex="-1" aria-labelledby="addFileLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Neue Datei hinzufügen</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Gib den neuen Dateinamen für die Datei ein. Denke an die Dateiendung
+            (typischerweise <code>.java</code>)! <br> <br>
+            Wenn du einen Order anlegen möchtest, dann musst du gleichzeitig auch eine Datei innerhalb des neuen Ordners
+            angeben. <br>
+            <br>
+            <b><u>Beispiel:</u></b><br>
+            Wenn du den Ordner "<code>neu</code>" anlegen möchtest, dann musst du auch eine Datei innerhalb des Ordners
+            angeben (z. B. <code>MeineKlasse.java</code>). Gib daher als vollen Dateinamen
+            <code>neu/MeineKlasse.java</code> an.
+
+
+            <div class="input-group my-3">
+              <input type="text" class="form-control" id="addFilenameInput" v-model="state.newFileName"
+                @keyup.enter="addFile()">
+            </div>
+
+            <div v-if="state.newFileNameInvalid" class="alert alert-danger" role="alert">
+              Dateiname ist ungültig (enthält Leerzeichen oder der Name existiert bereits)!
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-primary" @click.prevent="addFile()">
+              <span v-if="!state.isAddingFile">Hinzufügen</span>
+              <div v-else class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Datei löschen?</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Möchtest du die Datei <b><u>{{ state.deleteFilePath }}</u></b> wirklich löschen?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-primary" @click.prevent="deleteFile()">
+              <span v-if="!state.isDeletingFile">Löschen</span>
+              <div v-else class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="deleteDirectoryModal" tabindex="-1" aria-labelledby="deleteDirectoryLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Ordner löschen</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Ordner können leider <b>nicht</b> direkt gelöscht werden. Du kannst allerdings sämtlichen Inhalt des
+            Ordners löschen, dann wird der Ordner automatisch mitgelöscht.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="renameDirectoryModal" tabindex="-1" aria-labelledby="renameDirectoryLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Ordner umbenennen</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Ordner können leider <b>nicht</b> direkt umbenannt werden. Du kannst allerdings sämtlichen Inhalt
+            des Ordners umbenennen, dann entsteht automatisch ein neuer Ordner mit neuem Namen und der jetzige Ordner wird
+            automatisch gelöscht.
+            <br> <br>
+            <u><b>Beispiel:</b></u><br>
+            Du hast einen Ordner <code>old</code>, in dem sich die beiden Dateien <code>First.java</code> und
+            <code>Second.java</code> befinden. Mit vollem Namen lauten diese Dateien <code>old/First.java</code> und
+            <code>old/Second.java</code>. Wenn du die Dateien nacheinander in <code>new/First.java</code> und
+            <code>new/Second.java</code>
+            umbenennst, entspricht das dem Umbenennen des Ordners von <code>old</code> zu <code>new</code>.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="modal fade" id="renameFileModal" tabindex="-1" aria-labelledby="renameFileLabel" aria-hidden="true">
       <div class="modal-dialog">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Datei umbenennen</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1303,10 +1619,13 @@ function closeTab(tabID) {
             Gib den neuen Dateinamen für die Datei <u>{{ state.renameFilePath }}</u> ein. Denke an die Dateiendung
             (typischerweise <i>.java</i>)!
 
-            <div class="input-group mt-3">
-              <input type="text" class="form-control" id="renameFilenameInput"
-                :placeholder="state.renameFilePath.split('/').slice(-1)" v-model="state.renameFileNewName"
-                @keyup.enter="renameFile()">
+            <div class="input-group my-3">
+              <input type="text" class="form-control" id="renameFilenameInput" :placeholder="state.renameFilePath"
+                v-model="state.renameFileNewName" @keyup.enter="renameFile()">
+            </div>
+
+            <div v-if="state.newFileNameInvalid" class="alert alert-danger" role="alert">
+              Dateiname ist ungültig (enthält Leerzeichen oder der Name existiert bereits)!
             </div>
           </div>
           <div class="modal-footer">
@@ -1326,7 +1645,7 @@ function closeTab(tabID) {
     <div class="modal fade" id="createHomeworkModal" tabindex="-1" aria-labelledby="createHomeworkModalLabel"
       aria-hidden="true">
       <div class="modal-dialog modal-lg">
-        <div class="modal-content dark-text">
+        <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Hausaufgabe erstellen</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1424,16 +1743,10 @@ function closeTab(tabID) {
               </a>
               <ul class="dropdown-menu" data-bs-theme="light">
                 <li>
-                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-file-circle-plus" />
-                    Neue Datei (ohne Funktion)</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-folder-plus" /> Neuer
-                    Ordner (ohne Funktion)</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#"><font-awesome-icon icon="fa-solid fa-trash" /> Datei/Ordner
-                    löschen (ohne Funktion)</a>
+                  <a class="dropdown-item" href="#" @click.prevent="prepareAddFileModal()"><font-awesome-icon
+                      icon="fa-solid fa-file-circle-plus" />
+                    Neue Datei / Klasse
+                  </a>
                 </li>
                 <li class="dropdown-divider"></li>
                 <li>
@@ -1546,7 +1859,9 @@ function closeTab(tabID) {
                       </div>
                     </div>
                   </div>
-                  <IDEFileTree :files="state.files" @openFile="openFile" @renameFile="renameFileModal" />
+                  <IDEFileTree :files="state.files" @openFile="openFile" @renameFile="renameFileModal"
+                    @deleteFile="deleteFileModal" @renameDirectory="renameDirectoryModal"
+                    @deleteDirectory="deleteDirectoryModal" />
                 </pane>
                 <!-- Description -->
                 <pane min-size="10" size="50" max-size="60"> <!-- style="background-color: #383838" -->

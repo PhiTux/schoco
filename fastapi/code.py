@@ -117,7 +117,7 @@ def recursively_download_all_files(project_uuid: str, id: int, path: str):
                 url=git.replace_base_url(c['download_url'])), 'sha': c['sha']})
         else:
             recursively_download_all_files(
-                project_uuid=project_uuid, path=f"/{c['path']}/")
+                project_uuid=project_uuid, id=id, path=f"/{c['path']}/")
 
     return (results)
 
@@ -535,9 +535,9 @@ def deleteProject(user_id: models_and_schemas.UserById, project_uuid: str = Path
 
 @code.post('/renameFile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
 def renameFile(file: models_and_schemas.RenameFile, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
-    if file.new_path.strip() == "":
+    if file.new_path.strip() == "" or " " in file.new_path.strip():
         raise HTTPException(
-            status_code=400, detail="Wrong input: New path is empty.")
+            status_code=400, detail="Wrong input: New path is invalid.")
 
     if not git.renameFile(file.old_path, file.new_path, project_uuid, user_id, file.content, file.sha):
         raise HTTPException(
@@ -720,3 +720,30 @@ async def uploadProject(file: UploadFile, db: Session = Depends(database_config.
         return False
 
     return True
+
+
+@code.post('/addEmptyFile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def addEmptyFile(addFile: models_and_schemas.AddFile, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if addFile.path.strip() == "" or " " in addFile.path.strip():
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Invalid Path.")
+
+    res = git.add_empty_file(project_uuid, user_id, addFile.path)
+    if not res['success']:
+        raise HTTPException(
+            status_code=500, detail="Error on adding file.")
+
+    return {'success': True, 'sha': res['sha']}
+
+
+@code.post('/deleteFile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def deleteFile(deleteFile: models_and_schemas.DeleteFile, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if deleteFile.path.strip() == "" or deleteFile.sha.strip() == "":
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Path or sha is empty.")
+
+    if not git.delete_file(project_uuid, user_id, deleteFile.path, deleteFile.sha):
+        raise HTTPException(
+            status_code=500, detail="Error on deleting file.")
+
+    return {'success': True}

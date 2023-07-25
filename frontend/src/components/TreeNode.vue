@@ -5,7 +5,7 @@ const props = defineProps({
     value: Object
 })
 
-const emit = defineEmits(['openFile', 'toggleFolder', 'renameFile'])
+const emit = defineEmits(['openFile', 'toggleFolder', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory'])
 
 function openFile(path) {
     emit('openFile', path)
@@ -17,6 +17,18 @@ function toggleFolder(path, event) {
 
 function renameFile(path) {
     emit('renameFile', path)
+}
+
+function deleteFile(path) {
+    emit('deleteFile', path)
+}
+
+function renameDirectory() {
+    emit('renameDirectory')
+}
+
+function deleteDirectory() {
+    emit('deleteDirectory')
 }
 
 </script>
@@ -35,35 +47,66 @@ function renameFile(path) {
             </a>
             <a v-if="props.path !== 'Schoco.java/' && props.path !== 'Tests.java/'"
                 class="file-dropdown dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></a>
-            <ul class="dropdown-menu">
+            <!-- if file -->
+            <ul v-if="Object.keys(props.value).length === 0" class="dropdown-menu" data-bs-theme="light">
                 <li><a class="dropdown-item" @click="$emit('renameFile', props.path)"><font-awesome-icon
                             icon="fa-solid fa-pencil" fixed-width /> Umbenennen</a></li>
-                <li><a class="dropdown-item"><font-awesome-icon icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
+                <li><a class="dropdown-item" @click="$emit('deleteFile', props.path)"><font-awesome-icon
+                            icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
+            </ul>
+            <!-- if directory -->
+            <ul v-else class="dropdown-menu" data-bs-theme="light">
+                <li><a class="dropdown-item" @click="$emit('renameDirectory')"><font-awesome-icon icon="fa-solid fa-pencil"
+                            fixed-width /> Umbenennen</a></li>
+                <li><a class="dropdown-item" @click="$emit('deleteDirectory')"><font-awesome-icon icon="fa-solid fa-trash"
+                            fixed-width /> Löschen</a></li>
             </ul>
         </div>
-        <!-- <div v-else class="px-1">{{ props.name }}</div> -->
     </li>
     <ul v-if="Object.keys(props.value).length !== 0">
         <TreeNode v-for="[newKey, newValue] of Object.entries(props.value)" :name="newKey" :value="newValue"
-            :path="props.path + newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile">
+            :path="props.path + newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile"
+            @deleteFile="deleteFile" @renameDirectory="renameDirectory" @deleteDirectory="deleteDirectory">
         </TreeNode>
     </ul>
 </template>
 
 <style scoped lang="scss">
-/* [data-bs-theme=light] .treeItem {
-    background-color: lightgray;
-} */
+[data-bs-theme=dark] {
+    .name {
+        color: lightgray;
+    }
+
+    .file-dropdown {
+        background-color: #444;
+    }
+
+    .file-dropdown:hover {
+        background-color: #555;
+    }
+}
+
+[data-bs-theme=light] {
+    .name {
+        background-color: lightgray;
+    }
+
+    .file-dropdown {
+        background-color: #eee;
+    }
+
+    .file-dropdown:hover {
+        background-color: #ddd;
+    }
+}
 
 .file-dropdown {
     border-radius: 5px;
-    background-color: #444;
     color: #999;
     transition: 0.2s;
 }
 
 .file-dropdown:hover {
-    background-color: #555;
     color: #fff;
 }
 
@@ -79,9 +122,5 @@ a {
     border-radius: 5px;
     background-color: #555;
     display: inherit;
-}
-
-[data-bs-theme=light] .name {
-    background-color: lightgray;
 }
 </style>

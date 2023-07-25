@@ -129,6 +129,14 @@ class CodeService {
         formData.append('file', file);
         return axiosAuth.postForm('uploadProject', file, config)
     }
+
+    addEmptyFile(project_uuid, user_id, path) {
+        return axiosAuth.post(`addEmptyFile/${project_uuid}/${user_id}`, { 'path': path })
+    }
+
+    deleteFile(project_uuid, user_id, path, sha) {
+        return axiosAuth.post(`deleteFile/${project_uuid}/${user_id}`, { 'path': path, 'sha': sha })
+    }
 }
 
 export default new CodeService()

@@ -207,3 +207,12 @@ class RenameHomework(BaseModel):
 class ChangePassword(BaseModel):
     oldPassword: str
     newPassword: str
+
+
+class AddFile(BaseModel):
+    path: str
+
+
+class DeleteFile(BaseModel):
+    path: str
+    sha: str

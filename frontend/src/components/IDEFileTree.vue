@@ -3,7 +3,7 @@ import { computed } from "vue";
 import TreeNode from "./TreeNode.vue"
 
 
-const emit = defineEmits(['openFile', 'renameFile'])
+const emit = defineEmits(['openFile', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory'])
 
 const props = defineProps(["files"]);
 
@@ -41,6 +41,18 @@ function renameFile(path) {
   emit('renameFile', path)
 }
 
+function deleteFile(path) {
+  emit('deleteFile', path)
+}
+
+function renameDirectory() {
+  emit('renameDirectory')
+}
+
+function deleteDirectory() {
+  emit('deleteDirectory')
+}
+
 function toggleFolder(path, event) {
   console.log(path)
   console.log(event.target)
@@ -60,7 +72,8 @@ function toggleFolder(path, event) {
   <div class="tree">
     <ul id="root">
       <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue"
-        :path="newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile">
+        :path="newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile"
+        @deleteFile="deleteFile" @renameDirectory="renameDirectory" @deleteDirectory="deleteDirectory">
       </TreeNode>
     </ul>
   </div>

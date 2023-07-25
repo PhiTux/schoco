@@ -108,7 +108,8 @@ def load_all_meta_content(project_uuid: str, id: int, path: str):
     content = []
     for i in range(len(res)):
         if res[i]['type'] == 'dir':
-            content.append({'path': res[i]['path'], 'isDir': True})
+            content.append(
+                {'path': res[i]['path'], 'isDir': True, 'sha': res[i]['sha']})
         else:
             content.append({'path': res[i]['path'], 'isDir': False,
                             'download_url': res[i]['download_url'], 'sha': res[i]['sha']})
@@ -275,3 +276,60 @@ def renameFile(old_path: str, new_path: str, uuid: str, user_id: int, content: s
     if (res_code >= 200 and res_code < 300):
         return True
     return False
+
+
+def add_empty_file(uuid: str, user_id: int, path: str):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{settings.GITEA_USERNAME}/{uuid}/contents/{path}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
+    post_data = {'content': ""}
+
+    if user_id != 0:
+        post_data['branch'] = str(user_id)
+
+    c.setopt(c.POSTFIELDS, json.dumps(post_data))
+    c.setopt(pycurl.HTTPHEADER, [
+        'Accept: application/json', 'Content-Type: application/json'])
+
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    res = buffer.getvalue().decode('utf8')
+    res = json.loads(res)
+
+    if (res_code >= 200 and res_code < 300):
+        return {'success': True, 'sha': res['content']['sha']}
+    return {'success': False}
+
+
+def delete_file(uuid: str, user_id: int, path: str, sha: str):
+    buffer = BytesIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, api_full_url(
+        f"/repos/{settings.GITEA_USERNAME}/{uuid}/contents/{path}"))
+    c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
+    post_data = {'sha': sha}
+
+    if user_id != 0:
+        post_data['branch'] = str(user_id)
+
+    c.setopt(c.POSTFIELDS, json.dumps(post_data))
+    c.setopt(pycurl.HTTPHEADER, [
+        'Accept: application/json', 'Content-Type: application/json'])
+
+    c.setopt(c.CUSTOMREQUEST, 'DELETE')
+    c.setopt(c.WRITEDATA, buffer)
+    c.perform()
+    res_code = c.getinfo(c.RESPONSE_CODE)
+    c.close()
+
+    res = buffer.getvalue().decode('utf8')
+    res = json.loads(res)
+
+    if (res_code >= 200 and res_code < 300):
+        return {'success': True}
+    return {'success': False}
