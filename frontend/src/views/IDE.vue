@@ -1739,7 +1739,8 @@ function deleteFile() {
         <div class="collapse navbar-collapse d-flex" id="navbarSupportedContent">
           <ul class="navbar-nav">
             <li class="nav-item dropdown mx-3">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="dropdown-toggle btn btn-outline-secondary" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
                 Projekt
               </a>
               <ul class="dropdown-menu" data-bs-theme="light">

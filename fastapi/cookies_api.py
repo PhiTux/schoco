@@ -13,8 +13,8 @@ import uuid
 from multiprocessing import Manager
 from config import settings
 import pycurl
-#from fastapi.logger import logger
-#import logging
+# from fastapi.logger import logger
+# import logging
 
 """ gunicorn_logger = logging.getLogger('gunicorn.error')
 logger.handlers = gunicorn_logger.handlers
@@ -114,19 +114,29 @@ def writeFiles(filesList: models_and_schemas.filesList, uuid: str):
         output_file.write_text(f.content)
 
 
-def save_compilation_result(container_uuid: str, project_uuid: str):
-    sourcepath = os.path.join(data_path, str(container_uuid))
+def recursivelyCopyClassFiles(sourcepath: str, destinationpath: str):
     sourcefiles = os.listdir(sourcepath)
-    destinationpath = os.path.join(data_path, str(project_uuid))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
 
-    print(sourcepath)
-    print(sourcefiles)
+    filesExist = False
+    sourcefiles = os.listdir(sourcepath)
     for file in sourcefiles:
         if file.endswith('.class'):
-            print("-> " + file)
-            shutil.move(os.path.join(sourcepath, file),
-                        os.path.join(destinationpath, file))
+            filesExist = True
+            shutil.copyfile(os.path.join(sourcepath, file),
+                            os.path.join(destinationpath, file))
+        elif os.path.isdir(os.path.join(sourcepath, file)):
+            if recursivelyCopyClassFiles(os.path.join(
+                    sourcepath, file), os.path.join(destinationpath, file)):
+                filesExist = True
+    return filesExist
+
+
+def save_compilation_result(container_uuid: str, project_uuid: str):
+    sourcepath = os.path.join(data_path, str(container_uuid))
+    destinationpath = os.path.join(data_path, str(project_uuid))
+
+    recursivelyCopyClassFiles(sourcepath, destinationpath)
 
 
 def remove_compilation_result(project_uuid: str):
@@ -157,7 +167,7 @@ def createNewContainer():
         'NetworkSettings']['Networks']['schoco']['IPAddress']
     port = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
-    
+
     print("created: " + str(new_uuid) + " with port: " + str(port))
 
     return {'id': new_container.id, 'uuid': str(new_uuid), 'ip': ip, 'port': port, 'in_use': False}
@@ -302,16 +312,13 @@ def prepare_execute(project_uuid: str, user_id: int):
     if not os.path.exists(sourcepath):
         put_container_back_in_new_queue(c)
         return {'executable': False}
-    sourcefiles = os.listdir(sourcepath)
+
     destinationpath = os.path.join(data_path, str(c['uuid']))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
 
-    filesExist = False
-    for file in sourcefiles:
-        if file.endswith('.class'):
-            filesExist = True
-            shutil.copyfile(os.path.join(sourcepath, file),
-                            os.path.join(destinationpath, file))
+    #sourcefiles = os.listdir(sourcepath)
+
+    filesExist = recursivelyCopyClassFiles(sourcepath, destinationpath)
 
     # if no .class files existed, then return container to newContainers-Queue
     if not filesExist:
