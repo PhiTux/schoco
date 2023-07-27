@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeMount, reactive, watch, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Toast, Popover, Modal } from "bootstrap";
+import { Toast, Popover, Modal, Tooltip } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { useAuthStore } from "../stores/auth.store.js";
@@ -92,6 +92,12 @@ window.addEventListener('keydown', (e) => {
   } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '-') {
     e.preventDefault()
     zoomMinus()
+  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '1') {
+    compileBtn()
+  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '2') {
+    executeBtn()
+  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '3') {
+    testBtn()
   }
 })
 
@@ -226,6 +232,11 @@ onMounted(() => {
       setLight(true)
     }
   }
+
+  // enable tooltips
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  console.log(tooltipTriggerList)
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
 })
 
 function setLight(light) {
@@ -1885,21 +1896,24 @@ function deleteHomework() {
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
               <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
-                :disabled="state.tabsWithChanges.length == 0">
+                :disabled="state.tabsWithChanges.length == 0" data-bs-toggle="tooltip" data-bs-title="Strg + s"
+                data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
                 Speichern
               </button>
-              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow">
+              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow" data-bs-toggle="tooltip"
+                data-bs-title="Strg + 1" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                 Kompilieren
               </button>
-              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue">
+              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue" data-bs-toggle="tooltip"
+                data-bs-title="Strg + 2" data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -1907,7 +1921,8 @@ function deleteHomework() {
                 Ausführen
               </button>
               <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
-                class="btn btn-indigo">
+                class="btn btn-indigo" data-bs-toggle="tooltip" data-bs-title="Strg + 3"
+                data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>

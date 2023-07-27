@@ -35,9 +35,9 @@ function deleteDirectory() {
 
 <template>
     <li class="my-2">
-        <font-awesome-icon v-if="Object.keys(props.value).length !== 0" icon="fa-solid fa-folder-open"
-            class="mx-1 treeItem" />
-        <font-awesome-icon v-else icon="fa-solid fa-file" class="mx-1 treeItem" />
+        <font-awesome-icon v-if="Object.keys(props.value).length !== 0" icon="fa-solid fa-folder-open" class="mx-1 treeItem"
+            fixed-width />
+        <font-awesome-icon v-else icon="fa-solid fa-file" class="mx-1 treeItem" fixed-width />
         <div class="btn-group">
             <a v-if="Object.keys(props.value).length === 0" @click="$emit('openFile', props.path)">
                 <div class="name px-1">{{ props.name }}</div>
