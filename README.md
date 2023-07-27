@@ -198,7 +198,6 @@ services:
 **From now on, there are just a few more features missing (and some polishing here and there of course...)**
 Especially the following things are planned to be adressed until September 2023
 - [ ] Stop compilation/execution button
-- [ ] add keyboard-shortcuts
 - [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
 - [ ] Mark projects as templates (when being a teacher)
 - [ ] Perhaps some possibility to link a teacher's solution to a previous homework after the deadline has passed?!
