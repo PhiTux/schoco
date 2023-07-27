@@ -63,12 +63,14 @@ let state = reactive({
   newFileNameInvalid: false,
   deleteFilePath: "",
   isDeletingFile: false,
+  isResettingHomework: false,
 });
 
 let homework = reactive({
   deadlineDate: new Date(),
   selectedCourse: "",
-  computationTime: ""
+  computationTime: "",
+  id: 0,
 })
 
 let allCourses = ref([])
@@ -177,6 +179,7 @@ onBeforeMount(() => {
         if (state.isHomework) {
           state.fullUserName = response.data.fullusername;
           state.deadline = response.data.deadline
+          homework.id = response.data.id
 
           // show warning about editing the template
           if (route.params.user_id == 0) {
@@ -1306,6 +1309,74 @@ function deleteFile() {
       toast.show();
     })
 }
+
+function prepareDeleteHomework() {
+  state.isResettingHomework = false
+
+  var modal = new Modal(document.getElementById("restartHomeworkBranchModal"));
+  modal.show();
+}
+
+function deleteHomework() {
+  if (state.isResettingHomework || !state.isHomework) return;
+
+  state.isResettingHomework = true
+
+  CodeService.deleteProject(route.params.project_uuid, route.params.user_id).then(
+    (response) => {
+      state.isResettingHomework = false
+
+      if (response.data) {
+        // reload site
+        CodeService.startHomework(homework.id).then(
+          (response) => {
+            if (response.data) {
+              // close modal
+              var elem = document.getElementById("restartHomeworkBranchModal");
+              var modal = Modal.getInstance(elem);
+              modal.hide();
+
+              router.go(0);
+            } else {
+              // show error toast
+              const toast = new Toast(
+                document.getElementById("toastDeleteProjectError")
+              );
+              toast.show();
+            }
+          }, (error) => {
+            console.log(error.response)
+          }
+        )
+      } else {
+        // close modal
+        var elem = document.getElementById("restartHomeworkBranchModal");
+        var modal = Modal.getInstance(elem);
+        modal.hide();
+
+        // show error toast
+        const toast = new Toast(
+          document.getElementById("toastDeleteProjectError")
+        );
+        toast.show();
+      }
+    }, (error) => {
+      state.isResettingHomework = false
+      console.log(error.response)
+
+      // close modal
+      var elem = document.getElementById("restartHomeworkBranchModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      // show error toast
+      const toast = new Toast(
+        document.getElementById("toastDeleteProjectError")
+      );
+      toast.show();
+    })
+}
+
 </script>
 
 <template>
@@ -1434,6 +1505,15 @@ function deleteFile() {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Löschen der Datei!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastDeleteProjectError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Zurücksetzen der Hausaufgabe!
           </div>
         </div>
       </div>
@@ -1728,6 +1808,37 @@ function deleteFile() {
       </div>
     </div>
 
+    <div class="modal fade" id="restartHomeworkBranchModal" tabindex="-1"
+      aria-labelledby="restartHomeworkBranchModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">
+              Hausaufgabe neu beginnen?
+            </h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Möchtest du deinen bisherigen Fortschritt löschen und anschließend wieder in
+            einem "sauberen" Projekt von vorne beginnen?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Abbrechen
+            </button>
+            <button @click.prevent="deleteHomework()" type="button" class="btn btn-primary">
+              <span v-if="!state.isResettingHomework">Neu beginnen</span>
+              <span v-else>
+                <div class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Navbar -->
     <nav class="navbar sticky-top navbar-expand-lg">
@@ -1745,15 +1856,19 @@ function deleteFile() {
               </a>
               <ul class="dropdown-menu" data-bs-theme="light">
                 <li>
-                  <a class="dropdown-item" href="#" @click.prevent="prepareAddFileModal()"><font-awesome-icon
+                  <a class="dropdown-item" @click.prevent="prepareAddFileModal()"><font-awesome-icon
                       icon="fa-solid fa-file-circle-plus" />
                     Neue Datei / Klasse
                   </a>
                 </li>
                 <li class="dropdown-divider"></li>
+                <li v-if="state.isHomework && !state.isTeacher">
+                  <a class="dropdown-item" @click.prevent="prepareDeleteHomework()">
+                    <font-awesome-icon icon="fa-solid fa-trash" /> Hausaufgabe neu beginnen
+                  </a>
+                </li>
                 <li>
-                  <a class="dropdown-item" href="#"
-                    @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
+                  <a class="dropdown-item" @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
                       icon="fa-solid fa-download" /> Projekt
                     herunterladen</a>
                 </li>

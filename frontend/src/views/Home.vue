@@ -649,7 +649,6 @@ function downloadProject(uuid) {
             </span>
           </div>
         </div>
-        <div class="flex-div"></div>
       </div>
 
       <h1 v-if="state.new_homework.length">Aktuelle Hausaufgaben</h1>

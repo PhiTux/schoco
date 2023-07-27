@@ -846,7 +846,8 @@ function removeCourseFromNewPupils(id) {
             <li v-for="u in state.username_errors">{{ u }}</li>
           </ul>
           <div class="border-top mb-1"></div>
-          Stelle außerdem sicher, dass das Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
+          Eventuell gab es auch Probleme mit den Passwörtern:<br />
+          Stelle sicher, dass das Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
           der drei folgenden Kriterien erfüllt:
           <ul>
             <li>Enthält einen Buchstabe</li>

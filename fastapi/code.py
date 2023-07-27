@@ -168,6 +168,7 @@ def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Sessio
         user = crud.get_user_by_id(db=db, id=user_id)
         result['fullusername'] = user.full_name
         result['deadline'] = homework.deadline
+        result['id'] = homework.id
 
     return result
 
