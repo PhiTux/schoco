@@ -1358,7 +1358,7 @@ function removeCourseFromNewPupils(id) {
 </template>
 
 <style scoped lang="scss">
-.courseDropdown {
+.dropdown-menu {
   min-width: 0;
 }
 

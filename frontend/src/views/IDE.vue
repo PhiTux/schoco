@@ -235,7 +235,6 @@ onMounted(() => {
 
   // enable tooltips
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  console.log(tooltipTriggerList)
   const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
 })
 
@@ -1913,7 +1912,7 @@ function deleteHomework() {
                 Kompilieren
               </button>
               <button @click.prevent="executeBtn()" type="button" class="btn btn-blue" data-bs-toggle="tooltip"
-                data-bs-title="Strg + 2" data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
+                data-bs-title="Strg + 2" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -1922,7 +1921,7 @@ function deleteHomework() {
               </button>
               <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
                 class="btn btn-indigo" data-bs-toggle="tooltip" data-bs-title="Strg + 3"
-                data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
+                data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -2100,19 +2099,35 @@ function deleteHomework() {
   min-width: 0;
 }
 
-[data-bs-theme=light] .navbar {
-  background-color: #f4f4f4;
+[data-bs-theme=light] {
+  .navbar {
+    background-color: #f4f4f4;
+  }
+
+  .splitpanes.default-theme .splitpanes__pane {
+    background-color: #e4e4e4;
+  }
+
+  input[type="range"]::-moz-range-track {
+    background-color: #ddd;
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    background-color: #ddd;
+  }
 }
+
 
 [data-bs-theme=dark] {
   .navbar {
     background-color: black;
   }
+
+  .splitpanes.default-theme .splitpanes__pane {
+    background-color: inherit;
+  }
 }
 
-.splitpanes.default-theme .splitpanes__pane {
-  background-color: inherit;
-}
 
 .closeTabBtn {
   color: grey;
