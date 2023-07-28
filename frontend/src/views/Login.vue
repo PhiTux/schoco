@@ -236,9 +236,11 @@ const registerPasswordTooShort = computed(() => {
 
                       <PasswordInfo />
 
-                      <PasswordInput v-model="register.password1" description="Passwort" />
+                      <PasswordInput :disabled="register.teacherKey === ''" v-model="register.password1"
+                        description="Passwort" />
 
-                      <PasswordInput v-model="register.password2" description="Passwort" />
+                      <PasswordInput :disabled="register.teacherKey === ''" v-model="register.password2"
+                        description="Passwort" />
 
                       <div v-if="state.registerIncomplete" class="alert alert-danger" role="alert">
                         Eingabe unvollständig

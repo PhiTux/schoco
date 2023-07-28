@@ -64,6 +64,7 @@ let state = reactive({
   deleteFilePath: "",
   isDeletingFile: false,
   isResettingHomework: false,
+  isCreatingHomework: false,
 });
 
 let homework = reactive({
@@ -882,6 +883,9 @@ function saveDescription() {
 }
 
 function createHomework() {
+  if (state.isCreatingHomework) return;
+  state.isCreatingHomework = true;
+
   let projectFiles = [];
   for (let i = 0; i < state.files.length; i++) {
     projectFiles.push({
@@ -892,6 +896,8 @@ function createHomework() {
 
   CodeService.createHomework(route.params.project_uuid, projectFiles, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime).then(
     (response) => {
+      state.isCreatingHomework = false;
+
       // close modal
       var elem = document.getElementById("createHomeworkModal");
       var modal = Modal.getInstance(elem);
@@ -909,6 +915,8 @@ function createHomework() {
         toast.show();
       }
     }, (error) => {
+      state.isCreatingHomework = false;
+
       // close modal
       var elem = document.getElementById("createHomeworkModal");
       var modal = Modal.getInstance(elem);
@@ -1811,8 +1819,14 @@ function deleteHomework() {
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
             <button type="button" class="btn btn-primary" @click.prevent="createHomework()"
-              :disabled="Object.keys(homework.selectedCourse).length === 0 || homework.deadlineDate <= new Date() || !(homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime)))">Hausaufgabe
-              erstellen</button>
+              :disabled="Object.keys(homework.selectedCourse).length === 0 || homework.deadlineDate <= new Date() || !(homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime)))">
+              <div v-if="!state.isCreatingHomework">
+                Hausaufgabe erstellen
+              </div>
+              <div v-else class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
           </div>
         </div>
       </div>

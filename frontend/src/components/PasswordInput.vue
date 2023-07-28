@@ -3,7 +3,8 @@ import { reactive, computed } from "vue";
 
 const props = defineProps({
     modelValue: String,
-    description: String
+    description: String,
+    disabled: Boolean
 });
 
 defineEmits(['update:modelValue'])
@@ -28,7 +29,7 @@ function showPassword() {
             <input :type="[
                 state.showPassword ? 'text' : 'password',
             ]" id="floatingPassword" class="form-control" :placeholder="description" :value="modelValue"
-                @input="$emit('update:modelValue', $event.target.value)" />
+                @input="$emit('update:modelValue', $event.target.value)" :disabled="disabled" />
             <label for="floatingPassword">{{ description }}</label>
         </div>
         <span class="input-group-text" id="basic-addon1">
