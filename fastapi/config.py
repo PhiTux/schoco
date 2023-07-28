@@ -13,8 +13,7 @@ class Settings(BaseSettings):
     PRODUCTION: bool = True
     JWT_EXP_DAYS: int = 15
     FULL_DATA_PATH: str = "/app/data"
-    COOKIES_TAG: str = "1.0.0"
-    BACKEND_VER: str = "0.0.4"
+    BACKEND_VER: str = "0.0.5"
 
 
 settings = Settings()

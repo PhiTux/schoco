@@ -191,6 +191,8 @@ services:
 > No! It uses git under the hood, since this design-decision makes sense when handling a lot of code. Schoco uses several git-features like branches and the commit-history, but there is no direct access to git by the user.
 - Can I run/install/develop schoco without docker?
 > No, absolutely not! It requires docker to run the 'schoco-cookies' (the Java-workers) - it's an intended security-feature.
+- Live-output of the Java-programs is provided by websocket. What happens if a firewall doesn't allow websocket?
+> Schoco will automatically switch to http-response (no live-output), if websocket-connection fails and back to WS when it's working again. Sadly there's only a single http-response, when the whole Java-program finished executing, therefore no live-output. Additionally right now, there's no way to send user-input to a running program, when websocket is not working. If this is a major issue for you, then please open an issue on github - perhaps there's a way to find a solution.
 
 ## Progress
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
