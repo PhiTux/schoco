@@ -193,6 +193,11 @@ services:
 > No, absolutely not! It requires docker to run the 'schoco-cookies' (the Java-workers) - it's an intended security-feature.
 - Live-output of the Java-programs is provided by websocket. What happens if a firewall doesn't allow websocket?
 > Schoco will automatically switch to http-response (no live-output), if websocket-connection fails and back to WS when it's working again. Sadly there's only a single http-response, when the whole Java-program finished executing, therefore no live-output. Additionally right now, there's no way to send user-input to a running program, when websocket is not working. If this is a major issue for you, then please open an issue on github - perhaps there's a way to find a solution.
+- Why does schoco consist of four different docker images?
+> The <ins>backend</ins> (schoco-backend) is written in Python FastAPI. To make this thing fast, the docker image is based on [tiangolo/uvicorn-gunicorn-fastapi](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker) which includes auto-tuning for the number of workers. Otherwise you would have to regulate the number of workers via more complex systems like kubernetes - but I want to keep things as simple as possible. Schoco is designed for educational institutions with a moderate number of simultaneous users.  
+The <ins>frontend</ins> ("schoco-nginx" - which is delivered by nginx), is then unfortunately not compatible with the special multi-process image of the backend. Therefore, the frontend runs in a separate docker image.  
+The <ins>git-repo</ins> (gitea) is naturally running in it's own original and untouched docker image.  
+Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use containers!
 
 ## Progress
 **Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
