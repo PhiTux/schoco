@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from "../stores/auth.store.js";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { Modal, Toast } from "bootstrap";
 import { reactive, computed } from "vue";
 import UserService from "../services/user.service.js"
@@ -10,6 +10,7 @@ import ColorModeSwitch from "./ColorModeSwitch.vue";
 
 const authStore = useAuthStore();
 const route = useRoute();
+const router = useRouter();
 
 let state = reactive({
   oldPassword: "",
@@ -124,13 +125,13 @@ function changePassword() {
         </div>
         <div class="modal-body">
 
-          <PasswordInput v-model="state.oldPassword" description="Altes Passwort" focus />
+          <PasswordInput v-model="state.oldPassword" description="Altes Passwort" id="pwd1" focus />
 
           <PasswordInfo />
 
-          <PasswordInput v-model="state.newPassword1" description="Neues Passwort" />
+          <PasswordInput v-model="state.newPassword1" description="Neues Passwort" id="pwd2" />
 
-          <PasswordInput v-model="state.newPassword2" description="Neues Passwort" />
+          <PasswordInput v-model="state.newPassword2" description="Neues Passwort" id="pwd3" />
 
           <div v-if="passwordTooShort" class="alert alert-danger" role="alert">
             Passwort muss mindestens 8 Zeichen enthalten.
@@ -160,7 +161,7 @@ function changePassword() {
 
   <nav class="navbar fixed-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/#/home">{🍫}</a>
+      <router-link class="navbar-brand" to="/home">{🍫}</router-link>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -168,12 +169,13 @@ function changePassword() {
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item me-4">
-            <a class="nav-link active" aria-current="page" href="/#/home">Home</a>
+            <router-link class="nav-link active" aria-current="page" to="/home">Home</router-link>
           </li>
 
-          <a v-if="authStore.isTeacher() && route.name !== 'users'" class="btn btn-outline-secondary" href="/#/users">
+          <router-link v-if="authStore.isTeacher() && route.name !== 'users'" class="btn btn-outline-secondary"
+            to='/users'> <!-- href="/#/users" -->
             <font-awesome-icon icon="fa-solid fa-users" /> Benutzerverwaltung
-          </a>
+          </router-link>
         </ul>
 
         <ColorModeSwitch class="me-2" />

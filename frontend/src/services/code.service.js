@@ -137,6 +137,10 @@ class CodeService {
     deleteFile(project_uuid, user_id, path, sha) {
         return axiosAuth.post(`deleteFile/${project_uuid}/${user_id}`, { 'path': path, 'sha': sha })
     }
+
+    updateHomeworkSettings(id, deadlineDate, computationTime) {
+        return axiosAuth.post('updateHomeworkSettings', { 'id': id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
+    }
 }
 
 export default new CodeService()

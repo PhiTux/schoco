@@ -558,14 +558,6 @@ function connectWebsocket(id) {
     if (state.isCompiling || state.isExecuting || state.isTesting) {
       results.value = "Live-Ausgabe nicht möglich, Ergebnis folgt gleich..."
     }
-
-    if (state.isCompiling) {
-      state.isCompiling = false;
-    } else if (state.isExecuting) {
-      state.isExecuting = false;
-    } else if (state.isTesting) {
-      state.isTesting = false;
-    }
   };
 
   ws.onopen = function (event) {

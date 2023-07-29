@@ -33,7 +33,7 @@ public class Java_api {
 						+ postData.get("timeout_cpu") 
 						+ " " 
 						+ postData.get("timeout_session") 
-						+ (postData.get("save_output").trim().equals("true") ? " && echo '\nschoco compilation finished SBsodjpFo43E5Y7d'" : "") 
+						+ (postData.get("save_output").trim().equals("true") ? " ; echo '\nschoco compilation finished SBsodjpFo43E5Y7d'" : "") 
 						+ "; exit" }; // random string to indicate end of execution
 
 						Process p;
@@ -104,7 +104,7 @@ public class Java_api {
 						+ postData.get("timeout_cpu") 
 						+ " " 
 						+ postData.get("timeout_session") 
-						+ (postData.get("save_output").trim().equals("true") ? " && echo '\nschoco execution finished JVXjUq5wpdxDTki5'" : "")
+						+ (postData.get("save_output").trim().equals("true") ? " ; echo '\nschoco execution finished JVXjUq5wpdxDTki5'" : "")
 						+ "; exit" };
 
 						Process p; 
@@ -171,7 +171,7 @@ public class Java_api {
 					String stdout;
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp:/usr/share/java/junit.jar:/app/hamcrest.jar org.junit.runner.JUnitCore Tests' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + " && echo '\nschoco JUnit finished'; exit" };
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -cp /app/tmp:/usr/share/java/junit.jar:/app/hamcrest.jar org.junit.runner.JUnitCore Tests' " + postData.get("timeout_cpu") + " " + postData.get("timeout_session") + " ; echo '\nschoco JUnit finished'; exit" };
 						Process p = new ProcessBuilder().redirectErrorStream(true).command(command).start();
 
 						BufferedReader reader = 

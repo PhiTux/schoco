@@ -746,3 +746,20 @@ def deleteFile(deleteFile: models_and_schemas.DeleteFile, project_uuid: str = Pa
             status_code=500, detail="Error on deleting file.")
 
     return {'success': True}
+
+
+@code.post('/updateHomeworkSettings', dependencies=[Depends(auth.check_teacher)])
+def updateHomeworkSettings(homework: models_and_schemas.UpdateHomeworkSettings, db: Session = Depends(database_config.get_db)):
+    if homework.deadline_date == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Deadline is empty.")
+
+    if not crud.update_computation_time(db=db, id=homework.id, computation_time=homework.computation_time):
+        raise HTTPException(
+            status_code=500, detail="Error on updating computation time.")
+
+    if not crud.update_deadline(db=db, id=homework.id, deadline=homework.deadline_date):
+        raise HTTPException(
+            status_code=500, detail="Error on updating deadline.")
+
+    return {'success': True}

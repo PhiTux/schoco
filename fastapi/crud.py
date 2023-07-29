@@ -591,3 +591,47 @@ def edit_course(db: Session, course: models_and_schemas.Course):
         db.rollback()
         return False
     return True
+
+
+def get_template_project_by_homework_id(db: Session, id: int):
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.id == id)).first()
+    project = db.exec(select(models_and_schemas.Project).where(
+        models_and_schemas.Project.id == homework.template_project_id)).first()
+    return project
+
+
+def update_computation_time(db: Session, id: int, computation_time: int):
+    # get template project
+    template_project = get_template_project_by_homework_id(db, id)
+    if template_project is None:
+        return False
+
+    # update computation time
+    template_project.computation_time = computation_time
+    try:
+        db.add(template_project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def update_deadline(db: Session, id: int, deadline: int):
+    # get homework
+    homework = get_homework_by_id(db, id)
+    if homework is None:
+        return False
+
+    # update deadline
+    homework.deadline = deadline
+    try:
+        db.add(homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True

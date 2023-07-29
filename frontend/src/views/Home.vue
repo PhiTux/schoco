@@ -106,7 +106,6 @@ function getProjectsAsPupil() {
 }
 
 function startHomework(id) {
-  console.log("startHomework", id);
   CodeService.startHomework(id).then(
     (response) => {
       if (response.data.success) {

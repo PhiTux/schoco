@@ -216,3 +216,9 @@ class AddFile(BaseModel):
 class DeleteFile(BaseModel):
     path: str
     sha: str
+
+
+class UpdateHomeworkSettings(BaseModel):
+    id: int
+    deadline_date: str
+    computation_time: int

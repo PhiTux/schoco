@@ -1,10 +1,11 @@
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, onMounted } from "vue";
 
 const props = defineProps({
     modelValue: String,
     description: String,
-    disabled: Boolean
+    disabled: Boolean,
+    id: String
 });
 
 defineEmits(['update:modelValue'])
@@ -20,6 +21,7 @@ function hidePassword() {
 function showPassword() {
     state.showPassword = true;
 }
+
 </script>
 
 <template>
@@ -28,9 +30,9 @@ function showPassword() {
         <div class="form-floating">
             <input :type="[
                 state.showPassword ? 'text' : 'password',
-            ]" id="floatingPassword" class="form-control" :placeholder="description" :value="modelValue"
+            ]" :id="id" class="form-control" :placeholder="description" :value="modelValue"
                 @input="$emit('update:modelValue', $event.target.value)" :disabled="disabled" />
-            <label for="floatingPassword">{{ description }}</label>
+            <label :for="id">{{ description }}</label>
         </div>
         <span class="input-group-text" id="basic-addon1">
             <a class="greyButton" @mousedown="showPassword()" @mouseup="hidePassword()" @mouseleave="hidePassword()">

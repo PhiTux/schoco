@@ -96,11 +96,13 @@ onMounted(() => {
                 <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
                     class="btn btn-primary">🌟Hausaufgabe
                     beginnen</a>
-                <a v-else-if="!isTeacher && isHomework && isEditing" :href="'#/ide/' + uuid + '/' + branch"
+                <router-link v-else-if="!isTeacher && isHomework && isEditing" :to="'/ide/' + uuid + '/' + branch"
                     class="btn btn-primary">Hausaufgabe
-                    bearbeiten</a>
-                <a v-else-if="isTeacher && isHomework" :href="'#/homework/' + id" class="btn btn-primary">Details zeigen</a>
-                <a v-else-if="!isHomework" :href="'#/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt öffnen</a>
+                    bearbeiten</router-link>
+                <router-link v-else-if="isTeacher && isHomework" :to="'/homework/' + id" class="btn btn-primary">Details
+                    zeigen</router-link>
+                <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt
+                    öffnen</router-link>
             </div>
         </div>
     </div>
