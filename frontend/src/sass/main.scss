@@ -1,4 +1,3 @@
-
 //$body-bg: #eeeeee;
 //$body-bg-rgb: 238, 238, 238;
 
@@ -18,6 +17,11 @@ $enable-dark-mode: true;
 $enable-shadows: true;
 
 .modal {
+    @extend [data-bs-theme="light"];
+    color: #212529;
+}
+
+.popover {
     @extend [data-bs-theme="light"];
     color: #212529;
 }

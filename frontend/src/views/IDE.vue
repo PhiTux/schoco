@@ -1886,7 +1886,7 @@ function deleteHomework() {
                   </a>
                 </li>
                 <li class="dropdown-divider"></li>
-                <li v-if="state.isHomework && !state.isTeacher">
+                <li v-if="state.isHomework && route.params.user_id != 0">
                   <a class="dropdown-item" @click.prevent="prepareDeleteHomework()">
                     <font-awesome-icon icon="fa-solid fa-trash" /> Hausaufgabe neu beginnen
                   </a>

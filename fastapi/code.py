@@ -440,7 +440,7 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
         db=db, id=homework.template_project_id)
 
     result = {"name": template_project.name, "uuid": template_project.uuid, "course_name": homework.course.name,
-              "course_color": homework.course.color, "course_font_dark": homework.course.fontDark}
+              "course_color": homework.course.color, "course_font_dark": homework.course.fontDark, "deadline": homework.deadline, "computation_time": template_project.computation_time}
 
     # get each user's results
     pupils = crud.get_all_users_of_course_id(db=db, id=homework.course_id)

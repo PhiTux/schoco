@@ -3,6 +3,7 @@ import { onBeforeMount, reactive } from "vue";
 import { useRoute } from "vue-router";
 import CodeService from "../services/code.service.js";
 import CourseBadge from "../components/CourseBadge.vue";
+import { Modal, Popover } from "bootstrap";
 
 const route = useRoute()
 
@@ -16,6 +17,11 @@ let state = reactive({
     uuid: "",
 })
 
+let homework = reactive({
+    deadlineDate: new Date(),
+    computationTime: 10,
+})
+
 onBeforeMount(() => {
     CodeService.getHomeworkInfo(route.params.id).then(
         response => {
@@ -26,11 +32,14 @@ onBeforeMount(() => {
             state.pupils = response.data.pupils_results;
             state.uuid = response.data.uuid;
 
+            homework.deadlineDate = new Date(response.data.deadline)
+            homework.computationTime = response.data.computation_time
+
             document.title = state.name
         },
         error => {
             console.log(error.response)
-            document.title = "Hausaufgabe"
+            document.title = "Unbekannte Hausaufgabe"
         }
     )
 })
@@ -49,9 +58,99 @@ function calc_result_color(input_string) {
     return 3
 }
 
+function prepareEditHomeworkModal() {
+    //open Modal
+    let myModal = new Modal(document.getElementById('editHomeworkModal'))
+    myModal.show()
+
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
+}
+
 </script>
 
 <template>
+    <div class="modal fade" id="editHomeworkModal" tabindex="-1" aria-labelledby="editHomeworkModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Hausaufgabe bearbeiten</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="coursename" class="col-sm-4 col-form-label">
+                            <font-awesome-icon icon="fa-square-check" style="color: var(--bs-success)" />
+                        </label>
+                        <div class="col-sm-8 d-flex align-items-center">
+                            <CourseBadge :color="state.course_color" :font-dark="state.course_font_dark"
+                                :name="state.course_name" />
+                            <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
+                                title="Kurs ändern"
+                                data-bs-content="Du kannst bei einer bereits erstellten Hausaufgabe den Kurs <b>nicht mehr ändern</b>!<br/>Du kannst die Hausaufgabe nur in <a href='/'>Home</a> löschen und anschließend für einen anderen Kurs neu erstellen.">
+                                <font-awesome-icon icon="fa-circle-exclamation" size="lg"
+                                    style="color: var(--bs-primary)" />
+                            </a>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="deadline" class="col-sm-4 col-form-label">
+                            <font-awesome-icon v-if="homework.deadlineDate > new Date()" icon="fa-square-check"
+                                style="color: var(--bs-success)" />
+                            <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
+                            Abgabefrist:</label>
+                        <div class="col-sm-8">
+                            <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
+                            <VueDatePicker v-model="homework.deadlineDate" placeholder="Start Typing ..." text-input
+                                auto-apply :min-date="new Date()" prevent-min-max-navigation locale="de"
+                                format="E dd.MM.yyyy, HH:mm" />
+                            UTC: <em>{{ homework.deadlineDate.toISOString() }}</em><br>
+                            Bearbeitungszeit: <em v-if="homework.deadlineDate > new Date()"><b>{{
+                                Math.floor((homework.deadlineDate
+                                    -
+                                    new Date()) / (1000 * 3600 * 24)) }} Tage,
+                                    {{ Math.floor((homework.deadlineDate - new Date()) / (1000 * 3600) % 24) }}
+                                    Stunden</b></em>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="deadline" class="col-sm-4 col-form-label">
+                            <font-awesome-icon
+                                v-if="homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime))"
+                                icon="fa-square-check" style="color: var(--bs-success)" />
+                            <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Rechenzeit:
+                            <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
+                                title="Rechenzeit"
+                                data-bs-content="Lege fest, wie viele <b>Sekunden</b> Rechenzeit (bzw. genauer: Laufzeit) auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.">
+                                <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
+                            </a>
+                        </label>
+                        <div class="col-sm-8">
+                            <input class="hwTimeInput" :value="homework.computationTime"
+                                @input="event => homework.computationTime = event.target.value" type="number" min="3"
+                                step="1" placeholder="Mindestens 3, Standard 10" data-bs-theme="light" />
+                            <br>
+                            {{ homework.computationTime }} Sekunden
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="button" class="btn btn-primary" @click.prevent="updateSettings()"
+                        :disabled="homework.deadlineDate <= new Date() || !(homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime)))">
+                        <div v-if="!state.isCreatingHomework">
+                            Speichern
+                        </div>
+                        <div v-else class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h2>
             <CourseBadge :name="state.course_name" :color="state.course_color" :font-dark="state.course_font_dark">
@@ -59,15 +158,22 @@ function calc_result_color(input_string) {
         </h2>
 
         <div class="d-flex mb-3">
-            <div class="p-2">
+            <div class="p-2 ">
                 <div class="my-3 form-check form-switch">
                     <input class="form-check-input" type="checkbox" role="switch" id="showDetails"
                         v-model="state.showDetails">
                     <label class="form-check-label disable-select" for="showDetails">Zeige Ergebnisse</label>
                 </div>
             </div>
-            <div class="ms-auto p-2"><a class="btn btn-secondary" :href="'#/ide/' + state.uuid + '/0'">Vorlage
-                    bearbeiten</a>
+            <div class="ms-auto p-2">
+                <a class="btn btn-secondary" @click="prepareEditHomeworkModal()">
+                    <font-awesome-icon icon="fa-solid fa-gear" fixed-width /> Einstellungen
+                </a>
+            </div>
+            <div class="p-2">
+                <a class="btn btn-secondary" :href="'#/ide/' + state.uuid + '/0'">
+                    <font-awesome-icon icon="fa-solid fa-code" fixed-width /> Vorlage bearbeiten
+                </a>
             </div>
         </div>
 
@@ -104,6 +210,11 @@ function calc_result_color(input_string) {
 </template>
 
 <style scoped>
+.hwTimeInput {
+    background-color: white;
+    color: #333
+}
+
 .resultGreen {
     color: green;
 }
