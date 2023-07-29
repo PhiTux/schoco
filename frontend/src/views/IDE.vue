@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, reactive, watch, ref, onMounted } from "vue";
+import { onBeforeMount, onBeforeUnmount, reactive, watch, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Toast, Popover, Modal, Tooltip } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
@@ -83,24 +83,7 @@ let ws;
 
 var isMac = /mac/i.test(navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform);
 
-window.addEventListener('keydown', (e) => {
-  if ((isMac ? e.metaKey : e.ctrlKey) && e.key === 's') {
-    e.preventDefault()
-    saveAllBtn()
-  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '+') {
-    e.preventDefault()
-    zoomPlus()
-  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '-') {
-    e.preventDefault()
-    zoomMinus()
-  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '1') {
-    compileBtn()
-  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '2') {
-    executeBtn()
-  } else if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '3') {
-    testBtn()
-  }
-})
+
 
 watch(results, () => {
   let output = document.getElementById("output");
@@ -146,7 +129,33 @@ function editorInit() {
   editor.on("change", editorChange);
 }
 
+function checkKeyDown(e) {
+  if (isMac ? e.metaKey : e.ctrlKey) {
+    if (e.key === 's') {
+      e.preventDefault()
+      saveAllBtn()
+    } else if (e.key === '+') {
+      e.preventDefault()
+      zoomPlus()
+    } else if (e.key === '-') {
+      e.preventDefault()
+      zoomMinus()
+    } else if (e.key === '1') {
+      e.preventDefault()
+      compileBtn()
+    } else if (e.key === '2') {
+      e.preventDefault()
+      executeBtn()
+    } else if (e.key === '3') {
+      e.preventDefault()
+      testBtn()
+    }
+  }
+}
+
 onBeforeMount(() => {
+  window.addEventListener('keydown', checkKeyDown)
+
   CodeService.loadAllFiles(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.status == 200) {
@@ -218,6 +227,11 @@ onBeforeMount(() => {
       }
     );
   }
+});
+
+onBeforeUnmount(() => {
+  // remove event listener
+  window.removeEventListener('keydown', checkKeyDown)
 });
 
 onMounted(() => {
@@ -686,6 +700,8 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
 }
 
 function testBtn() {
+  if (!authStore.isTeacher() && !state.isHomework) return;
+
   state.actionGoal = "test"
   test(false)
 }

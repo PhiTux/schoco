@@ -59,7 +59,7 @@ class Project(SQLModel, table=True):
     name: str
     description: str
     owner_id: int = Field(foreign_key="user.id")
-    computation_time: int
+    computation_time: Optional[int] = 10
 
     owner: "User" = Relationship(back_populates="projects")
 

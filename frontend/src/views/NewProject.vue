@@ -106,15 +106,7 @@ function uploadFiles() {
     let file = state.files[i]
     state.uploadIndexes.push(i);
 
-    CodeService.uploadProject(file, {
-      // TODO: check if this is needed
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        console.log(percentCompleted);
-      }
-    }).then(
+    CodeService.uploadProject(file).then(
       (response) => {
 
         const index = state.uploadIndexes.indexOf(i);
