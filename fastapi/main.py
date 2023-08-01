@@ -46,11 +46,15 @@ lock = Lock()
 firstRun = True
 
 
+# we repeat it every 60 seconds to refill the queue (in case there's some hickup...)
 @ app.on_event("startup")
 @ repeat_every(seconds=60)
 def startup_event():
     global firstRun
     if firstRun:
+        # delete all container_dirs from previous runs
+        cookies_api.remove_all_container_dirs()
+
         database_config.create_db_and_tables()
         firstRun = False
         with lock:
@@ -58,3 +62,11 @@ def startup_event():
     else:
         with lock:
             cookies_api.refillNewContainersQueue()
+
+
+@ app.on_event("shutdown")
+def shutdown_event():
+    # delete all containers and container_dirs
+    cookies_api.kill_all_containers()
+    cookies_api.remove_all_container_dirs()
+    print("Goodbye!")

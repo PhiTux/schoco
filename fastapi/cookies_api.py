@@ -23,6 +23,8 @@ if __name__ != "main":
 else:
     logger.setLevel(logging.DEBUG) """
 
+containers = "containers"
+projects = "projects"
 
 if settings.PRODUCTION:
     data_path = "/app/data"
@@ -133,8 +135,9 @@ def recursivelyCopyClassFiles(sourcepath: str, destinationpath: str):
 
 
 def save_compilation_result(container_uuid: str, project_uuid: str):
-    sourcepath = os.path.join(data_path, str(container_uuid))
-    destinationpath = os.path.join(data_path, str(project_uuid))
+    sourcepath = os.path.join(data_path, containers, str(container_uuid))
+    destinationpath = os.path.join(
+        data_path, projects, str(project_uuid))
 
     recursivelyCopyClassFiles(sourcepath, destinationpath)
 
@@ -151,10 +154,11 @@ def createNewContainer():
     new_name = f"schoco-cookies-{new_uuid}"
 
     # build and create directory for this uuid
-    uuid_dir = Path(os.path.join(settings.FULL_DATA_PATH, str(new_uuid)))
+    uuid_dir = Path(os.path.join(
+        settings.FULL_DATA_PATH, containers, str(new_uuid)))
     """This variable is a parameter for the container and thus must always be an OS-path"""
 
-    create_dir = Path(os.path.join(data_path, str(new_uuid)))
+    create_dir = Path(os.path.join(data_path, containers, str(new_uuid)))
     create_dir.mkdir(exist_ok=True, parents=True)
 
     client = docker.from_env()
@@ -191,15 +195,6 @@ def fillNewContainersQueue():
     containers = client.containers.list(all=True)
     for c in containers:
         if str(c.name).startswith('schoco-cookies-'):
-
-            # remove dir
-            try:
-                dir = os.path.join(data_path, c.name[15:])
-                if os.path.exists(dir):
-                    shutil.rmtree(dir)
-            except:
-                print("couldn't remove directory:", dir)
-
             # kill container
             try:
                 if c.status == 'running':
@@ -225,7 +220,7 @@ def prepareCompile(filesList: models_and_schemas.filesList):
     print("prepared: " + c['uuid'] + " with port: " + str(c['port']))
 
     # write files to filesystem
-    writeFiles(filesList, c['uuid'])
+    writeFiles(filesList, os.path.join(containers, c['uuid']))
 
     return c
 
@@ -264,6 +259,28 @@ def startCompile(uuid: str, port: int, computation_time: int, save_output: bool)
     return json.loads(buffer.getvalue().decode('utf-8'), strict=False)
 
 
+def remove_all_container_dirs():
+    """Removes all container-dirs (and thus all files)"""
+    dir = os.path.join(data_path, containers)
+    if os.path.exists(dir):
+        shutil.rmtree(dir)
+
+
+def kill_all_containers():
+    """Kills all containers that are still running."""
+    client = docker.from_env()
+    containers = client.containers.list(all=True)
+    for c in containers:
+        if str(c.name).startswith('schoco-cookies-'):
+            try:
+                if c.status == 'running':
+                    c.kill()
+                else:
+                    c.remove(force=True)
+            except:
+                print("concurrent deletion of same container")
+
+
 def kill_n_create(container_uuid: str):
     """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
 
@@ -271,7 +288,7 @@ def kill_n_create(container_uuid: str):
     runningContainers.remove_by_uuid(container_uuid)
 
     # remove container-dir
-    dir = os.path.join(data_path, container_uuid)
+    dir = os.path.join(data_path, containers, container_uuid)
     shutil.rmtree(dir)
 
     # kill and (hopefully automatically) remove container
@@ -308,15 +325,15 @@ def prepare_execute(project_uuid: str, user_id: int):
     runningContainers.append(c)
 
     # copy .class files to container-mount
-    sourcepath = os.path.join(data_path, f"{project_uuid}_{user_id}")
+    sourcepath = os.path.join(data_path, projects,
+                              f"{project_uuid}_{user_id}")
     if not os.path.exists(sourcepath):
         put_container_back_in_new_queue(c)
         return {'executable': False}
 
-    destinationpath = os.path.join(data_path, str(c['uuid']))
+    destinationpath = os.path.join(
+        data_path, containers, str(c['uuid']))
     Path(destinationpath).mkdir(exist_ok=True, parents=True)
-
-    #sourcefiles = os.listdir(sourcepath)
 
     filesExist = recursivelyCopyClassFiles(sourcepath, destinationpath)
 

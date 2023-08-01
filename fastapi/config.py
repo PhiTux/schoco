@@ -4,7 +4,7 @@ import os
 
 class Settings(BaseSettings):
     SECRET_KEY: str = os.urandom(24)
-    TEACHER_KEY: str = "This is not secure!"
+    TEACHER_KEY: str = os.urandom(10)
     GITEA_USERNAME: str = "schoco"
     GITEA_PASSWORD: str = "schoco1234"
     GITEA_LOCALHOST_PORT: int = 3000

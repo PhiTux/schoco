@@ -15,6 +15,7 @@ from sqlmodel import Session
 
 code = APIRouter(prefix="/api")
 
+#CODE_PATH = "code/"
 DEFAULT_COMPUTATION_TIME = 10
 
 
