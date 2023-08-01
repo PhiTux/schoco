@@ -204,8 +204,8 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 **From now on, there are just a few more features missing (and some polishing here and there of course...)**
 Especially the following things are planned to be adressed until September 2023
-- [ ] Stop compilation/execution button
 - [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
+- [ ] Provide a way to make teacher's solution visible to students AFTER the deadline has passed
 - [ ] Mark projects as templates (when being a teacher)
 - [ ] Perhaps some possibility to link a teacher's solution to a previous homework after the deadline has passed?!
 - [ ] Perhaps some possibility to view pupil's private projects as teacher?!
@@ -228,6 +228,7 @@ Especially the following things are planned to be adressed until September 2023
 - [x] Automatic saving and compilation (if necessary) before executing/testing
 - [x] Automatically switching to http-response (no live-output), if websocket-connection fails and back to WS if working again.
 - [x] Add/rename/remove (Java-)Files and folders to Project
+- [x] Stop compilation/execution button
 
 # Start developing
 
