@@ -962,7 +962,7 @@ function prepareHomeworkModal() {
   homework.computationTime = 10
 
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { trigger: 'focus', html: true }))
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl))
 }
 
 
@@ -1973,24 +1973,26 @@ function stopContainer() {
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
               <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
-                :disabled="state.tabsWithChanges.length == 0" data-bs-toggle="tooltip" data-bs-title="Strg + s"
-                data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
+                :disabled="state.tabsWithChanges.length == 0" data-bs-trigger="hover" data-bs-toggle="tooltip"
+                data-bs-title="Strg + s" data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
                 Speichern
               </button>
-              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow" data-bs-toggle="tooltip"
-                data-bs-title="Strg + 1" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow" data-bs-trigger="hover"
+                data-bs-toggle="tooltip" data-bs-title="Strg + 1" data-bs-delay='{"show":500,"hide":0}'
+                data-bs-placement="bottom">
                 <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                 Kompilieren
               </button>
-              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue" data-bs-toggle="tooltip"
-                data-bs-title="Strg + 2" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue" data-bs-trigger="hover"
+                data-bs-toggle="tooltip" data-bs-title="Strg + 2" data-bs-delay='{"show":500,"hide":0}'
+                data-bs-placement="bottom">
                 <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -1998,7 +2000,7 @@ function stopContainer() {
                 Ausführen
               </button>
               <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
-                class="btn btn-indigo" data-bs-toggle="tooltip" data-bs-title="Strg + 3"
+                class="btn btn-indigo" data-bs-trigger="hover" data-bs-toggle="tooltip" data-bs-title="Strg + 3"
                 data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
