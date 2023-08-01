@@ -141,6 +141,10 @@ class CodeService {
     updateHomeworkSettings(id, deadlineDate, computationTime) {
         return axiosAuth.post('updateHomeworkSettings', { 'id': id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
     }
+
+    stopContainer(uuid) {
+        return axiosAuth.post('stopContainer', {'uuid': uuid})
+    }
 }
 
 export default new CodeService()

@@ -6,8 +6,8 @@
 - [Installation](#installation)
 - [Architecture](#architecture)
   - [How it works under the hood](#how-it-works-under-the-hood)
-  - [Progress](#progress)
   - [FAQ](#faq)
+  - [Progress](#progress)
 - [Start developing](#start-developing)
 - [Build and run schoco locally](#build-and-run-schoco-locally)
 

@@ -222,3 +222,7 @@ class UpdateHomeworkSettings(BaseModel):
     id: int
     deadline_date: str
     computation_time: int
+
+
+class UUID(BaseModel):
+    uuid: str

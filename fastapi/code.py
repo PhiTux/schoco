@@ -764,3 +764,12 @@ def updateHomeworkSettings(homework: models_and_schemas.UpdateHomeworkSettings, 
             status_code=500, detail="Error on updating deadline.")
 
     return {'success': True}
+
+
+@code.post('/stopContainer', dependencies=[Depends(auth.oauth2_scheme)])
+def stopContainer(container_uuid: models_and_schemas.UUID, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    if not cookies_api.kill_container(container_uuid.uuid):
+        raise HTTPException(
+            status_code=500, detail="Error on stopping container.")
+
+    return {'success': True}

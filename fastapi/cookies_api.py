@@ -143,7 +143,7 @@ def save_compilation_result(container_uuid: str, project_uuid: str):
 
 
 def remove_compilation_result(project_uuid: str):
-    destinationpath = os.path.join(data_path, str(project_uuid))
+    destinationpath = os.path.join(data_path, projects, str(project_uuid))
     if os.path.exists(destinationpath):
         shutil.rmtree(destinationpath)
 
@@ -281,8 +281,23 @@ def kill_all_containers():
                 print("concurrent deletion of same container")
 
 
-def kill_n_create(container_uuid: str):
-    """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
+def kill_container(container_uuid: str):
+    # kill and (hopefully automatically) remove container
+    client = docker.from_env()
+    try:
+        c = client.containers.get(f"schoco-cookies-{container_uuid}")
+    except docker.errors.NotFound as e:
+        print("container not found")
+        return False
+    except docker.errors.APIError as e:
+        print(e)
+        print(traceback.format_exc())
+        return False
+
+    if c.status == 'running':
+        c.kill()
+    else:
+        c.remove(force=True)
 
     # remove containerInfo from runningContainers
     runningContainers.remove_by_uuid(container_uuid)
@@ -291,19 +306,12 @@ def kill_n_create(container_uuid: str):
     dir = os.path.join(data_path, containers, container_uuid)
     shutil.rmtree(dir)
 
-    # kill and (hopefully automatically) remove container
-    client = docker.from_env()
-    try:
-        c = client.containers.get(f"schoco-cookies-{container_uuid}")
-    except (docker.errors.NotFound, docker.errors.APIError) as e:
-        print(e)
-        print(traceback.format_exc())
-        return
+    return True
 
-    if c.status == 'running':
-        c.kill()
-    else:
-        c.remove(force=True)
+
+def kill_n_create(container_uuid: str):
+    """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
+    kill_container(container_uuid)
 
     # refill newContainers
     refillNewContainersQueue()

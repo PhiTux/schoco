@@ -65,6 +65,9 @@ let state = reactive({
   isDeletingFile: false,
   isResettingHomework: false,
   isCreatingHomework: false,
+  runningContainerUuid: "",
+  aborted: false,
+  isStopping: false,
 });
 
 let homework = reactive({
@@ -443,6 +446,7 @@ function compile() {
   }
 
   state.isCompiling = true;
+  state.aborted = false;
   state.receivedWS = false;
   results.value = "";
 
@@ -463,6 +467,8 @@ function compile() {
           "Der Server war leider gerade überlastet 😥 Bitte erneut versuchen!";
         return;
       }
+
+      state.runningContainerUuid = response.data.uuid;
 
       // attach WS(S)
       connectWebsocket(response.data.id);
@@ -608,6 +614,7 @@ function execute(just_compiled) {
   }
 
   state.isExecuting = true;
+  state.aborted = false;
   state.receivedWS = false;
 
   results.value = "";
@@ -621,6 +628,8 @@ function execute(just_compiled) {
         compile()
         return;
       }
+
+      state.runningContainerUuid = response.data.uuid;
 
       connectWebsocket(response.data.id);
 
@@ -669,8 +678,11 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
       }
 
       if (response.data.status === "connect_error") {
-        results.value =
-          'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
+        if (!state.aborted) {
+          results.value =
+            'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
+        }
+
         state.actionGoal = ""
         return;
       }
@@ -715,6 +727,7 @@ function test(just_compiled) {
   }
 
   state.isTesting = true;
+  state.aborted = false;
   state.receivedWS = false;
 
   // using this line here (instead at opening WS), since Testing does not start a WS-connection
@@ -729,6 +742,8 @@ function test(just_compiled) {
         compile();
         return;
       }
+
+      state.runningContainerUuid = response.data.uuid;
 
       startTest(
         response.data.ip,
@@ -769,6 +784,8 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
         results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die untere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
       } else if (response.data.passed_tests == 0 && response.data.failed_tests == 0) {
         results.value += "❌ Es gab beim Testen wohl irgendeinen Fehler. Überprüfe nochmals dein Programm."
+      } else if (state.aborted) {
+        results.value += "❌ Der Test wurde durch den User abgebrochen."
       }
       else {
         let percent = Math.round((response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100 * 10) / 10
@@ -1403,6 +1420,36 @@ function deleteHomework() {
     })
 }
 
+
+function stopContainer() {
+  if (state.aborted || state.runningContainerUuid === "" || (!state.isExecuting && !state.isTesting)) return;
+
+  state.aborted = true;
+  state.isStopping = true;
+
+  CodeService.stopContainer(state.runningContainerUuid).then(
+    (response) => {
+      state.isStopping = false;
+
+      if (response.data.success) {
+        results.value = results.value + "Programm wurde vom User beendet! ✔";
+      } else {
+        // show toast
+        const toast = new Toast(
+          document.getElementById("toastStopContainerError")
+        );
+        toast.show();
+      }
+    }, (error) => {
+      // show toast
+      const toast = new Toast(
+        document.getElementById("toastStopContainerError")
+      );
+      toast.show();
+      console.log(error.response)
+    })
+}
+
 </script>
 
 <template>
@@ -1540,6 +1587,15 @@ function deleteHomework() {
         <div class="d-flex">
           <div class="toast-body">
             Fehler beim Zurücksetzen der Hausaufgabe!
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastStopContainerError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Programm konnte nicht beendet werden!
           </div>
         </div>
       </div>
@@ -1950,6 +2006,13 @@ function deleteHomework() {
                 <font-awesome-icon v-else icon="fa-solid fa-list-check" /> Testen
               </button>
             </div>
+            <button :class="{ hidden: !state.isExecuting && !state.isTesting }" @click.prevent="stopContainer()"
+              type="button" class="btn btn-outline-danger me-3">
+              <div v-if="state.isStopping" class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <font-awesome-icon v-else icon="fa-solid fa-ban" /> Abbrechen
+            </button>
             <button v-if="authStore.isTeacher() && !state.isHomework" @click.prevent="prepareHomeworkModal()"
               type="button" data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
               <font-awesome-icon icon="fa-solid fa-share-nodes" /> Hausaufgabe erstellen
@@ -2112,6 +2175,10 @@ function deleteHomework() {
 
 
 <style scoped lang="scss">
+.hidden {
+  visibility: hidden;
+}
+
 .hwTimeInput {
   background-color: white;
   color: #333
