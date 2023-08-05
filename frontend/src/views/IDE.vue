@@ -128,6 +128,7 @@ function editorInit() {
     scrollPastEnd: 0.5,
     enableBasicAutocompletion: true,
     showPrintMargin: false,
+    autoScrollEditorIntoView: true,
   });
   editor.on("change", editorChange);
 }
@@ -1945,19 +1946,19 @@ function stopContainer() {
               <ul class="dropdown-menu" data-bs-theme="light">
                 <li>
                   <a class="dropdown-item" @click.prevent="prepareAddFileModal()"><font-awesome-icon
-                      icon="fa-solid fa-file-circle-plus" />
-                    Neue Datei / Klasse
+                      icon="fa-solid fa-file-circle-plus" fixed-width />
+                    Neue Datei
                   </a>
                 </li>
                 <li class="dropdown-divider"></li>
                 <li v-if="state.isHomework && route.params.user_id != 0">
                   <a class="dropdown-item" @click.prevent="prepareDeleteHomework()">
-                    <font-awesome-icon icon="fa-solid fa-trash" /> Hausaufgabe neu beginnen
+                    <font-awesome-icon icon="fa-solid fa-trash" fixed-width /> Hausaufgabe neu beginnen
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item" @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
-                      icon="fa-solid fa-download" /> Projekt
+                      icon="fa-solid fa-download" fixed-width /> Projekt
                     herunterladen</a>
                 </li>
               </ul>
@@ -2035,12 +2036,12 @@ function stopContainer() {
     </nav>
 
     <div class="ide-main">
-      <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false"> <!--  -->
+      <splitpanes class="default-theme" height="100%" horizontal :push-other-panes="false">
         <pane>
           <splitpanes :push-other-panes="false">
-            <pane min-size="15" size="20" max-size="30">
-              <splitpanes horizontal :push-other-panes="false"><!-- class="default-theme" -->
-                <pane> <!-- style="background-color: #383838" -->
+            <pane size="20" min-size="15" max-size="30">
+              <splitpanes horizontal :push-other-panes="false">
+                <pane>
                   <div class="projectName d-flex align-items-center justify-content-center position-relative">
                     <p class="placeholder-wave" v-if="state.projectName === ''">
                       <span class="placeholder col-12"></span>
@@ -2082,7 +2083,7 @@ function stopContainer() {
                     @deleteDirectory="deleteDirectoryModal" />
                 </pane>
                 <!-- Description -->
-                <pane min-size="10" size="50" max-size="60"> <!-- style="background-color: #383838" -->
+                <pane min-size="30" size="50" max-size="70">
                   <div v-if="!state.editingDescription" class="description p-1">
                     <div class="description-content">
                       {{ state.projectDescription }}
@@ -2096,7 +2097,7 @@ function stopContainer() {
                     </div>
                   </div>
 
-                  <div v-if="state.editingDescription" class="position-relative edit-description">
+                  <div v-else class="position-relative edit-description">
                     <textarea class="textarea-description" v-model="state.newProjectDescription" />
                     <div class="position-absolute bottom-0 end-0">
                       <a @click.prevent="abortDescription()" class="btn btn-overlay btn-abort">
@@ -2120,7 +2121,7 @@ function stopContainer() {
               </splitpanes>
             </pane>
             <pane>
-              <div class="editor-relative">
+              <div class="editor-relative d-flex flex-column">
                 <ul class="nav nav-tabs pt-2">
                   <li class="nav-item" v-for="f in state.openFiles">
                     <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
@@ -2152,17 +2153,15 @@ function stopContainer() {
 
           </splitpanes>
         </pane>
-        <pane size="20" max-size="50">
+        <pane size="20" min-size="10" max-size="50">
           <div class="bottom d-flex flex-column">
             <div class="output p-2 flex-grow-1" id="output">
               <pre>{{ results }}</pre>
             </div>
             <div class="input align-items-center d-flex flex-row">
               <label for="inputMessage" class="px-2 col-form-label">Eingabe:</label>
-              <!-- <div> -->
               <input class="rounded flex-fill" :disabled="!state.websocket_open" @keyup.enter="sendMessage()" type="text"
                 id="inputMessage" v-model="state.sendMessage" placeholder="Eingabe (Entertaste zum Senden)" />
-              <!-- </div> -->
               <button :disabled="!state.websocket_open" @click.prevent="sendMessage()" type="button"
                 class="btn btn-light btn-sm mx-2" id="messageSendButton">
                 Senden
@@ -2244,6 +2243,7 @@ function stopContainer() {
   position: absolute;
   z-index: 10;
   padding: 5px;
+  margin-right: 20px;
   width: 200px;
 }
 
