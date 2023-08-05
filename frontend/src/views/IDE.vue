@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onBeforeUnmount, reactive, watch, ref, onMounted } from "vue";
+import { onBeforeMount, onBeforeUnmount, reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Toast, Popover, Modal, Tooltip } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
@@ -17,6 +17,7 @@ import "ace-builds/src-min-noconflict/ext-language_tools";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import ColorModeSwitch from "../components/ColorModeSwitch.vue";
+import { debounce } from "lodash";
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -81,17 +82,17 @@ let allCourses = ref([])
 
 /** Stores the output displayed in the bottom pane. */
 let results = ref("");
+let resultsElement = ref(null);
 
 let ws;
 
 var isMac = /mac/i.test(navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform);
 
 
-
-watch(results, () => {
+function scrollResults() {
   let output = document.getElementById("output");
   output.scrollTop = output.scrollHeight;
-});
+}
 
 
 function editorChange() {
@@ -238,7 +239,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', checkKeyDown)
 });
 
-onMounted(() => {
+let worker
+onMounted(async () => {
   //set light/dark mode of editor
   if (localStorage.getItem("theme") == "light") {
     setLight(true)
@@ -252,9 +254,21 @@ onMounted(() => {
     }
   }
 
-  // enable tooltips
-  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
+  // enable websocket-worker (other thread for decoding)
+  worker = new Worker(new URL("../services/websocket-worker.js", import.meta.url), { type: "module" });
+
+  // observe the HTML-Element to trigger scrolling to bottom of results
+  const observer = new MutationObserver(async () => {
+    scrollResults()
+  });
+  observer.observe(resultsElement.value, { childList: true });
+
+  // enable tooltips (wait until test-button is rendered after getProjectInfo())
+  setTimeout(() => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
+  }, 500)
+
 })
 
 function setLight(light) {
@@ -537,9 +551,12 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
 }
 
 
-function showWSError() {
-  results.value = "Verbindungsfehler ⚡\nAktuell kann keine Ausgabe angezeigt werden.\n\nWenn das Problem bestehen bleibt, dann gib bitte deiner Lehrkraft Bescheid!";
-}
+// debouce-function to actually update the results
+let buffer = "";
+let updateResults = debounce(() => {
+  results.value = buffer
+  scrollResults()
+}, 20, { leading: true })
 
 
 function connectWebsocket(id) {
@@ -556,21 +573,31 @@ function connectWebsocket(id) {
   );
   ws.binaryType = 'arraybuffer';
 
+  buffer = "";
+
+  // "outsource" the decoding to web-worker
   ws.onmessage = function (event) {
-    let dec = new TextDecoder();
-    let msg = dec.decode(event.data);
+    worker.postMessage(event.data);
+  };
+
+  worker.onmessage = function (event) {
+    const msg = event.data;
 
     if (state.receivedWS == false) {
       state.receivedWS = true;
       results.value = "";
     }
 
+    //check if message is actually the one being sent
     if (msg !== "\r\n" && msg.trim() === state.sendMessage.trim()) {
       state.sendMessage = ""
       return
     }
 
-    results.value += msg;
+    buffer = buffer.concat(msg);
+
+    //update results via debounce -> don't do instant updates of "millions" single-lines, but rather update every few ms
+    updateResults()
   };
 
   ws.onerror = function (event) {
@@ -776,13 +803,17 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
         return
       }
 
+      results.value += response.data.stdout
+
+      results.value += "\n\n==================\n\n"
+
       if (response.data.exitCode == 143) {
-        results.value = "Programm wurde frühzeitig beendet! ❌ Die Rechenzeit ist vermutlich abgelaufen. Hast du irgendwo eine Endlosschleife?"
+        results.value += "❌ Programm wurde frühzeitig beendet! Die Rechenzeit ist vermutlich abgelaufen. Hast du irgendwo eine Endlosschleife?"
       }
       else if (response.data.failed_tests == 0 && response.data.passed_tests > 0) {
         results.value += "Alle Tests bestanden 🎉🤩\n\nDu kannst nun höchstens noch versuchen, deinen Quellcode zu \"verschönern\" ;-)"
       } else if (response.data.passed_tests == 0) {
-        results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die untere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
+        results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die obere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
       } else if (response.data.passed_tests == 0 && response.data.failed_tests == 0) {
         results.value += "❌ Es gab beim Testen wohl irgendeinen Fehler. Überprüfe nochmals dein Programm."
       } else if (state.aborted) {
@@ -790,12 +821,9 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
       }
       else {
         let percent = Math.round((response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100 * 10) / 10
-        results.value += `Du hast ${percent}% der Tests bestanden. Vielleicht hilft dir die untere Ausgabe, um die restlichen Tests auch noch zu bestehen 🤗`
+        results.value += `Du hast ${percent}% der Tests bestanden. Vielleicht hilft dir die obere Ausgabe, um die restlichen Tests auch noch zu bestehen 🤗`
       }
 
-      results.value += "\n\n==================\n\n"
-
-      results.value += response.data.stdout
     },
     (error) => {
       results.value = "💥🙈 es gab wohl einen Fehler beim Testen deines Programms. Probiere es erneut!\nStelle zunächst sicher, dass dein Programm ausgeführt werden kann.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden."
@@ -1433,7 +1461,7 @@ function stopContainer() {
       state.isStopping = false;
 
       if (response.data.success) {
-        results.value = results.value + "Programm wurde vom User beendet! ✔";
+        results.value += "\nProgramm wurde vom User beendet! ✔";
       } else {
         // show toast
         const toast = new Toast(
@@ -1975,7 +2003,7 @@ function stopContainer() {
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
               <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
                 :disabled="state.tabsWithChanges.length == 0" data-bs-trigger="hover" data-bs-toggle="tooltip"
-                data-bs-title="Strg + s" data-bs-delay='{"show":1000,"hide":0}' data-bs-placement="bottom">
+                data-bs-title="Strg + s" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -2156,7 +2184,7 @@ function stopContainer() {
         <pane size="20" min-size="10" max-size="50">
           <div class="bottom d-flex flex-column">
             <div class="output p-2 flex-grow-1" id="output">
-              <pre>{{ results }}</pre>
+              <pre ref="resultsElement">{{ results }}</pre>
             </div>
             <div class="input align-items-center d-flex flex-row">
               <label for="inputMessage" class="px-2 col-form-label">Eingabe:</label>
