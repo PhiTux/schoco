@@ -991,7 +991,7 @@ function prepareHomeworkModal() {
   homework.computationTime = 10
 
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl))
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { html: true }))
 }
 
 

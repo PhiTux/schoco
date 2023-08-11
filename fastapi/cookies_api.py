@@ -13,15 +13,15 @@ import uuid
 from multiprocessing import Manager
 from config import settings
 import pycurl
-# from fastapi.logger import logger
-# import logging
+from fastapi.logger import logger
+import logging
 
-""" gunicorn_logger = logging.getLogger('gunicorn.error')
+gunicorn_logger = logging.getLogger('gunicorn.error')
 logger.handlers = gunicorn_logger.handlers
 if __name__ != "main":
     logger.setLevel(gunicorn_logger.level)
 else:
-    logger.setLevel(logging.DEBUG) """
+    logger.setLevel(logging.DEBUG)
 
 containers = "containers"
 projects = "projects"
@@ -37,49 +37,39 @@ class ContainerList():
 
     def __init__(self):
         self._list = Manager().list()
-#        self._lock = Lock()
 
     def append(self, value):
-        #        with self._lock:
         self._list.append(value)
         return True
 
     def get(self, index):
         """Return item without removal."""
-#        with self._lock:
         return self._list[index]
 
     def remove(self, index):
-        #        with self._lock:
         return self._list.pop(index)
 
     def remove_first(self, timeout):
-        #        with self._lock:
-
         if len(self._list) > 0:
             return self._list.pop(0)
         else:
             return None
 
     def remove_by_uuid(self, container_uuid):
-        #        with self._lock:
         for i in range(len(self._list)):
             if self._list[i]['uuid'] == container_uuid:
                 self._list.pop(i)
                 break
 
     def get_and_remove_by_uuid(self, container_uuid):
-        #        with self._lock:
         for i in range(len(self._list)):
             if self._list[i]['uuid'] == container_uuid:
                 return self._list.pop(i)
 
     def length(self):
-        #        with self._lock:
         return len(self._list)
 
     def contains_uuid(self, container_uuid):
-        #        with self._lock:
         for i in range(len(self._list)):
             if self._list[i]['uuid'] == container_uuid:
                 return True
@@ -88,10 +78,10 @@ class ContainerList():
 
 m = Manager()
 newContainers = m.Queue()  # maxsize=settings.MAX_CONTAINERS)
-# newContainers = ThreadSaveList()
 # """Holds the infos of the new (running) cookies-containers, that are WAITING for usage."""
 
 runningContainers = ContainerList()
+# containers that are doing something right now (compile, run, test)
 
 
 def writeFiles(filesList: models_and_schemas.filesList, uuid: str):
@@ -164,7 +154,7 @@ def createNewContainer():
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=3700, hard=5000)
     new_container = client.containers.run(
-        f"phitux/schoco-cookies:1.1.1", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
+        "phitux/schoco-cookies:1.1.1", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
     ip = apiclient.inspect_container(new_name)[
@@ -310,7 +300,7 @@ def kill_container(container_uuid: str):
 
 
 def kill_n_create(container_uuid: str):
-    """Kills the containers that was just executing a command and refills the queue of new (waiting) containers."""
+    """Kills the container that was just executing a command and refills the queue of new (waiting) containers."""
     kill_container(container_uuid)
 
     # refill newContainers
@@ -374,6 +364,7 @@ def start_execute(uuid: str, port: int, computation_time: int, save_output: bool
         try:
             c.setopt(c.POSTFIELDS, json.dumps(post_data))
             c.setopt(c.WRITEDATA, buffer)
+            c.setopt(c.CONNECTTIMEOUT_MS, 50)
             c.perform()
             break
         except BaseException as e:
@@ -409,6 +400,7 @@ def start_test(uuid: str, port: int, computation_time: int):
         try:
             c.setopt(c.POSTFIELDS, json.dumps(post_data))
             c.setopt(c.WRITEDATA, buffer)
+            c.setopt(c.CONNECTTIMEOUT_MS, 50)
             c.perform()
             break
         except BaseException as e:

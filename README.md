@@ -163,6 +163,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
 ```
+  7. **On the first startup** you will need to add the gitea user using the following command
+  > `docker exec --user 1000 schoco-gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
+
 
 # Architecture
 <img src="./schoco_architecture.svg">
