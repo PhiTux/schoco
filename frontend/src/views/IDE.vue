@@ -79,6 +79,7 @@ let homework = reactive({
 })
 
 let allCourses = ref([])
+let existingHomeworkCourses = ref([])
 
 /** Stores the output displayed in the bottom pane. */
 let results = ref("");
@@ -231,8 +232,24 @@ onBeforeMount(() => {
         } else console.log(error.response);
       }
     );
+
+    // get all courses, where this original project was already used to create a homework out of it
+    if (route.params.user_id == 0) {
+      checkExistingHomework()
+    }
   }
 });
+
+function checkExistingHomework() {
+  UserService.checkExistingHomework(route.params.project_uuid).then(
+    (response) => {
+      existingHomeworkCourses.value = response.data;
+    },
+    (error) => {
+      console.log(error.response)
+    }
+  )
+}
 
 onBeforeUnmount(() => {
   // remove event listener
@@ -956,6 +973,8 @@ function createHomework() {
       var elem = document.getElementById("createHomeworkModal");
       var modal = Modal.getInstance(elem);
       modal.hide();
+
+      checkExistingHomework()
 
       if (response.data) {
         const toast = new Toast(
@@ -1843,11 +1862,23 @@ function stopContainer() {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <span>⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig abgeschlossen sein,
+            <div class="alert alert-warning">⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig
+              abgeschlossen sein,
               <b>bevor</b>
               du daraus eine Hausaufgabe erstellst. Nach diesem Schritt sollten Änderungen vermieden werden, da die
-              Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.</span>
+              Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.
+            </div>
             <hr>
+            <div v-if="existingHomeworkCourses.length">
+              <div class="alert alert-success">
+                Aus diesem Projekt wurde bereits eine Hausaufgabe erstellt für folgende Kurse: <br>
+                <CourseBadge v-for="c in existingHomeworkCourses" :color="c.color" :font-dark="c.fontDark"
+                  :name="c.name" />
+              </div>
+              <hr>
+            </div>
+
+
             <div class="mb-3 row">
               <label for="coursename" class="col-sm-4 col-form-label">
                 <font-awesome-icon v-if="Object.keys(homework.selectedCourse).length !== 0" icon="fa-square-check"

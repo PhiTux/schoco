@@ -74,7 +74,7 @@ def get_all_users(db: Session):
 
 
 def get_all_courses(db: Session):
-    courses = db.query(models_and_schemas.Course).all()
+    courses = db.exec(select(models_and_schemas.Course)).all()
     return courses
 
 
@@ -635,3 +635,22 @@ def update_deadline(db: Session, id: int, deadline: int):
         db.rollback()
         return False
     return True
+
+
+def get_courses_of_homework_by_original_uuid(db: Session, original_project_id: int):   
+    homeworks = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.original_project_id == original_project_id)).all()
+    
+    if not len(homeworks):
+        return []
+
+    allCourses = get_all_courses(db=db)
+
+    homeworkCourses = []
+    for h in homeworks:
+        for c in allCourses:
+            if c.id == h.course_id:
+                homeworkCourses.append(c)
+                break
+
+    return homeworkCourses

@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL
 const axiosAuth = axios.create({
     baseURL: API_URL
 });
-axiosAuth.interceptors.request.use((config) => {    
+axiosAuth.interceptors.request.use((config) => {
     const authStore = useAuthStore()
     if (authStore.user) {
         // go to login if token has expired
@@ -47,7 +47,7 @@ class UserService {
     }
 
     changePassword(oldPassword, newPassword) {
-        return axiosAuth.post('changePassword', {'oldPassword': oldPassword, 'newPassword': newPassword})
+        return axiosAuth.post('changePassword', { 'oldPassword': oldPassword, 'newPassword': newPassword })
     }
 
     getAllUsers() {
@@ -63,7 +63,7 @@ class UserService {
     }
 
     editCourse(courseID, courseName, courseColor, courseFontDark) {
-        return axiosAuth.post('editCourse', {'id': courseID, 'name': courseName, 'color': courseColor, 'fontDark': courseFontDark})
+        return axiosAuth.post('editCourse', { 'id': courseID, 'name': courseName, 'color': courseColor, 'fontDark': courseFontDark })
     }
 
     removeCourse(course_id) {
@@ -83,15 +83,19 @@ class UserService {
     }
 
     changeName(user_id, name) {
-        return axiosAuth.post('changeName', {'user_id': user_id, 'name': name})
+        return axiosAuth.post('changeName', { 'user_id': user_id, 'name': name })
     }
 
     changeUsername(user_id, username) {
-        return axiosAuth.post('changeUsername', {'user_id': user_id, 'name': username})
+        return axiosAuth.post('changeUsername', { 'user_id': user_id, 'name': username })
     }
 
     getVersion() {
         return axios.get(API_URL + 'getVersion')
+    }
+
+    checkExistingHomework(uuid) {
+        return axiosAuth.post('checkExistingHomework', { 'uuid': uuid })
     }
 }
 
