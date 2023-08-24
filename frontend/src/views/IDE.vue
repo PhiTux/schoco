@@ -1984,7 +1984,7 @@ function stopContainer() {
                     <font-awesome-icon icon="fa-solid fa-trash" fixed-width /> Hausaufgabe neu beginnen
                   </a>
                 </li>
-                <li>
+                <li v-if="!(state.isHomework && route.params.user_id != 0)"> <!-- anyone except pupils in homeworks -->
                   <a class="dropdown-item" @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
                       icon="fa-solid fa-download" fixed-width /> Projekt
                     herunterladen</a>
