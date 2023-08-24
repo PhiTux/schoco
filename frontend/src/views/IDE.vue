@@ -1854,23 +1854,29 @@ function stopContainer() {
                   style="color: var(--bs-success)" />
                 <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Kurs wählen:</label>
               <div class="col-sm-8 d-flex align-items-center">
-                <CourseBadge v-if="homework.selectedCourse" :color="homework.selectedCourse.color"
-                  :font-dark="homework.selectedCourse.fontDark" :name="homework.selectedCourse.name" />
-                <a class="btn-round btn" data-bs-toggle="dropdown">
-                  <font-awesome-layers class="fa-lg" style="display: block !important;">
-                    <font-awesome-icon icon="fa-circle" style="color: var(--bs-secondary)" />
-                    <div style="color: var(--bs-light)">
-                      <font-awesome-icon icon="fa-plus" transform="shrink-6" />
-                    </div>
-                  </font-awesome-layers>
-                </a>
-                <ul class="dropdown-menu courseDropdown" data-bs-theme="light">
-                  <li v-for="c in allCourses">
-                    <a class="dropdown-item btn" @click.prevent="homework.selectedCourse = c">
-                      <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
-                    </a>
-                  </li>
-                </ul>
+                <div v-if="!allCourses.length" class="alert alert-danger">
+                  Du musst zuerst in der Benutzerverwaltung einen Kurs anlegen (idealerweise mit Schülern)!
+                </div>
+                <div v-else>
+                  <CourseBadge v-if="homework.selectedCourse" :color="homework.selectedCourse.color"
+                    :font-dark="homework.selectedCourse.fontDark" :name="homework.selectedCourse.name" />
+                  <a class="btn-round btn" data-bs-toggle="dropdown">
+                    <font-awesome-layers class="fa-lg" style="display: block !important;">
+                      <font-awesome-icon icon="fa-circle" style="color: var(--bs-secondary)" />
+                      <div style="color: var(--bs-light)">
+                        <font-awesome-icon icon="fa-plus" transform="shrink-6" />
+                      </div>
+                    </font-awesome-layers>
+                  </a>
+                  <ul class="dropdown-menu courseDropdown" data-bs-theme="light">
+                    <li v-for="c in allCourses">
+                      <a class="dropdown-item btn" @click.prevent="homework.selectedCourse = c">
+                        <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
               </div>
             </div>
             <div class="mb-3 row">
