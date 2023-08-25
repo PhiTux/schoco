@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, onMounted } from "vue";
+import { reactive } from "vue";
 
 const props = defineProps({
     modelValue: String,
