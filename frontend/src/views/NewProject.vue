@@ -380,4 +380,8 @@ function resetFileList() {
   height: 200px;
   color: grey;
 }
+
+#HelloWorldDescription {
+  font-family: monospace;
+}
 </style>
