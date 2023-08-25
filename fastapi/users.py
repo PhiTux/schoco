@@ -230,3 +230,12 @@ def checkExistingHomework(uuid: models_and_schemas.UUID, db: Session = Depends(d
     homeworkCourses = crud.get_courses_of_homework_by_original_uuid(db=db, original_project_id=project.id)
 
     return homeworkCourses
+
+@users.post('/confirmTeacherPassword', dependencies=[Depends(auth.check_teacher)])
+def confirmTeacherPassword(password: models_and_schemas.Password, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    user = crud.get_user_by_username(db=db, username=username)
+    
+    if auth.verify_password(password.password, user.hashed_password):
+        return {'success': True}
+    
+    return {'success': False}

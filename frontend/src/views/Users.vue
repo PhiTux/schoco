@@ -33,7 +33,11 @@ let state = reactive({
   newCourseName: "",
   deleteUserFullname: "",
   deleteUserUsername: "",
+  deleteUserIsTeacher: false,
   deleteUserId: 0,
+  confirmPassword: "",
+  confirmPasswordInvalid: false,
+  isConfirmingPassword: false,
   selectedUser: false,
   edit_user_id: 0,
   edit_user_property: "",
@@ -185,6 +189,7 @@ function openModalDeleteUser(id) {
     if (allUsers.value[i].id == id) {
       state.deleteUserFullname = allUsers.value[i].full_name;
       state.deleteUserUsername = allUsers.value[i].username;
+      state.deleteUserIsTeacher = allUsers.value[i].role === 'teacher'
       state.deleteUserId = id;
       break;
     }
@@ -482,9 +487,47 @@ watch(newPupils, () => {
   }
 });
 
-onMounted(() => {
+function passwordConfirmed() {
   getAllUsers();
   getAllCourses();
+
+  const modal = Modal.getInstance(
+    document.getElementById("confirmPasswordModal")
+  );
+  modal.hide();
+}
+
+function confirmPassword() {
+  if (state.isConfirmingPassword) return
+  if (!state.confirmPassword.length) {
+    state.confirmPasswordInvalid = true;
+  }
+
+  state.isConfirmingPassword = true;
+  state.confirmPasswordInvalid = false
+
+  UserService.confirmTeacherPassword(state.confirmPassword).then(
+    (response) => {
+      state.isConfirmingPassword = false;
+      if (response.data.success) {
+        passwordConfirmed()
+      } else {
+        state.confirmPasswordInvalid = true
+      }
+    }, (error) => {
+      const toast = new Toast(
+        document.getElementById("toastErrorConfirmPassword")
+      );
+      toast.show();
+      console.log(error.response)
+    }
+  )
+}
+
+onMounted(() => {
+  //confirm Password:
+  const modal = new Modal(document.getElementById("confirmPasswordModal"));
+  modal.show();
 
   document.title = "Benutzerverwaltung"
 });
@@ -709,6 +752,15 @@ function removeCourseFromNewPupils(id) {
 <template>
   <div>
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div class="toast align-items-center text-bg-danger border-0" id="toastErrorConfirmPassword" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            Fehler beim Überprüfen des Passworts!
+          </div>
+        </div>
+      </div>
+
       <div class="toast align-items-center text-bg-danger border-0" id="toastUpdateNameEmpty" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -886,7 +938,7 @@ function removeCourseFromNewPupils(id) {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>Möchten Sie den Kurs <b>{{ state.removeCourseName }}</b> wirklich löschen?</p>
+            <p>Möchtest du den Kurs <b>{{ state.removeCourseName }}</b> wirklich löschen?</p>
             Damit werden auch Hausaufgaben gelöscht, die diesem Kurs zugeordnet sind. Außerdem werden alle Schüler aus dem
             Kurs entfernt.
           </div>
@@ -1054,20 +1106,51 @@ function removeCourseFromNewPupils(id) {
           </div>
           <div class="modal-body text-center">
             <h4>
-              Folgenden Benutzer wirklich löschen?<br />
+              Folgenden
+              <u><span v-if="state.deleteUserIsTeacher">Lehrer</span><span v-else>Schüler</span></u>
+              wirklich löschen?<br />
               <b>{{ state.deleteUserFullname }} ({{
                 state.deleteUserUsername
               }})</b>
             </h4>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Schließen
+            </button>
+            <button type="button" class="btn btn-primary" @click.prevent="deleteUser()">
+              Benutzer löschen
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Schließen
-              </button>
-              <button type="button" class="btn btn-primary" @click.prevent="deleteUser()">
-                Benutzer löschen
-              </button>
+    <div class="modal fade" id="confirmPasswordModal" data-bs-backdrop="static" tabindex="-1"
+      aria-labelledby="confirmPasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            Passwort bestätigen
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="confirmPassword()">
+              <PasswordInput v-model="state.confirmPassword" description="Passwort" />
+            </form>
+            <div v-if="state.confirmPasswordInvalid" class="alert alert-danger">
+              Passwort ist ungültig!
             </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click.prevent="$router.back()" data-bs-dismiss="modal">
+              Zurück
+            </button>
+            <button :disabled="!state.confirmPassword.length || state.isConfirmingPassword" type="button"
+              class="btn btn-primary" @click.prevent="confirmPassword()">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
+                v-if="state.isConfirmingPassword"></span>
+              <span v-else>Weiter</span>
+            </button>
           </div>
         </div>
       </div>
@@ -1329,7 +1412,7 @@ function removeCourseFromNewPupils(id) {
                 </ul>
               </div>
             </td>
-            <td><span v-if="x.role === 'teacher'">👨‍🏫</span><!--<span v-else>📚</span>--> {{ x.role }}</td>
+            <td><span v-if="x.role === 'teacher'">👨‍🏫</span> {{ x.role }}</td>
             <td>
               <a class="btn-round btn" data-bs-toggle="modal" data-bs-target="#changeUserPasswordModal"
                 @click.prevent="openModalChangePassword(x.id)">

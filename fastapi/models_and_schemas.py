@@ -228,3 +228,7 @@ class UpdateHomeworkSettings(BaseModel):
 
 class UUID(BaseModel):
     uuid: str
+
+
+class Password(BaseModel):
+    password: str

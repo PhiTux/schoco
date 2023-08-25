@@ -97,6 +97,10 @@ class UserService {
     checkExistingHomework(uuid) {
         return axiosAuth.post('checkExistingHomework', { 'uuid': uuid })
     }
+
+    confirmTeacherPassword(password) {
+        return axiosAuth.post('confirmTeacherPassword', { 'password': password })
+    }
 }
 
 export default new UserService()

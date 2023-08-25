@@ -1,4 +1,4 @@
-import {createRouter, createWebHashHistory} from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store.js'
 import Login from "../views/Login.vue"
 import Home from "../views/Home.vue"
@@ -9,13 +9,13 @@ import Homework from "../views/Homework.vue"
 
 
 const routes = [
-    {path: '/login', name: 'login', component: Login},
-    {path: '/home', name: "home", component: Home},
-    {path: '/users', name: "users", component: Users},
-    {path: '/newProject', name: "newProject", component: NewProject},
-    {path: '/ide/:project_uuid/:user_id', name: "ide", component: Ide, params: {project_uuid: "", user_id: ""}},
-    {path: '/homework/:id', name: "homework", component: Homework, params: {id: ""}},
-    {path: '/:pathMatch(.*)*', redirect: "/home"}
+    { path: '/login', name: 'login', component: Login },
+    { path: '/home', name: "home", component: Home },
+    { path: '/users', name: "users", component: Users },
+    { path: '/newProject', name: "newProject", component: NewProject },
+    { path: '/ide/:project_uuid/:user_id', name: "ide", component: Ide, params: { project_uuid: "", user_id: "" } },
+    { path: '/homework/:id', name: "homework", component: Homework, params: { id: "" } },
+    { path: '/:pathMatch(.*)*', redirect: "/home" }
 ]
 
 export const router = createRouter({
