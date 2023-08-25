@@ -73,6 +73,8 @@ class Homework(SQLModel, table=True):
     original_project_id: int = Field(
         default=None, foreign_key="project.id")
     deadline: str  # datetime
+    solution_project_id: Optional[int] = Field(default=None, foreign_key="project.id")
+    solution_start_showing: Optional[str] = "" # datetime, when the solution may be shown to pupils
     # oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")

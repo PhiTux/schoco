@@ -1,7 +1,8 @@
 <script setup>
-import { computed, getCurrentInstance, onBeforeMount, reactive, watch } from "vue";
+import { computed, onBeforeMount, reactive } from "vue";
 import CodeService from "../services/code.service.js";
 import ProjectCard from "../components/ProjectCard.vue";
+import AddSolutionModalContent from "../components/AddSolutionModalContent.vue";
 import { useAuthStore } from "../stores/auth.store.js";
 import { useRouter } from "vue-router";
 import { Toast, Modal } from "bootstrap";
@@ -22,6 +23,7 @@ let state = reactive({
   isRenaming: false,
   isDeleting: false,
   searchProject: "",
+  addSolutionHomeworkId: 0
 });
 
 onBeforeMount(() => {
@@ -380,6 +382,12 @@ function downloadProject(uuid) {
     }
   );
 }
+
+function addSolution(homework_id) {
+  state.addSolutionHomeworkId = homework_id
+  const modal = new Modal(document.getElementById("addSolutionModal"));
+  modal.show();
+}
 </script>
 
 <template>
@@ -626,6 +634,11 @@ function downloadProject(uuid) {
       </div>
     </div>
 
+    <div class="modal fade" id="addSolutionModal" tabindex="-1" aria-labelledby="addSolutionModalLabel"
+      aria-hidden="true">
+      <AddSolutionModalContent :homework_id="state.addSolutionHomeworkId" :my-projects="state.myProjects" />
+    </div>
+
     <div class="container main">
       <div class="d-flex flex-row flex-wrap align-items-center justify-content-center">
         <div class="flex-div">
@@ -657,7 +670,7 @@ function downloadProject(uuid) {
         <ProjectCard v-if="authStore.isTeacher()" v-for="(h, index) in newHomeworkFiltered" :key="`${index}-${h.id}`"
           isHomework isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
           :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
-          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" />
+          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="addSolution" />
 
         <!-- else -->
         <ProjectCard v-else v-for="(h, index2) in newHomeworkFiltered" :key="`${index2}-${h.id}`" isHomework

@@ -24,7 +24,10 @@ const props = defineProps({
     courseFontDark: Boolean,
     courseName: String,
     lastEdited: String,
-    evaluation: Number
+    evaluation: Number,
+    solution_uuid: String,
+    solution_name: String,
+    solution_start_showing: String
 });
 
 onMounted(() => {
@@ -103,6 +106,10 @@ onMounted(() => {
                     zeigen</router-link>
                 <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt
                     öffnen</router-link>
+                <a v-if="isTeacher && isHomework" @click.prevent="$emit('addSolution', id)"
+                    class="ms-auto btn btn-outline-success">
+                    Lösung hinzufügen
+                </a>
             </div>
         </div>
     </div>
