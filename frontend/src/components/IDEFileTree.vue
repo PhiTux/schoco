@@ -5,7 +5,7 @@ import TreeNode from "./TreeNode.vue"
 
 const emit = defineEmits(['openFile', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory'])
 
-const props = defineProps(["files"]);
+const props = defineProps(["files", "renameAllowed", "deleteAllowed"]);
 
 const nestedFiles = computed(() => {
   let f = [];
@@ -72,8 +72,9 @@ function toggleFolder(path, event) {
   <div class="tree">
     <ul id="root">
       <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue"
-        :path="newKey + '/'" @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile"
-        @deleteFile="deleteFile" @renameDirectory="renameDirectory" @deleteDirectory="deleteDirectory">
+        :path="newKey + '/'" :renameAllowed="renameAllowed" :deleteAllowed="deleteAllowed" @toggleFolder="toggleFolder"
+        @openFile="openFile" @renameFile="renameFile" @deleteFile="deleteFile" @renameDirectory="renameDirectory"
+        @deleteDirectory="deleteDirectory">
       </TreeNode>
     </ul>
   </div>

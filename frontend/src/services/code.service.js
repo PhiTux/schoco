@@ -145,6 +145,10 @@ class CodeService {
     stopContainer(uuid) {
         return axiosAuth.post('stopContainer', {'uuid': uuid})
     }
+
+    addSolution(homework_id, solution_id, solution_start_showing) {
+        return axiosAuth.post('addSolution', {'homework_id': homework_id, 'solution_id': solution_id, 'solution_start_showing': solution_start_showing})
+    }
 }
 
 export default new CodeService()

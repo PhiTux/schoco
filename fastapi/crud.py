@@ -52,9 +52,7 @@ def get_user_by_username(db: Session, username: str):
 
 
 def get_user_by_id(db: Session, id: int):
-    user = db.exec(select(models_and_schemas.User).where(
-        models_and_schemas.User.id == id)).first()
-    return user
+    return db.get(models_and_schemas.User, id)
 
 
 def change_password_by_username(username: str, password: str, db: Session):
@@ -268,9 +266,7 @@ def get_project_by_project_uuid(db: Session, project_uuid: str):
 
 
 def get_project_by_id(db: Session, id: int):
-    project = db.exec(select(models_and_schemas.Project).where(
-        models_and_schemas.Project.id == id)).first()
-    return project
+    return db.get(models_and_schemas.Project, id)
 
 
 def get_projects_by_ids(db: Session, ids: list[int]):
@@ -348,7 +344,7 @@ def get_pupils_homework_by_username(db: Session, username: str):
     for h in homework:
         project = get_project_by_id(db=db, id=h.template_project_id)
         results.append({"deadline": h.deadline, "id": h.id,
-                       "name": project.name, "description": project.description, "uuid": project.uuid})
+                       "name": project.name, "description": project.description, "uuid": project.uuid, "solution_project_id": h.solution_project_id, "solution_start_showing": h.solution_start_showing})
 
     return results
 
@@ -376,9 +372,7 @@ def get_editing_homework_by_username(db: Session, username: str):
 
 
 def get_homework_by_id(db: Session, id: int):
-    homework = db.exec(select(models_and_schemas.Homework).where(
-        models_and_schemas.Homework.id == id)).first()
-    return homework
+    return db.get(models_and_schemas.Homework, id)
 
 
 def create_editing_homework(db: Session, editing_homework: models_and_schemas.EditingHomework):
@@ -637,10 +631,10 @@ def update_deadline(db: Session, id: int, deadline: int):
     return True
 
 
-def get_courses_of_homework_by_original_uuid(db: Session, original_project_id: int):   
+def get_courses_of_homework_by_original_uuid(db: Session, original_project_id: int):
     homeworks = db.exec(select(models_and_schemas.Homework).where(
         models_and_schemas.Homework.original_project_id == original_project_id)).all()
-    
+
     if not len(homeworks):
         return []
 
@@ -654,3 +648,40 @@ def get_courses_of_homework_by_original_uuid(db: Session, original_project_id: i
                 break
 
     return homeworkCourses
+
+
+def add_solution(db: Session, homework_id: int, solution_id: int, solution_start_showing: str):
+    if solution_id is None or solution_id == 0 or solution_start_showing == "" or homework_id == 0:
+        return False
+
+    # get homework
+    homework = get_homework_by_id(db, homework_id)
+    if homework is None:
+        return False
+
+    # update solution
+    homework.solution_project_id = solution_id
+    homework.solution_start_showing = solution_start_showing
+    try:
+        db.add(homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def check_if_uuid_is_solution(db: Session, uuid: str):
+    # get project
+    project = get_project_by_project_uuid(db, uuid)
+    if project is None:
+        return False
+
+    # get homework
+    homework = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.solution_project_id == project.id)).first()
+    if homework is None:
+        return False
+
+    return True

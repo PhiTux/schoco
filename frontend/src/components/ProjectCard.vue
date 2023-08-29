@@ -27,6 +27,7 @@ const props = defineProps({
     evaluation: Number,
     solution_uuid: String,
     solution_name: String,
+    solution_id: Number,
     solution_start_showing: String
 });
 
@@ -106,16 +107,36 @@ onMounted(() => {
                     zeigen</router-link>
                 <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt
                     öffnen</router-link>
-                <a v-if="isTeacher && isHomework" @click.prevent="$emit('addSolution', id)"
-                    class="ms-auto btn btn-outline-success">
-                    Lösung hinzufügen
-                </a>
+
+                <div v-if="isTeacher && isHomework" class="ms-auto input-group" style="width: inherit;">
+                    <div class="p-1 border border-success input-group-text" v-if="isHomework && solution_id != 0">
+                        {{ solution_name }}<br>
+                        {{ new Date(solution_start_showing).toLocaleString("default", {
+                            weekday: "short", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute:
+                                "2-digit"
+                        }) }}
+                    </div>
+
+                    <a @click.prevent="$emit('addSolution', id)" class="btn btn-outline-success"
+                        :class="{ borderDashed: solution_id == 0 }">
+                        <span v-if="solution_id == 0">Lösung hinzufügen</span>
+                        <span v-else>Lösung<br>ändern</span>
+                    </a>
+                </div>
+                <div v-else-if="!isTeacher && isHomework && solution_uuid !== ''" class="ms-auto">
+                    <router-link :to="'/ide/' + solution_uuid + '/0'" class="btn btn-success">Lösung
+                        öffnen</router-link>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
+.borderDashed {
+    border-style: dashed;
+}
+
 .text-clamp {
     white-space: pre-line;
 }

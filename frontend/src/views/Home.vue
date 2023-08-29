@@ -2,10 +2,13 @@
 import { computed, onBeforeMount, reactive } from "vue";
 import CodeService from "../services/code.service.js";
 import ProjectCard from "../components/ProjectCard.vue";
-import AddSolutionModalContent from "../components/AddSolutionModalContent.vue";
 import { useAuthStore } from "../stores/auth.store.js";
 import { useRouter } from "vue-router";
 import { Toast, Modal } from "bootstrap";
+import vSelect from 'vue-select'
+import 'vue-select/dist/vue-select.css';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 
 const router = useRouter();
 
@@ -23,7 +26,11 @@ let state = reactive({
   isRenaming: false,
   isDeleting: false,
   searchProject: "",
-  addSolutionHomeworkId: 0
+  addSolutionHomeworkId: 0,
+  solution_id: 0,
+  solution_start_showing: new Date(),
+  isAddingSolution: false,
+  addSolutionInputInvalid: false,
 });
 
 onBeforeMount(() => {
@@ -383,10 +390,83 @@ function downloadProject(uuid) {
   );
 }
 
-function addSolution(homework_id) {
+function openAddSolutionModal(homework_id) {
+  if (!authStore.isTeacher()) {
+    return
+  }
   state.addSolutionHomeworkId = homework_id
-  const modal = new Modal(document.getElementById("addSolutionModal"));
+  state.addSolutionInputInvalid = false
+
+  // get solution_id from homework_id
+  let found = false
+  for (var i = 0; i < state.old_homework.length; i++) {
+    if (state.old_homework[i].id == homework_id) {
+      state.solution_id = state.old_homework[i].solution_id
+      state.solution_start_showing = state.old_homework[i].solution_start_showing
+      found = true
+      break
+    }
+  }
+  if (!found) {
+    for (var i = 0; i < state.new_homework.length; i++) {
+      if (state.new_homework[i].id == homework_id) {
+        state.solution_id = state.new_homework[i].solution_id
+        state.solution_start_showing = state.new_homework[i].solution_start_showing
+        break
+      }
+    }
+  }
+
+  if (state.solution_id == 0) {
+    state.solution_id = null
+  }
+
+  const modal = new Modal(document.getElementById("editSolutionModal"));
   modal.show();
+}
+
+function addSolution() {
+  if (!authStore.isTeacher()) {
+    return
+  }
+
+  if (state.solution_id === null || state.solution_id === 0) {
+    state.addSolutionInputInvalid = true;
+    return
+  }
+
+  state.isAddingSolution = true;
+
+  CodeService.addSolution(state.addSolutionHomeworkId, state.solution_id, state.solution_start_showing).then(
+    (response) => {
+      state.isAddingSolution = false;
+
+      // close modal
+      var elem = document.getElementById("editSolutionModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        getProjectsAsTeacher();
+
+        const toast = new Toast(
+          document.getElementById("toastAddSolutionSuccess")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastAddSolutionError")
+        );
+        toast.show();
+      }
+    },
+    (error) => {
+      state.addSolutionInputInvalid = true;
+      state.isAddingSolution = false;
+      console.log(error.response);
+    }
+  );
+
 }
 </script>
 
@@ -401,6 +481,21 @@ function addSolution(homework_id) {
             Fehler beim Starten der Hausaufgabe. Probiere es erneut und frage
             andernfalls deine Lehrkraft um Hilfe.
           </div>
+        </div>
+      </div>
+
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastAddSolutionSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">Lösung wurde hinzugefügt.</div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastAddSolutionError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">Fehler beim Zufügen der Lösung.</div>
         </div>
       </div>
 
@@ -634,9 +729,71 @@ function addSolution(homework_id) {
       </div>
     </div>
 
-    <div class="modal fade" id="addSolutionModal" tabindex="-1" aria-labelledby="addSolutionModalLabel"
+    <div class="modal fade" id="editSolutionModal" tabindex="-1" aria-labelledby="editSolutionModalLabel"
       aria-hidden="true">
-      <AddSolutionModalContent :homework_id="state.addSolutionHomeworkId" :my-projects="state.myProjects" />
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5">
+              <span v-if="state.solution_id == null">Lösung hinzufügen</span>
+              <span v-else>Lösung ändern</span>
+            </h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              Wähle ein privates Projekt aus, welches die Schüler ab einem bestimmten Zeitpunkt als Lösung anschauen
+              können. Die Schüler können die Lösung nur öffnen und ausführen, aber nicht bearbeiten.
+            </div>
+            <label class="form-label">Wähle die Lösung:</label>
+            <v-select :options="state.myProjects" v-model="state.solution_id" label="name" :reduce="p => p.id"
+              placeholder="">
+            </v-select>
+            <br>
+            <br>
+            <label class="form-label">Ab wann soll die Lösung sichtbar sein?</label>
+            <div class="d-flex flex-row align-items-center">
+              <button type="button" class="btn btn-primary btn-sm"
+                @click.prevent="state.solution_start_showing = new Date()">
+                Ab sofort
+              </button>
+              <span class="mx-2"><b>oder</b></span>
+              <VueDatePicker class="flex-fill" v-model="state.solution_start_showing" placeholder="Datum wählen ..."
+                text-input auto-apply :min-date="new Date()" prevent-min-max-navigation locale="de"
+                format="E dd.MM.yyyy, HH:mm" />
+            </div>
+            <font-awesome-icon icon="fa-solid fa-arrow-right" fixed-width />
+            <span v-if="state.solution_start_showing === ''"><em class="text-bg-warning">Eingabe fehlt</em></span>
+            <span v-else-if="(new Date(state.solution_start_showing) <= new Date())"><b>Sichtbar ab
+                <u>sofort</u></b>
+            </span>
+            <span v-else><b>Sichtbar in <u>{{
+              Math.floor((new Date(state.solution_start_showing)
+                -
+                new
+                  Date()) / (1000 * 3600 * 24)) }} Tage,
+                  {{ Math.floor((new Date(state.solution_start_showing) - new Date()) / (1000 * 3600) % 24) }}
+                  Stunden</u></b>
+            </span>
+            <br>
+
+            <div v-if="state.addSolutionInputInvalid" class="alert alert-danger mt-4">
+              Lösung konnte nicht gespeichert werden. Überprüfe deine Eingaben.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Abbrechen
+            </button>
+            <button @click.prevent="addSolution()" type="button" class="btn btn-primary" :disabled="!state.solution_id">
+              <div v-if="!state.isAddingSolution">Speichern</div>
+              <div v-else class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="container main">
@@ -670,12 +827,13 @@ function addSolution(homework_id) {
         <ProjectCard v-if="authStore.isTeacher()" v-for="(h, index) in newHomeworkFiltered" :key="`${index}-${h.id}`"
           isHomework isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
           :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
-          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="addSolution" />
+          :solution_name="h.solution_name" :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
+          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal" />
 
         <!-- else -->
         <ProjectCard v-else v-for="(h, index2) in newHomeworkFiltered" :key="`${index2}-${h.id}`" isHomework
           @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :description="h.description"
-          :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline"
+          :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline" :solution_uuid="h.solution_uuid"
           @deleteHomeworkBranch="askDeleteHomeworkBranch" />
       </div>
 

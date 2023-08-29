@@ -12,6 +12,7 @@ import uuid
 import os
 import git
 from sqlmodel import Session
+import datetime
 
 code = APIRouter(prefix="/api")
 
@@ -71,6 +72,10 @@ def project_access_allowed(project_uuid: str, user_id: str, db: Session = Depend
         if project != None and project.owner.username == username:
             return True
 
+        # ... or he is trying to open a solution
+        if check_if_solution(db=db, project_uuid=project_uuid, username=username):
+            return True
+
     else:
         # ...or he is trying to open his branch (of a homework)
         if int(user_id) == user.id:
@@ -99,10 +104,15 @@ def project_access_allowed_teacher_only(project_uuid: str, db: Session = Depends
         status_code=405, detail="You're not allowed to open or edit this project")
 
 
+def check_if_solution(db: Session, project_uuid: str, username: str):
+    """Returns True if project_uuid is a solution-project AND (!) if user is NOT owner, otherwise False"""
+    return crud.check_if_uuid_is_solution(db=db, uuid=project_uuid) and crud.get_project_by_project_uuid(db=db, project_uuid=project_uuid).owner.username != username
+
+
 results = []
 
 
-def recursively_download_all_files(project_uuid: str, id: int, path: str):
+def recursively_download_all_files(project_uuid: str, id: int, path: str, is_solution: bool = False):
     global results
 
     root = git.load_all_meta_content(
@@ -112,24 +122,27 @@ def recursively_download_all_files(project_uuid: str, id: int, path: str):
     for c in root:
         if not c['isDir']:
             # skip Tests.java if it's a pupil's-branch
-            if id != 0 and c['path'] == 'Tests.java':
+            if (id != 0 or is_solution) and c['path'] == 'Tests.java':
                 continue
             results.append({'path': c['path'], 'content': git.download_file_by_url(
                 url=git.replace_base_url(c['download_url'])), 'sha': c['sha']})
         else:
             recursively_download_all_files(
-                project_uuid=project_uuid, id=id, path=f"/{c['path']}/")
+                project_uuid=project_uuid, id=id, path=f"/{c['path']}/", is_solution=is_solution)
 
     return (results)
 
 
 @ code.get('/loadAllFiles/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def loadAllFiles(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+def loadAllFiles(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     global results
     results = []
 
+    is_solution = check_if_solution(
+        db=db, project_uuid=project_uuid, username=username)
+
     res = recursively_download_all_files(
-        project_uuid=project_uuid, id=user_id, path="/")
+        project_uuid=project_uuid, id=user_id, path="/", is_solution=is_solution)
 
     return res
 
@@ -153,7 +166,7 @@ def saveProjectName(updateProjectName: models_and_schemas.updateText, project_uu
 
 
 @ code.get('/getProjectInfo/{project_uuid}/{user_id}', dependencies=[Depends(auth.oauth2_scheme)])
-def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
 
@@ -162,8 +175,11 @@ def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Sessio
     if homework == None:
         isHomework = False
 
+    is_solution = check_if_solution(
+        db=db, project_uuid=project_uuid, username=username)
+
     result = {"name": project.name,
-              "description": project.description, "isHomework": isHomework}
+              "description": project.description, "isHomework": isHomework, "isSolution": is_solution}
 
     if isHomework and user_id != 0:
         user = crud.get_user_by_id(db=db, id=user_id)
@@ -208,17 +224,43 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
             if p.id == h.template_project_id:
                 is_homework = True
                 course = crud.get_course_by_id(db=db, id=h.course_id)
+
+                solution_project = crud.get_project_by_id(
+                    db=db, id=h.solution_project_id)
+                if solution_project == None:
+                    solution_name = ""
+                else:
+                    solution_name = solution_project.name
+
                 homework.append({"deadline": h.deadline, "name": p.name, "description": p.description, "id": h.id,
-                                "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark})
+                                "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
+                                 "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing})
                 # TODO append "edited by X/Y pupils" and "average points of solutions"
                 break
 
         # ...otherwise its a regular project
         if not is_homework:
             projects.append(
-                {"name": p.name, "description": p.description, "uuid": p.uuid})
+                {"name": p.name, "description": p.description, "uuid": p.uuid, "id": p.id})
 
     return {"homework": homework, "projects": projects}
+
+
+def get_solution_project_uuid(db, homework):
+    if homework["solution_project_id"] == None:
+        return ""
+
+    # check if solution_start_showing has passed -> solution may be shown
+    try:
+        if datetime.datetime.strptime(homework["solution_start_showing"], '%Y-%m-%dT%H:%M:%S.%fZ') > datetime.datetime.utcnow():
+            return ""
+    # if solution_start_showing is broken, then solution may be shown
+    except ValueError:
+        print("Timecode error of solution_start_showing")
+
+    # get solution project uuid
+    return crud.get_project_by_id(
+        db=db, id=homework["solution_project_id"]).uuid
 
 
 @code.get('/getProjectsAsPupil')
@@ -230,26 +272,31 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
     all_editing_homework = crud.get_editing_homework_by_username(
         db=db, username=username)
 
-    all_new_homework = crud.get_pupils_homework_by_username(
+    all_homework = crud.get_pupils_homework_by_username(
         db=db, username=username)
 
     homework = []
 
-    for h in all_new_homework:
+    for h in all_homework:
         already_edited = False
+
+        # check if solution may be shown
+        solution_uuid = get_solution_project_uuid(db, h)
+
         for e in all_editing_homework:
             if h["id"] == e.homework_id:
                 # append those homeworks, that are already edited
                 already_edited = True
                 uuid = crud.get_uuid_of_homework(
                     db=db, homework_id=h['id'])
+
                 homework.append({"is_editing": True, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                                "id": h["id"], "uuid": uuid, "branch": user.id})
+                                "id": h["id"], "uuid": uuid, "branch": user.id, "solution_uuid": solution_uuid})
                 break
         # ... and those, which are not yet started by the pupil
         if not already_edited:
             homework.append({"is_editing": False, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                             "id": h["id"]})
+                             "id": h["id"], "solution_uuid": solution_uuid})
 
     return {"homework": homework, "projects": all_projects}
 
@@ -774,5 +821,14 @@ def stopContainer(container_uuid: models_and_schemas.UUID, db: Session = Depends
     if not cookies_api.kill_container(container_uuid.uuid):
         raise HTTPException(
             status_code=500, detail="Error on stopping container.")
+
+    return {'success': True}
+
+
+@code.post('/addSolution', dependencies=[Depends(auth.check_teacher)])
+def addSolution(addSolution: models_and_schemas.AddSolution, db: Session = Depends(database_config.get_db)):
+    if not crud.add_solution(db=db, homework_id=addSolution.homework_id, solution_id=addSolution.solution_id, solution_start_showing=addSolution.solution_start_showing):
+        raise HTTPException(
+            status_code=500, detail="Error on adding solution.")
 
     return {'success': True}

@@ -69,6 +69,7 @@ let state = reactive({
   runningContainerUuid: "",
   aborted: false,
   isStopping: false,
+  isSolution: false,
 });
 
 let homework = reactive({
@@ -196,8 +197,14 @@ onBeforeMount(() => {
     (response) => {
       if (response.status == 200) {
         state.isHomework = response.data.isHomework;
+        state.isSolution = response.data.isSolution;
         state.projectName = response.data.name;
         state.projectDescription = response.data.description;
+
+        if (state.isSolution) {
+          var editor = ace.edit("editor");
+          editor.setReadOnly(true);
+        }
         if (state.isHomework) {
           state.fullUserName = response.data.fullusername;
           state.deadline = response.data.deadline
@@ -2010,8 +2017,9 @@ function stopContainer() {
               </a>
               <ul class="dropdown-menu" data-bs-theme="light">
                 <li>
-                  <a class="dropdown-item" @click.prevent="prepareAddFileModal()"><font-awesome-icon
-                      icon="fa-solid fa-file-circle-plus" fixed-width />
+                  <a v-if="!state.isSolution" class="dropdown-item"
+                    @click.prevent="prepareAddFileModal()"><font-awesome-icon icon="fa-solid fa-file-circle-plus"
+                      fixed-width />
                     Neue Datei
                   </a>
                 </li>
@@ -2021,7 +2029,8 @@ function stopContainer() {
                     <font-awesome-icon icon="fa-solid fa-trash" fixed-width /> Hausaufgabe neu beginnen
                   </a>
                 </li>
-                <li v-if="!(state.isHomework && route.params.user_id != 0)"> <!-- anyone except pupils in homeworks -->
+                <li v-if="!(state.isHomework && route.params.user_id != 0) && !state.isSolution">
+                  <!-- anyone except pupils in homeworks -->
                   <a class="dropdown-item" @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
                       icon="fa-solid fa-download" fixed-width /> Projekt
                     herunterladen</a>
@@ -2029,18 +2038,21 @@ function stopContainer() {
               </ul>
             </li>
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button @click.prevent="undo()" type="button" class="btn btn-outline-secondary">
+              <button :disabled="state.isSolution" @click.prevent="undo()" type="button"
+                class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-rotate-left" />
               </button>
-              <button @click.prevent="redo()" type="button" class="btn btn-outline-secondary">
+              <button :disabled="state.isSolution" @click.prevent="redo()" type="button"
+                class="btn btn-outline-secondary">
                 <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
               </button>
             </div>
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
               <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
-                :disabled="state.tabsWithChanges.length == 0" data-bs-trigger="hover" data-bs-toggle="tooltip"
-                data-bs-title="Strg + s" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                :disabled="state.tabsWithChanges.length == 0 || state.isSolution" data-bs-trigger="hover"
+                data-bs-toggle="tooltip" data-bs-title="Strg + s" data-bs-delay='{"show":500,"hide":0}'
+                data-bs-placement="bottom">
                 <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -2114,7 +2126,7 @@ function stopContainer() {
                     <div v-else>
                       <div v-if="!state.editingProjectName">
                         <span>{{ state.projectName }}</span>
-                        <div v-if="route.params.user_id == 0"
+                        <div v-if="route.params.user_id == 0 && !state.isSolution"
                           class="position-absolute top-50 end-0 mx-1 translate-middle-y">
                           <a @click.prevent="editProjectName()" class="btn btn-overlay btn-outline-secondary">
                             <div>
@@ -2143,7 +2155,8 @@ function stopContainer() {
                       </div>
                     </div>
                   </div>
-                  <IDEFileTree :files="state.files" @openFile="openFile" @renameFile="renameFileModal"
+                  <IDEFileTree :files="state.files" :rename-allowed="!state.isSolution"
+                    :delete-allowed="!state.isSolution" @openFile="openFile" @renameFile="renameFileModal"
                     @deleteFile="deleteFileModal" @renameDirectory="renameDirectoryModal"
                     @deleteDirectory="deleteDirectoryModal" />
                 </pane>
@@ -2153,7 +2166,7 @@ function stopContainer() {
                     <div class="description-content">
                       {{ state.projectDescription }}
                     </div>
-                    <div v-if="route.params.user_id == 0" class="description-button bottom-0 end-0">
+                    <div v-if="route.params.user_id == 0 && !state.isSolution" class="description-button bottom-0 end-0">
                       <a @click.prevent="editDescription()" class="btn btn-overlay btn-outline-secondary">
                         <div>
                           <font-awesome-icon icon="fa-pencil" />

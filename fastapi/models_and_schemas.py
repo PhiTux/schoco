@@ -73,8 +73,10 @@ class Homework(SQLModel, table=True):
     original_project_id: int = Field(
         default=None, foreign_key="project.id")
     deadline: str  # datetime
-    solution_project_id: Optional[int] = Field(default=None, foreign_key="project.id")
-    solution_start_showing: Optional[str] = "" # datetime, when the solution may be shown to pupils
+    solution_project_id: Optional[int] = Field(
+        default=None, foreign_key="project.id")
+    # datetime, when the solution may be shown to pupils
+    solution_start_showing: Optional[str] = ""
     # oldest_commit_allowed: str
 
     course: "Course" = Relationship(back_populates="homeworks")
@@ -232,3 +234,9 @@ class UUID(BaseModel):
 
 class Password(BaseModel):
     password: str
+
+
+class AddSolution(BaseModel):
+    homework_id: int
+    solution_id: int
+    solution_start_showing: str
