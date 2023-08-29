@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, HTTPException, Body, Request
+from fastapi import APIRouter, Depends, Form, HTTPException
 import auth
 import database_config
 import models_and_schemas
@@ -15,6 +15,10 @@ users = APIRouter(prefix="/api")
 def register_user(teacherkey: str = Form(), username: str = Form(), full_name: str = Form(), password: str = Form(), db: Session = Depends(database_config.get_db)):
     if teacherkey != settings.TEACHER_KEY:
         raise HTTPException(status_code=401, detail="Teacherkey invalid")
+    if username.strip() == "" or " " in username.strip():
+        raise HTTPException(status_code=400, detail="Username invalid")
+    if full_name.strip() == "":
+        raise HTTPException(status_code=400, detail="Fullname empty")
     if not check_password_criteria(password):
         raise HTTPException(status_code=400, detail="Password invalid")
     user = models_and_schemas.UserSchema(
@@ -210,11 +214,15 @@ def get_courses(db: Session = Depends(database_config.get_db)):
 
 @users.post('/changeName', dependencies=[Depends(auth.check_teacher)])
 def change_name(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
+    if changeName.name.strip() == "":
+        return False
     return crud.change_name(db=db, user_id=changeName.user_id, name=changeName.name.strip())
 
 
 @users.post('/changeUsername', dependencies=[Depends(auth.check_teacher)])
 def change_username(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
+    if changeName.name.strip() == "" or " " in changeName.name.strip():
+        return False
     return crud.change_username(db=db, user_id=changeName.user_id, name=changeName.name.strip())
 
 
@@ -226,16 +234,18 @@ def get_version():
 @users.post('/checkExistingHomework', dependencies=[Depends(auth.check_teacher)])
 def checkExistingHomework(uuid: models_and_schemas.UUID, db: Session = Depends(database_config.get_db)):
     project = crud.get_project_by_project_uuid(db=db, project_uuid=uuid.uuid)
-    
-    homeworkCourses = crud.get_courses_of_homework_by_original_uuid(db=db, original_project_id=project.id)
+
+    homeworkCourses = crud.get_courses_of_homework_by_original_uuid(
+        db=db, original_project_id=project.id)
 
     return homeworkCourses
+
 
 @users.post('/confirmTeacherPassword', dependencies=[Depends(auth.check_teacher)])
 def confirmTeacherPassword(password: models_and_schemas.Password, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     user = crud.get_user_by_username(db=db, username=username)
-    
+
     if auth.verify_password(password.password, user.hashed_password):
         return {'success': True}
-    
+
     return {'success': False}

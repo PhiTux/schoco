@@ -16,6 +16,9 @@ const state = reactive({
   showLoginError: false,
   showRegistrationSuccess: false,
   backendVersion: "",
+  showRegistrationError: false,
+  showRegistrationErrorMessage: false,
+  registrationErrorMessage: "",
 });
 
 const login = reactive({
@@ -87,12 +90,22 @@ function registerTeacher() {
     register.password1
   ).then(
     (response) => {
-      state.showRegistrationSuccess = true;
-      state.showRegistrationError = false;
+      if (response.data) {
+        state.showRegistrationErrorMessage = false;
+        state.showRegistrationSuccess = true;
+        state.showRegistrationError = false;
+      } else {
+        state.showRegistrationErrorMessage = false;
+        state.showRegistrationError = true;
+        state.showRegistrationSuccess = false;
+      }
+
     },
     (error) => {
+      state.registrationErrorMessage = error.response.data.detail;
       state.showRegistrationError = true;
       state.showRegistrationSuccess = false;
+      state.showRegistrationErrorMessage = true;
     }
   );
 }
@@ -255,8 +268,11 @@ const registerPasswordTooShort = computed(() => {
                         Account erfolgreich erstellt. Bitte einloggen.
                       </div>
                       <div v-if="state.showRegistrationError" class="alert alert-danger" role="alert">
+                        <span v-if="state.showRegistrationErrorMessage">Fehlermeldung: {{
+                          state.registrationErrorMessage }}<br><br></span>
                         Account konnte nicht erstellt werden. Möglicherweise
-                        stimmt das Lehrer-Passwort nicht.
+                        stimmt das Lehrer-Passwort nicht, der Benutzer(-name) existiert bereits oder der Benutzername
+                        enthält Leerzeichen.
                       </div>
 
                       <button class="btn btn-primary" :class="{

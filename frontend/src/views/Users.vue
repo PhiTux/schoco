@@ -765,7 +765,7 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Projektname darf nicht leer sein!
+            Name darf nicht leer sein!
           </div>
         </div>
       </div>
