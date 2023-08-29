@@ -563,6 +563,10 @@ def deleteProject(user_id: models_and_schemas.UserById, project_uuid: str = Path
         if user.id != project.owner_id:
             return False
 
+        # remove project from homework-solution (if it is one)
+        if not crud.remove_solution_project_by_project_id(db=db, project_id=project.id):
+            return False
+
         # remove project from db
         if not crud.remove_project_by_uuid(db=db, project_uuid=project_uuid):
             return False

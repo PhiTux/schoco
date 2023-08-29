@@ -178,6 +178,8 @@ function deleteProject(uuid, user_id) {
         state.myProjects = state.myProjects.filter((p) => p.uuid != uuid);
         if (user_id != 0) {
           getProjectsAsPupil();
+        } else {
+          getProjectsAsTeacher();
         }
 
         const toast = new Toast(
@@ -652,6 +654,10 @@ function addSolution() {
             Möchtest du wirklich dein eigenes, privates Projekt mit dem Titel
             <b>{{ state.deleteName }}</b>
             löschen?
+
+            <div v-if="authStore.isTeacher()" class="mt-3 alert alert-warning">
+              Falls dieses Projekt als Lösung hinterlegt ist, dann wird auch diese Verknüpfung gelöscht.
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">

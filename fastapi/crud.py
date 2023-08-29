@@ -259,6 +259,22 @@ def remove_project_by_uuid(db: Session, project_uuid: str):
     return True
 
 
+def remove_solution_project_by_project_id(db: Session, project_id: int):
+    # check all homeworks, if they have this project as solution
+    homeworks = db.exec(select(models_and_schemas.Homework).where(
+        models_and_schemas.Homework.solution_project_id == project_id)).all()
+    for h in homeworks:
+        h.solution_project_id = None
+        h.solution_start_showing = None
+        try:
+            db.add(h)
+            db.commit()
+        except:
+            db.rollback()
+            return False
+    return True
+
+
 def get_project_by_project_uuid(db: Session, project_uuid: str):
     project = db.exec(select(models_and_schemas.Project).where(
         models_and_schemas.Project.uuid == project_uuid)).first()

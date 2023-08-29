@@ -217,7 +217,7 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Alle Projekte wurden importiert!
+            Alle Projekte wurden importiert! Du findest sie nun in <router-link to="/home">Home</router-link>.
           </div>
         </div>
       </div>
