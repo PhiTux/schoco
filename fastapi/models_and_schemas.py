@@ -1,10 +1,7 @@
-# see https://www.youtube.com/watch?v=rIC1JEsMzu8
-
 from sqlmodel import SQLModel, Field, Relationship
 from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel
-from datetime import datetime
 
 
 # database models
