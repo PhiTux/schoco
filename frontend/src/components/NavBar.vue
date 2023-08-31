@@ -174,7 +174,7 @@ function changePassword() {
 
           <router-link v-if="authStore.isTeacher() && route.name !== 'users'" class="btn btn-outline-secondary"
             to='/users'> <!-- href="/#/users" -->
-            <font-awesome-icon icon="fa-solid fa-users" /> Benutzerverwaltung
+            <font-awesome-icon icon="fa-solid fa-users" /> {{ $t("usermanagement") }}
           </router-link>
         </ul>
 

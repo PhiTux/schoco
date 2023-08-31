@@ -59,7 +59,7 @@ onMounted(() => {
 })
 
 async function loginUser() {
-  if (!loginValid) {
+  if (!loginValid.value) {
     state.loginIncomplete = true;
     return;
   }
@@ -122,7 +122,7 @@ const registerValid = computed(() => {
 });
 
 const loginValid = computed(() => {
-  var tmp = login.username != "" && login.password != "";
+  var tmp = login.username !== "" && login.password !== "";
   if (tmp) state.loginIncomplete = false;
   return tmp;
 });
@@ -145,7 +145,7 @@ const registerPasswordTooShort = computed(() => {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Deine Sitzung ist abgelaufen. Du musst dich erneut anmelden.
+            {{ $t("token_expired") }}
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ const registerPasswordTooShort = computed(() => {
                 <h2 class="accordion-header" id="headingOne">
                   <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
                     aria-expanded="true" aria-controls="collapseOne">
-                    Login
+                    {{ $t("login") }}
                   </button>
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
@@ -211,21 +211,21 @@ const registerPasswordTooShort = computed(() => {
                         <div class="form-floating">
                           <input type="text" id="floatingInputLogin" class="form-control" v-model="login.username"
                             placeholder="Username" autofocus />
-                          <label for="floatingInputLogin">Username</label>
+                          <label for="floatingInputLogin">{{ $t("username") }}</label>
                         </div>
                       </div>
 
-                      <PasswordInput v-model="login.password" description="Passwort" />
+                      <PasswordInput v-model="login.password" :description="$t('password')" />
 
                       <div v-if="state.loginIncomplete" class="alert alert-danger" role="alert">
-                        Eingabe unvollständig
+                        {{ $t("login_incomplete") }}
                       </div>
                       <div v-if="state.showLoginError" class="alert alert-danger" role="alert">
-                        Falscher Benutzername oder Passwort
+                        {{ $t("show_login_error") }}
                       </div>
 
                       <button class="btn btn-primary" :class="{ disabled: !loginValid }">
-                        Login
+                        {{ $t("login") }}
                       </button>
                     </form>
                   </div>
@@ -235,7 +235,7 @@ const registerPasswordTooShort = computed(() => {
                 <h2 class="accordion-header" id="headingTwo">
                   <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    Registrierung nur für Lehrkräfte
+                    {{ $t("registration_only_for_teachers") }}
                   </button>
                 </h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
@@ -248,8 +248,8 @@ const registerPasswordTooShort = computed(() => {
                         </span>
                         <div class="form-floating">
                           <input type="password" id="floatingInputTeacherKey" class="form-control"
-                            v-model="register.teacherKey" placeholder="Lehrer-Passwort" />
-                          <label for="floatingInputTeacherKey">Lehrer-Passwort</label>
+                            v-model="register.teacherKey" placeholder="" />
+                          <label for="floatingInputTeacherKey">{{ $t("teacher_key") }}</label>
                         </div>
                       </div>
 
@@ -261,8 +261,8 @@ const registerPasswordTooShort = computed(() => {
                         </span>
                         <div class="form-floating">
                           <input :disabled="register.teacherKey == ''" type="text" id="floatingInputRegisterName"
-                            class="form-control" v-model="register.name" placeholder="Vor- und Nachname" />
-                          <label for="floatingInputRegisterName">Vor- und Nachname</label>
+                            class="form-control" v-model="register.name" placeholder="" />
+                          <label for="floatingInputRegisterName">{{ $t("full_name") }}</label>
                         </div>
                       </div>
 
@@ -272,8 +272,8 @@ const registerPasswordTooShort = computed(() => {
                         </span>
                         <div class="form-floating">
                           <input :disabled="register.teacherKey == ''" type="text" id="floatingInputRegister"
-                            class="form-control" v-model="register.username" placeholder="Username" />
-                          <label for="floatingInputRegister">Username</label>
+                            class="form-control" v-model="register.username" placeholder="" />
+                          <label for="floatingInputRegister">{{ $t("username") }}</label>
                         </div>
                       </div>
 
@@ -282,35 +282,33 @@ const registerPasswordTooShort = computed(() => {
                       <PasswordInfo />
 
                       <PasswordInput :disabled="register.teacherKey === ''" v-model="register.password1"
-                        description="Passwort" />
+                        :description="$t('password')" />
 
                       <PasswordInput :disabled="register.teacherKey === ''" v-model="register.password2"
-                        description="Passwort" />
+                        :description="$t('password')" />
 
                       <div v-if="state.registerIncomplete" class="alert alert-danger" role="alert">
-                        Eingabe unvollständig
+                        {{ $t("input_incomplete") }}
                       </div>
                       <div v-if="!registerPasswordsEqual" class="alert alert-danger" role="alert">
-                        Passwörter nicht identisch
+                        {{ $t("passwords_not_identical") }}
                       </div>
                       <div v-if="registerPasswordTooShort" class="alert alert-danger" role="alert">
-                        Passwort muss mindestens 8 Zeichen enthalten!
+                        {{ $t("password_at_least_8") }}
                       </div>
                       <div v-if="state.showRegistrationSuccess" class="alert alert-success" role="alert">
-                        Account erfolgreich erstellt. Bitte einloggen.
+                        {{ $t("registration_successful") }}
                       </div>
                       <div v-if="state.showRegistrationError" class="alert alert-danger" role="alert">
-                        <span v-if="state.showRegistrationErrorMessage">Fehlermeldung: {{
+                        <span v-if="state.showRegistrationErrorMessage">{{ $t("error_msg") }}: {{
                           state.registrationErrorMessage }}<br><br></span>
-                        Account konnte nicht erstellt werden. Möglicherweise
-                        stimmt das Lehrer-Passwort nicht, der Benutzer(-name) existiert bereits oder der Benutzername
-                        enthält Leerzeichen.
+                        {{ $t("registration_error") }}
                       </div>
 
                       <button class="btn btn-primary" :class="{
                         disabled: !registerValid || registerPasswordTooShort,
                       }">
-                        Registrieren
+                        {{ $t("register") }}
                       </button>
                     </form>
                   </div>

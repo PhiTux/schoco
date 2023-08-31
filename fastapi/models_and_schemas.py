@@ -3,8 +3,19 @@ from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel
 
+# alembic readme:
+"""
+When updating the database models, you need to create a new revision with Alembic.
+BEFORE creating the model, make sure, that your old DB has included the metadata of the old alembic-revision.
+-> call: alembic -c alembic_dev.ini upgrade head
+
+Then edit the models and create a new revision:
+-> call: alembic -c alembic_dev.ini revision --autogenerate -m "EXCPLAIN WHAT YOU CHANGED"
+"""
 
 # database models
+
+
 class UserCourseLink(SQLModel, table=True):
     user_id: Optional[int] = Field(
         default=None, foreign_key="user.id", primary_key=True)

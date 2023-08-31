@@ -806,7 +806,7 @@ function addSolution() {
       <div class="d-flex flex-row flex-wrap align-items-center justify-content-center">
         <div class="flex-div">
           <a class="btn btn-outline-success my-3 sticky-content " type="submit" href="/#/newProject">
-            Neues Projekt <font-awesome-icon icon="fa-solid fa-plus" />
+            {{ $t("new_project") }} <font-awesome-icon icon="fa-solid fa-plus" />
           </a>
         </div>
         <div class="flex-div">
