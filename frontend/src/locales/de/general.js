@@ -1,0 +1,17 @@
+export const general_de = {
+    locale: "de",
+    long_date_format: "E dd.MM.yyyy, HH:mm",
+    username: "Username",
+    password: "Passwort",
+    full_name: "Vor- und Nachname",
+    input_incomplete: "Eingabe unvollständig",
+    passwords_not_identical: "Die Passwörter stimmen nicht überein",
+    password_at_least_8: "Passwort muss mindestens 8 Zeichen enthalten!",
+    abort: "Abbrechen",
+    rename: "Umbenennen",
+    save: "Speichern",
+    delete: "Löschen",
+    or: "oder",
+    select_date: "Datum wählen...",
+    input_missing: "Eingabe fehlt",
+}

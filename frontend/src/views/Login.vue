@@ -218,7 +218,7 @@ const registerPasswordTooShort = computed(() => {
                       <PasswordInput v-model="login.password" :description="$t('password')" />
 
                       <div v-if="state.loginIncomplete" class="alert alert-danger" role="alert">
-                        {{ $t("login_incomplete") }}
+                        {{ $t("input_incomplete") }}
                       </div>
                       <div v-if="state.showLoginError" class="alert alert-danger" role="alert">
                         {{ $t("show_login_error") }}

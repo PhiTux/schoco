@@ -1,16 +1,5 @@
-//$body-bg: #eeeeee;
-//$body-bg-rgb: 238, 238, 238;
-
-//@import "../node_modules/bootstrap/scss/functions";
 
 $primary: #6427ea;
-
-//@import "../node_modules/bootstrap/scss/variables";
-/*@import "../node_modules/bootstrap/scss/variables-dark";
-@import "../node_modules/bootstrap/scss/maps";
-@import "../node_modules/bootstrap/scss/mixins";
-@import "../node_modules/bootstrap/scss/root"; */
-
 
 
 $enable-dark-mode: true;
@@ -25,11 +14,6 @@ $enable-shadows: true;
     @extend [data-bs-theme="light"];
     color: #212529;
 }
-
-/* html[data-bs-theme="light"] {
-    background-color: #eeeeee;
-} 
- */
 
 
 

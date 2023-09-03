@@ -9,6 +9,9 @@ import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
+import { useI18n } from 'vue-i18n'
+
+const i18n = useI18n()
 
 const router = useRouter();
 
@@ -40,7 +43,7 @@ onBeforeMount(() => {
     getProjectsAsPupil();
   }
 
-  document.title = "Home";
+  document.title = i18n.t("home_title");
 });
 
 function filterForSearchString(array, searchstring) {
@@ -480,8 +483,7 @@ function addSolution() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Starten der Hausaufgabe. Probiere es erneut und frage
-            andernfalls deine Lehrkraft um Hilfe.
+            {{ $t("toastStartHomeworkError") }}
           </div>
         </div>
       </div>
@@ -490,42 +492,42 @@ function addSolution() {
       <div class="toast align-items-center text-bg-success border-0" id="toastAddSolutionSuccess" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Lösung wurde hinzugefügt.</div>
+          <div class="toast-body">{{ $t("toastAddSolutionSuccess") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastAddSolutionError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Fehler beim Zufügen der Lösung.</div>
+          <div class="toast-body">{{ $t("toastAddSolutionError") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastDownloadProjectError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Fehler beim Download des Projekts.</div>
+          <div class="toast-body">{{ $t("toastDownloadProjectError") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-success border-0" id="toastDuplicateProjectSuccess" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Projekt wurde dupliziert.</div>
+          <div class="toast-body">{{ $t("toastDuplicateProjectSuccess") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastDuplicateProjectError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Fehler beim Duplizieren des Projekts.</div>
+          <div class="toast-body">{{ $t("toastDuplicateProjectError") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-success border-0" id="toastRenameHomeworkSuccess" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Hausaufgabe wurde umbenannt.</div>
+          <div class="toast-body">{{ $t("toastRenameHomeworkSuccess") }}</div>
         </div>
       </div>
 
@@ -533,7 +535,7 @@ function addSolution() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Hausaufgabe konnte nicht umbenannt werden.
+            {{ $t("toastRenameHomeworkError") }}
           </div>
         </div>
       </div>
@@ -541,14 +543,14 @@ function addSolution() {
       <div class="toast align-items-center text-bg-success border-0" id="toastRenameProjectSuccess" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Projekt wurde umbenannt.</div>
+          <div class="toast-body">{{ $t("toastRenameProjectSuccess") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastRenameProjectError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Projekt konnte nicht umbenannt werden.</div>
+          <div class="toast-body">{{ $t("toastRenameProjectError") }}</div>
         </div>
       </div>
 
@@ -556,7 +558,7 @@ function addSolution() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Löschen des Projekts / der Hausaufgabe.
+            {{ $t("toastDeleteProjectError") }}
           </div>
         </div>
       </div>
@@ -565,7 +567,7 @@ function addSolution() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Das Projekt oder die Hausaufgabe wurde erfolgreich gelöscht.
+            {{ $t("toastDeleteProjectSuccess") }}
           </div>
         </div>
       </div>
@@ -578,13 +580,14 @@ function addSolution() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Hausaufgabe umbenennen
+              {{ $t("rename_assignment") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Gib den neuen Namen für die Hausaufgabe
-            <b>{{ state.renameName }}</b> ein:
+            <i18n-t keypath="enter_new_assignment_name" tag="label">
+              <b>{{ state.renameName }}</b>
+            </i18n-t>
             <div class="input-group mt-3">
               <input type="text" class="form-control" id="renameHomeworknameInput" :placeholder="state.renameName"
                 v-model="state.renameNameNew" @keyup.enter="renameHomework()" />
@@ -592,11 +595,11 @@ function addSolution() {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button :disabled="state.renameNameNew.trim() === ''" @click.prevent="renameHomework()" type="button"
               class="btn btn-primary">
-              <span v-if="!state.isRenaming"> Umbenennen </span>
+              <span v-if="!state.isRenaming"> {{ $t("rename") }} </span>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
@@ -612,13 +615,14 @@ function addSolution() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Projekt umbenennen
+              {{ $t("rename_project") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Gib den neuen Namen für das Projekt
-            <b>{{ state.renameName }}</b> ein:
+            <i18n-t keypath="enter_new_project_name" tag="label">
+              <b>{{ state.renameName }}</b>
+            </i18n-t>
             <div class="input-group mt-3">
               <input type="text" class="form-control" id="renameProjectnameInput" :placeholder="state.renameName"
                 v-model="state.renameNameNew" @keyup.enter="renameProject()" />
@@ -626,11 +630,11 @@ function addSolution() {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button :disabled="state.renameNameNew.trim() === ''" @click.prevent="renameProject()" type="button"
               class="btn btn-primary">
-              <span v-if="!state.isRenaming"> Umbenennen </span>
+              <span v-if="!state.isRenaming"> {{ $t("rename") }} </span>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
@@ -646,27 +650,27 @@ function addSolution() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Privates Projekt löschen?
+              {{ $t("delete_private_project") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Möchtest du wirklich dein eigenes, privates Projekt mit dem Titel
-            <b>{{ state.deleteName }}</b>
-            löschen?
+            <i18n-t keypath="want_to_delete_private_project" tag="label">
+              <b>{{ state.deleteName }}</b>
+            </i18n-t>
 
             <div v-if="authStore.isTeacher()" class="mt-3 alert alert-warning">
-              Falls dieses Projekt als Lösung hinterlegt ist, dann wird auch diese Verknüpfung gelöscht.
+              {{ $t("delete_private_project_teacher_warning") }}
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button @click.prevent="
               deleteProject(state.deleteUuid, state.deleteUserId)
               " type="button" class="btn btn-primary" data-bs-dismiss="modal">
-              Löschen
+              {{ $t("delete") }}
             </button>
           </div>
         </div>
@@ -679,28 +683,25 @@ function addSolution() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Fortschritt löschen?
+              {{ $t("delete_progress") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Du kannst eine Hausaufgabe nicht völlig löschen. Du kannst nur
-            deinen bisherigen Fortschritt löschen und anschließend wieder in
-            einem "sauberen" Projekt von vorne beginnen.
-            <br />
-            <br />
-            Möchtest du wirklich deinen Fortschritt von
-            <b>{{ state.deleteName }}</b>
-            löschen?
+            <i18n-t keypath="want_to_delete_progress" tag="label">
+              <br>
+              <br>
+              <b>{{ state.deleteName }}</b>
+            </i18n-t>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button @click.prevent="
               deleteProject(state.deleteUuid, state.deleteUserId)
               " type="button" class="btn btn-primary" data-bs-dismiss="modal">
-              Löschen
+              {{ $t("delete") }}
             </button>
           </div>
         </div>
@@ -713,22 +714,22 @@ function addSolution() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Hausaufgabe löschen?
+              {{ $t("delete_assignment") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Wenn du eine Hausaufgabe löschst, dann wird sie auch bei allen
-            Schüler/innen gelöscht. Möchtest du wirklich die Hausaufgabe mit dem
-            Titel <b>{{ state.deleteName }}</b> löschen?
+            <i18n-t keypath="want_to_delete_assignment" tag="label">
+              <b>{{ state.deleteName }}</b>
+            </i18n-t>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button @click.prevent="deleteHomework(state.deleteId)" type="button" class="btn btn-primary"
               data-bs-dismiss="modal">
-              Löschen
+              {{ $t("delete") }}
             </button>
           </div>
         </div>
@@ -741,58 +742,67 @@ function addSolution() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5">
-              <span v-if="state.solution_id == null">Lösung hinzufügen</span>
-              <span v-else>Lösung ändern</span>
+              <span v-if="state.solution_id == null">{{ $t("add_solution") }}</span>
+              <span v-else>{{ $t("change_solution") }}</span>
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div class="alert alert-info">
-              Wähle ein privates Projekt aus, welches die Schüler ab einem bestimmten Zeitpunkt als Lösung anschauen
-              können. Die Schüler können die Lösung nur öffnen und ausführen, aber nicht bearbeiten.
+              {{ $t("add_solution_info") }}
             </div>
-            <label class="form-label">Wähle die Lösung:</label>
+            <label class="form-label">{{ $t("select_the_solution") }}</label>
             <v-select :options="state.myProjects" v-model="state.solution_id" label="name" :reduce="p => p.id"
               placeholder="">
             </v-select>
             <br>
             <br>
-            <label class="form-label">Ab wann soll die Lösung sichtbar sein?</label>
+            <label class="form-label">{{ $t("solution_visible_from_when") }}</label>
             <div class="d-flex flex-row align-items-center">
               <button type="button" class="btn btn-primary btn-sm"
                 @click.prevent="state.solution_start_showing = new Date()">
-                Ab sofort
+                {{ $t("from_right_now") }}
               </button>
-              <span class="mx-2"><b>oder</b></span>
-              <VueDatePicker class="flex-fill" v-model="state.solution_start_showing" placeholder="Datum wählen ..."
-                text-input auto-apply :min-date="new Date()" prevent-min-max-navigation locale="de"
-                format="E dd.MM.yyyy, HH:mm" />
+              <span class="mx-2"><b>{{ $t("or") }}</b></span>
+              <VueDatePicker class="flex-fill" v-model="state.solution_start_showing" :placeholder="$t('select_date')"
+                text-input auto-apply :min-date="new Date()" prevent-min-max-navigation :locale="$t('locale')"
+                :format="$t('long_date_format')" />
             </div>
             <font-awesome-icon icon="fa-solid fa-arrow-right" fixed-width />
-            <span v-if="state.solution_start_showing === ''"><em class="text-bg-warning">Eingabe fehlt</em></span>
-            <span v-else-if="(new Date(state.solution_start_showing) <= new Date())"><b>Sichtbar ab
-                <u>sofort</u></b>
+            <span v-if="state.solution_start_showing === ''">
+              <em class="text-bg-warning">{{ $t("input_missing") }}</em>
             </span>
-            <span v-else><b>Sichtbar in <u>{{
-              Math.floor((new Date(state.solution_start_showing)
-                -
-                new
-                  Date()) / (1000 * 3600 * 24)) }} Tage,
-                  {{ Math.floor((new Date(state.solution_start_showing) - new Date()) / (1000 * 3600) % 24) }}
-                  Stunden</u></b>
+            <span v-else-if="(new Date(state.solution_start_showing) <= new Date())">
+              <b v-html="$t('visible_from_now')">
+              </b>
+            </span>
+            <span v-else><b>
+                <i18n-t keypath="visible_in_x_days_hours" tag="label">
+                  <u>{{ $t("visible_in_x_days", Math.floor((new Date(state.solution_start_showing)
+                    -
+                    new
+                      Date()) / (1000 * 3600 * 24))) }}
+                  </u>
+                  <u>
+                    {{
+                      $t("visible_in_x_hours", Math.floor((new Date(state.solution_start_showing) - new Date()) / (1000
+                        * 3600) % 24)) }}
+                  </u>
+                </i18n-t>
+              </b>
             </span>
             <br>
 
             <div v-if="state.addSolutionInputInvalid" class="alert alert-danger mt-4">
-              Lösung konnte nicht gespeichert werden. Überprüfe deine Eingaben.
+              {{ $t("add_solution_input_invalid") }}
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button @click.prevent="addSolution()" type="button" class="btn btn-primary" :disabled="!state.solution_id">
-              <div v-if="!state.isAddingSolution">Speichern</div>
+              <div v-if="!state.isAddingSolution">{{ $t("save") }}</div>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
@@ -815,8 +825,8 @@ function addSolution() {
               <font-awesome-icon icon="fa-solid fa-search" /></span>
             <div class="form-floating">
               <input type="text" id="floatingInputSearchProject" class="form-control" v-model="state.searchProject"
-                placeholder="Projektsuche" />
-              <label for="floatingInputSearchProject">Projektsuche</label>
+                placeholder="" />
+              <label for="floatingInputSearchProject">{{ $t("project_search") }}</label>
             </div>
             <span :class="{ grey: !state.searchProject.length }" class="round-right input-group-text resetSearchProject"
               @click.prevent="state.searchProject = ''">
@@ -827,47 +837,47 @@ function addSolution() {
         <div class="flex-div"><!-- Don't remove (necessary for middle-positioning) --></div>
       </div>
 
-      <h1 v-if="state.new_homework.length">Aktuelle Hausaufgaben</h1>
+      <h1 v-if="state.new_homework.length">{{ $t("current_assignment") }}</h1>
       <div class="d-flex align-content-start flex-wrap">
         <!-- if teacher: -->
-        <ProjectCard v-if="authStore.isTeacher()" v-for="(h, index) in newHomeworkFiltered" :key="`${index}-${h.id}`"
+        <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  newHomeworkFiltered " :key="`${index}-${h.id}`"
           isHomework isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
           :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
           :solution_name="h.solution_name" :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
           @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal" />
 
         <!-- else -->
-        <ProjectCard v-else v-for="(h, index2) in newHomeworkFiltered" :key="`${index2}-${h.id}`" isHomework
+        <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
           @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :description="h.description"
           :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline" :solution_uuid="h.solution_uuid"
           @deleteHomeworkBranch="askDeleteHomeworkBranch" />
       </div>
 
-      <h1 v-if="state.old_homework.length">Frühere Hausaufgaben</h1>
+      <h1 v-if="state.old_homework.length">{{ $t("previous_assignments") }}</h1>
       <div class="d-flex align-content-start flex-wrap">
         <!-- if teacher: -->
-        <ProjectCard v-if="authStore.isTeacher()" v-for="(h, index) in oldHomeworkFiltered" :key="`${index}-${h.id}`"
+        <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  oldHomeworkFiltered " :key="`${index}-${h.id}`"
           isHomework isOld isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
           :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
           @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" />
 
         <!-- else -->
-        <ProjectCard v-else v-for="(h, index2) in oldHomeworkFiltered" :key="`${index2}-${h.id}`" isHomework isOld
+        <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld
           @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid"
           :description="h.description" :branch="h.branch" :id="h.id" :deadline="h.deadline"
           @deleteHomeworkBranch="askDeleteHomeworkBranch" />
       </div>
 
       <h1 v-if="state.myProjects.length">
-        Meine Projekte
+        {{ $t("my_projects") }}
         <div v-if="state.isDuplicating" class="spinner-border text-success" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </h1>
       <div class="d-flex align-content-start flex-wrap">
-        <ProjectCard v-for="(p, index) in myProjectsFiltered" :name="p.name" :description="p.description" :uuid="p.uuid"
-          :key="`${index}-${p.uuid}`" @renameProject="askRenameProject" @duplicateProject="duplicateProject"
-          @downloadProject="downloadProject" @deleteProject="askDeleteProject" />
+        <ProjectCard v-for="( p, index ) in  myProjectsFiltered " :name="p.name" :description="p.description"
+          :uuid="p.uuid" :key="`${index}-${p.uuid}`" @renameProject="askRenameProject"
+          @duplicateProject="duplicateProject" @downloadProject="downloadProject" @deleteProject="askDeleteProject" />
       </div>
     </div>
   </div>
