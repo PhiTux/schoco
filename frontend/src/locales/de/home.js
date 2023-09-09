@@ -39,4 +39,8 @@ export const home_de = {
     current_assignment: "Aktuelle Aufgaben",
     previous_assignments: "Frühere Aufgaben",
     my_projects: "Meine Projekte",
+    delete_solution: "Lösung löschen",
+    delete_solution_confirm: "Möchtest du die Verlinkung zur Lösung wirklich löschen? Dein privates Projekt bleibt davon unberührt.",
+    toastDeleteSolutionError: "Fehler beim Löschen der Lösung.",
+    toastDeleteSolutionSuccess: "Die Lösung wurde gelöscht.",
 }

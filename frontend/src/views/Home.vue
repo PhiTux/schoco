@@ -34,6 +34,8 @@ let state = reactive({
   solution_start_showing: new Date(),
   isAddingSolution: false,
   addSolutionInputInvalid: false,
+  deleteSolutionHomeworkId: 0,
+  isDeletingSolution: false,
 });
 
 onBeforeMount(() => {
@@ -402,6 +404,7 @@ function openAddSolutionModal(homework_id) {
   state.addSolutionHomeworkId = homework_id
   state.addSolutionInputInvalid = false
 
+
   // get solution_id from homework_id
   let found = false
   for (var i = 0; i < state.old_homework.length; i++) {
@@ -428,6 +431,79 @@ function openAddSolutionModal(homework_id) {
 
   const modal = new Modal(document.getElementById("editSolutionModal"));
   modal.show();
+}
+
+function openDeleteSolutionModal(homework_id) {
+  if (!authStore.isTeacher()) {
+    return
+  }
+  state.deleteSolutionHomeworkId = homework_id
+
+  const modal = new Modal(document.getElementById("deleteSolutionModal"));
+  modal.show();
+}
+
+function deleteSolution() {
+  if (!authStore.isTeacher() || state.isDeletingSolution) {
+    return
+  }
+
+  if (state.deleteSolutionHomeworkId === null || state.deleteSolutionHomeworkId === 0) {
+    //show error
+    const toast = new Toast(
+      document.getElementById("toastDeleteSolutionError")
+    );
+    toast.show();
+
+    //close modal
+    var elem = document.getElementById("deleteSolutionModal");
+    var modal = Modal.getInstance(elem);
+    modal.hide();
+
+    return
+  }
+
+  state.isDeletingSolution = true
+
+  CodeService.deleteSolution(state.deleteSolutionHomeworkId).then(
+    (response) => {
+      state.isDeletingSolution = false
+
+      //close modal
+      var elem = document.getElementById("deleteSolutionModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      if (response.data.success) {
+        getProjectsAsTeacher();
+
+        const toast = new Toast(
+          document.getElementById("toastDeleteSolutionSuccess")
+        );
+        toast.show();
+      } else {
+        const toast = new Toast(
+          document.getElementById("toastDeleteSolutionError")
+        );
+        toast.show();
+      }
+    },
+    (error) => {
+      state.isDeletingSolution = false
+      console.log(error.response);
+
+      //close modal
+      var elem = document.getElementById("deleteSolutionModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+
+      const toast = new Toast(
+        document.getElementById("toastDeleteSolutionError")
+      );
+      toast.show();
+    }
+  )
+
 }
 
 function addSolution() {
@@ -488,6 +564,14 @@ function addSolution() {
         </div>
       </div>
 
+      <div class="toast align-items-center text-bg-danger border-0" id="toastDeleteSolutionError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("toastDeleteSolutionError") }}
+          </div>
+        </div>
+      </div>
 
       <div class="toast align-items-center text-bg-success border-0" id="toastAddSolutionSuccess" role="alert"
         aria-live="assertive" aria-atomic="true">
@@ -769,7 +853,7 @@ function addSolution() {
                 :format="$t('long_date_format')" />
             </div>
             <font-awesome-icon icon="fa-solid fa-arrow-right" fixed-width />
-            <span v-if="state.solution_start_showing === ''">
+            <span v-if="state.solution_start_showing === '' || state.solution_start_showing == null">
               <em class="text-bg-warning">{{ $t("input_missing") }}</em>
             </span>
             <span v-else-if="(new Date(state.solution_start_showing) <= new Date())">
@@ -812,6 +896,36 @@ function addSolution() {
       </div>
     </div>
 
+    <div class="modal fade" id="deleteSolutionModal" tabindex="-1" aria-labelledby="deleteSolutionModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">
+              {{ $t("delete_solution") }}
+            </h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{ $t("delete_solution_confirm") }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              {{ $t("abort") }}
+            </button>
+            <button @click.prevent="deleteSolution()" type="button" class="btn btn-primary">
+              <div v-if="state.isDeletingSolution" class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <div v-else>
+                {{ $t("delete") }}
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="container main">
       <div class="d-flex flex-row flex-wrap align-items-center justify-content-center">
         <div class="flex-div">
@@ -844,7 +958,8 @@ function addSolution() {
           isHomework isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
           :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
           :solution_name="h.solution_name" :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
-          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal" />
+          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
+          @deleteSolution="openDeleteSolutionModal" />
 
         <!-- else -->
         <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
@@ -859,7 +974,9 @@ function addSolution() {
         <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  oldHomeworkFiltered " :key="`${index}-${h.id}`"
           isHomework isOld isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
           :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
-          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" />
+          :solution_name="h.solution_name" :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
+          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
+          @deleteSolution="openDeleteSolutionModal" />
 
         <!-- else -->
         <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld

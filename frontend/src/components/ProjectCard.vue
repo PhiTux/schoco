@@ -122,6 +122,10 @@ onMounted(() => {
                         <span v-if="solution_id == 0">Lösung hinzufügen</span>
                         <span v-else>Lösung<br>ändern</span>
                     </a>
+                    <a v-if="solution_id != 0" @click.prevent="$emit('deleteSolution', id)"
+                        class="btn btn-outline-danger d-flex align-items-center">
+                        <font-awesome-icon icon="fa-solid fa-trash" fixed-width />
+                    </a>
                 </div>
                 <div v-else-if="!isTeacher && isHomework && solution_uuid !== ''" class="ms-auto">
                     <router-link :to="'/ide/' + solution_uuid + '/0'" class="btn btn-success">Lösung

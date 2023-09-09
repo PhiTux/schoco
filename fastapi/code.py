@@ -564,7 +564,7 @@ def deleteProject(user_id: models_and_schemas.UserById, project_uuid: str = Path
             return False
 
         # remove project from homework-solution (if it is one)
-        if not crud.remove_solution_project_by_project_id(db=db, project_id=project.id):
+        if not crud.delete_solution_project_by_project_id(db=db, project_id=project.id):
             return False
 
         # remove project from db
@@ -834,5 +834,19 @@ def addSolution(addSolution: models_and_schemas.AddSolution, db: Session = Depen
     if not crud.add_solution(db=db, homework_id=addSolution.homework_id, solution_id=addSolution.solution_id, solution_start_showing=addSolution.solution_start_showing):
         raise HTTPException(
             status_code=500, detail="Error on adding solution.")
+
+    return {'success': True}
+
+
+@code.post('/deleteSolution', dependencies=[Depends(auth.check_teacher)])
+def deleteSolution(deleteSolution: models_and_schemas.DeleteSolution, db: Session = Depends(database_config.get_db)):
+    homework = crud.get_homework_by_id(db=db, id=deleteSolution.homework_id)
+    if homework == None:
+        raise HTTPException(
+            status_code=400, detail="Wrong input: Homework not found.")
+
+    if not crud.delete_solution_from_homework(db=db, homework=homework):
+        raise HTTPException(
+            status_code=500, detail="Error on deleting solution.")
 
     return {'success': True}

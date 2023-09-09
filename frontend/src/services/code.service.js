@@ -149,6 +149,10 @@ class CodeService {
     addSolution(homework_id, solution_id, solution_start_showing) {
         return axiosAuth.post('addSolution', {'homework_id': homework_id, 'solution_id': solution_id, 'solution_start_showing': solution_start_showing})
     }
+
+    deleteSolution(homework_id) {
+        return axiosAuth.post('deleteSolution', {'homework_id': homework_id})
+    }
 }
 
 export default new CodeService()

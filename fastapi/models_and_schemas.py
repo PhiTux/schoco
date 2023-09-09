@@ -248,3 +248,7 @@ class AddSolution(BaseModel):
     homework_id: int
     solution_id: int
     solution_start_showing: str
+
+
+class DeleteSolution(BaseModel):
+    homework_id: int
