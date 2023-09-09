@@ -3,8 +3,10 @@ import { reactive, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { Toast } from "bootstrap";
 import CodeService from "../services/code.service.js";
-/* import DropArea from "../components/DropArea.vue"; */
 import FileUpload from 'vue-upload-component'
+import { useI18n } from 'vue-i18n'
+
+const i18n = useI18n()
 
 const router = useRouter();
 
@@ -30,7 +32,7 @@ onMounted(() => {
     }
   })
 
-  document.title = "Neues Projekt"
+  document.title = i18n.t("new_project_title")
 })
 
 watch(() => state.files, (files) => {
@@ -172,7 +174,7 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Dein Projektname darf nicht leer sein.
+            {{ $t("project_name_must_not_be_empty") }}
           </div>
         </div>
       </div>
@@ -181,7 +183,7 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Das Projekt konnte leider nicht erstellt werden.
+            {{ $t("project_could_not_be_created") }}
           </div>
         </div>
       </div>
@@ -190,7 +192,7 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Nur Zip-Dateien erlaubt.
+            {{ $t("only_zip_files_allowed") }}
           </div>
         </div>
       </div>
@@ -199,7 +201,7 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Eine ausgewählte Datei ist zu groß (> 5 MB).
+            {{ $t("file_too_large") }}
           </div>
         </div>
       </div>
@@ -208,7 +210,7 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Nicht alle Projekte konnten importiert werden!
+            {{ $t("project_import_failed") }}
           </div>
         </div>
       </div>
@@ -217,60 +219,58 @@ function resetFileList() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Alle Projekte wurden importiert! Du findest sie nun in <router-link to="/home">Home</router-link>.
+            <i18n-t keypath="project_import_success" tag="span">
+              <router-link to="/home">{{ $t("home_title") }}</router-link>
+            </i18n-t>
           </div>
         </div>
       </div>
     </div>
 
     <div class="container">
-      <h1>Wähle dein Ausgangs-Projekt</h1>
-      <h2>1) Neues "leeres" Projekt</h2>
+      <h2 class="mt-4">{{ $t("new_empty_project") }}</h2>
 
       <div class="row">
         <div class="col-md-4 col-sm-6">
-          <label for="HelloWorldName">Projektname*</label>
+          <label for="HelloWorldName">{{ $t("project_name") }}*</label>
           <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
-            placeholder="Projektname" />
+            :placeholder="$t('project_name')" />
         </div>
         <div class="col-md-4 col-sm-6">
-          <label for="HelloWorldDescription">Projektbeschreibung</label>
+          <label for="HelloWorldDescription">{{ $t("project_description") }}</label>
           <textarea id="HelloWorldDescription" class="form-control" v-model="state.helloWorldDescription"
-            placeholder="Projektbeschreibung" rows="3" />
+            :placeholder="$t('project_description')" rows="3" />
         </div>
         <div class="col">
           <button class="btn btn-outline-success my-3" type="submit" @click.prevent="newHelloWorld()"
             :disabled="state.creatingProject">
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
               v-if="state.creatingProject"></span>
-            Projekt erstellen
+            {{ $t("create_project") }}
           </button>
         </div>
       </div>
 
       <!-- <h2>2) Vorlage wählen</h2> -->
-      <div class="or">ODER</div>
+      <div class="or">{{ $t("or") }}</div>
 
-      <h2>2) ZIPs hochladen</h2>
-      Lade zuvor exportierte Projekte hoch. Es können mehrere Projekte auf einmal hochgeladen werden.
+      <h2>{{ $t("upload_zips") }}</h2>
+      {{ $t("upload_zips_description") }}
       <div class="example-drag d-flex justify-content-center my-3">
-        <!-- <div class=""> -->
         <file-upload class="d-flex justify-content-center align-items-center droparea" id="droparea"
           post-action="/upload/post" accept="application/zip" :multiple="true" :drop="true" extensions="zip"
           v-model="state.files" ref="upload">
-          <!-- <i class="fa fa-plus"></i> -->
           <font-awesome-icon icon="fa-solid fa-upload"></font-awesome-icon>
         </file-upload>
-        <!-- </div> -->
         <div v-show="$refs.upload && $refs.upload.dropActive" class="drop-active">
-          <h3>Dateien zum Hochladen ablegen</h3>
+          <h3>{{ $t("drop_files_to_upload") }}</h3>
         </div>
       </div>
 
       <div v-if="state.files.length">
-        <h5>Ausgewählte Dateien:</h5>
+        <h5>{{ $t("selected_files") }}</h5>
         <ul>
-          <li v-for="(file, index) in state.files" :key="file.name" class="d-flex align-items-center">
+          <li v-for="( file, index ) in  state.files " :key="file.name" class="d-flex align-items-center">
             <font-awesome-icon v-if="state.successIndexes.includes(index)" icon="fa-circle-check" class="greenLabel" />
             <font-awesome-icon v-else-if="state.errorIndexes.includes(index)" icon="fa-triangle-exclamation"
               class="redLabel" />
@@ -298,10 +298,10 @@ function resetFileList() {
           @click.prevent="uploadFiles()">
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
             v-if="state.uploadIndexes.length"></span>
-          Hochladen
+          {{ $t("upload") }}
         </button>
         <button v-else class="btn btn-outline-success my-3" type="submit" @click.prevent="resetFileList()">
-          Datei-Liste zurücksetzen
+          {{ $t("reset_file_list") }}
         </button>
       </div>
     </div>
@@ -313,6 +313,7 @@ function resetFileList() {
   font-size: 20px;
   font-style: italic;
   text-decoration: underline;
+  text-decoration-color: red;
   margin-top: 1em;
   margin-bottom: 1em;
 }

@@ -6,6 +6,9 @@ import { useAuthStore } from "../stores/auth.store.js";
 import CourseBadge from "../components/CourseBadge.vue";
 import PasswordInput from "../components/PasswordInput.vue";
 import PasswordInfo from "../components/PasswordInfo.vue";
+import { useI18n } from 'vue-i18n'
+
+const i18n = useI18n()
 
 let allUsers = ref([]);
 
@@ -529,7 +532,7 @@ onMounted(() => {
   const modal = new Modal(document.getElementById("confirmPasswordModal"));
   modal.show();
 
-  document.title = "Benutzerverwaltung"
+  document.title = i18n.t("users_title")
 });
 
 function calculateFontDark(color) {
@@ -726,7 +729,6 @@ function addCourseToNewPupils(id) {
   // check if course already selected
   for (const e of state.newPupilsToCourses) {
     if (e.id == id) {
-      console.log("Course already selected...");
       return;
     }
   }
@@ -756,7 +758,7 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Überprüfen des Passworts!
+            {{ $t("error_confirming_password") }}
           </div>
         </div>
       </div>
@@ -765,7 +767,7 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Name darf nicht leer sein!
+            {{ $t("name_must_not_be_empty") }}
           </div>
         </div>
       </div>
@@ -773,21 +775,21 @@ function removeCourseFromNewPupils(id) {
       <div class="toast align-items-center text-bg-success border-0" id="toastSuccessPasswordChanged" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Passwort wurde geändert.</div>
+          <div class="toast-body">{{ $t("password_changed_success") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastPasswordChangeError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Fehler beim Ändern des Passworts.</div>
+          <div class="toast-body">{{ $t("password_changed_error") }}</div>
         </div>
       </div>
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastUsernameChangeError" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Fehler beim Ändern des Usernamens. Vielleicht existiert er bereits.</div>
+          <div class="toast-body">{{ $t("error_on_changing_username") }}</div>
         </div>
       </div>
 
@@ -795,9 +797,10 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Benutzer {{ state.deleteUserFullname }} ({{
-              state.deleteUserUsername
-            }}) konnte nicht gelöscht werden.
+            <i18n-t keypath="couldnt_delete_user" tag="span">
+              <span>{{ state.deleteUserFullname }}</span>
+              <span>({{ state.deleteUserUsername }})</span>
+            </i18n-t>
           </div>
         </div>
       </div>
@@ -806,9 +809,10 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Benutzer {{ state.deleteUserFullname }} ({{
-              state.deleteUserUsername
-            }}) wurde erfolgreich gelöscht.
+            <i18n-t keypath="delete_user_success" tag="span">
+              <span>{{ state.deleteUserFullname }}</span>
+              <span>({{ state.deleteUserUsername }})</span>
+            </i18n-t>
           </div>
         </div>
       </div>
@@ -816,7 +820,7 @@ function removeCourseFromNewPupils(id) {
       <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseCreated" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Kurs wurde erstellt.</div>
+          <div class="toast-body">{{ $t("course_created_success") }}</div>
         </div>
       </div>
 
@@ -824,8 +828,7 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Erstellen des Kurses. Vielleicht existiert der Kursname
-            bereits?
+            {{ $t("course_created_error") }}
           </div>
         </div>
       </div>
@@ -833,7 +836,7 @@ function removeCourseFromNewPupils(id) {
       <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseEdited" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Kurs wurde bearbeitet.</div>
+          <div class="toast-body">{{ $t("course_edited_success") }}</div>
         </div>
       </div>
 
@@ -841,7 +844,7 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Bearbeiten des Kurses.
+            {{ $t("course_edited_error") }}
           </div>
         </div>
       </div>
@@ -849,7 +852,7 @@ function removeCourseFromNewPupils(id) {
       <div class="toast align-items-center text-bg-success border-0" id="toastSuccessCourseRemoved" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Kurs wurde gelöscht.</div>
+          <div class="toast-body">{{ $t("course_deleted_success") }}</div>
         </div>
       </div>
 
@@ -857,18 +860,16 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Löschen des Kurses.
+            {{ $t("course_deleted_error") }}
           </div>
         </div>
       </div>
-
-
 
       <div class="toast align-items-center text-bg-danger border-0" id="toastErrorAddUserToCourse" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Konnte User nicht zum Kurs zufügen. Ist er bereits Mitglied?
+            {{ $t("add_user_to_course_error") }}
           </div>
         </div>
       </div>
@@ -876,7 +877,7 @@ function removeCourseFromNewPupils(id) {
       <div class="toast align-items-center text-bg-success border-0" id="toastAllAccountsCreated" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-          <div class="toast-body">Es wurden <b>alle</b> Accounts erstellt.</div>
+          <div class="toast-body"><span v-html="$t('all_accounts_created')"></span></div>
         </div>
       </div>
 
@@ -884,7 +885,9 @@ function removeCourseFromNewPupils(id) {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Es wurden <b>{{ state.xAccountsCreated }}</b> Accounts erstellt.
+            <i18n-t keypath="x_accounts_created" tag="span">
+              <b>{{ state.xAccountsCreated }}</b>
+            </i18n-t>
           </div>
         </div>
       </div>
@@ -892,23 +895,18 @@ function removeCourseFromNewPupils(id) {
       <div class="toast text-bg-danger" id="toastErrorAccountsCreated" role="alert" aria-live="assertive"
         aria-atomic="true" data-bs-autohide="false">
         <div class="toast-body">
-          Folgende Accounts konnten nicht erstellt werden. Vielleicht existieren
-          sie bereits?<br />
+          {{ $t("following_accounts_not_created") }}
+          <br />
           <ul>
-            <li v-for="u in state.username_errors">{{ u }}</li>
+            <li v-for=" u  in  state.username_errors ">{{ u }}</li>
           </ul>
           <div class="border-top mb-1"></div>
-          Eventuell gab es auch Probleme mit den Passwörtern:<br />
-          Stelle sicher, dass das Passwort mindestens 8 Zeichen lang ist und mindestens <b><ins>zwei</ins></b>
-          der drei folgenden Kriterien erfüllt:
-          <ul>
-            <li>Enthält einen Buchstabe</li>
-            <li>Enthält eine Zahl</li>
-            <li>Enthält ein Sonderzeichen</li>
-          </ul>
+          {{ $t("following_accounts_not_created_password_info") }}
+          <br />
+          <PasswordInfo></PasswordInfo>
           <div class="mt-2 pt-2 border-top">
             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
-              Schließen
+              {{ $t("close") }}
             </button>
           </div>
         </div>
@@ -917,10 +915,10 @@ function removeCourseFromNewPupils(id) {
       <div class="toast text-bg-danger" id="toastErrorAccountsCreatedCourses" role="alert" aria-live="assertive"
         aria-atomic="true" data-bs-autohide="false">
         <div class="toast-body">
-          Es gab Fehler bei der Zuordnung von Schülern zu Kursen. Bitte überprüfe die Zuordnung manuell.
+          {{ $t("add_users_to_courses_error") }}
           <div class="mt-2 pt-2 border-top">
             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">
-              Schließen
+              {{ $t("close") }}
             </button>
           </div>
         </div>
@@ -934,20 +932,23 @@ function removeCourseFromNewPupils(id) {
       <div class="modal-dialog">
         <div class="modal-content dark-text">
           <div class="modal-header">
-            <h1 class="modal-title fs-5">Kurs löschen</h1>
+            <h1 class="modal-title fs-5">{{ $t("delete_course") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p>Möchtest du den Kurs <b>{{ state.removeCourseName }}</b> wirklich löschen?</p>
-            Damit werden auch Hausaufgaben gelöscht, die diesem Kurs zugeordnet sind. Außerdem werden alle Schüler aus dem
-            Kurs entfernt.
+            <p>
+              <i18n-t keypath="delete_course_confirm" tag="span">
+                <b>{{ state.removeCourseName }}</b>
+              </i18n-t>
+            </p>
+            {{ $t("delete_course_confirm_info") }}
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Schließen
+              {{ $t("abort") }}
             </button>
             <button type="button" class="btn btn-primary" @click.prevent="removeCourse()">
-              Kurs löschen
+              {{ $t("delete_course") }}
             </button>
           </div>
         </div>
@@ -958,29 +959,29 @@ function removeCourseFromNewPupils(id) {
       <div class="modal-dialog">
         <div class="modal-content dark-text">
           <div class="modal-header">
-            <h1 class="modal-title fs-5">Neuen Kurs erstellen</h1>
+            <h1 class="modal-title fs-5">{{ $t("create_new_course") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3 row">
-              <label for="addCoursename" class="col-sm-4 col-form-label">Kursname</label>
+              <label for="addCoursename" class="col-sm-4 col-form-label">{{ $t("course_name") }}</label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="addCoursename" placeholder="Kursname"
+                <input type="text" class="form-control" id="addCoursename" :placeholder="$t('course_name')"
                   v-model="state.newCourseName" />
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="coursebackgroundcolor" class="col-sm-4 col-form-label">Hintergrundfarbe</label>
+              <label for="coursebackgroundcolor" class="col-sm-4 col-form-label">{{ $t("background_color") }}</label>
               <div class="col-sm-8">
                 <input type="color" class="form-control form-control-color" id="coursebackgroundcolor"
-                  v-model="state.newCourseColor" title="Farbe wählen" />
+                  v-model="state.newCourseColor" :title="$t('choose_color')" />
               </div>
             </div>
 
             <hr />
 
             <div class="mb-3 row">
-              <label for="coursepreview" class="col-sm-4 col-form-label"><b>Vorschau</b></label>
+              <label for="coursepreview" class="col-sm-4 col-form-label"><b>{{ $t("preview") }}</b></label>
               <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
                 <CourseBadge :color="state.newCourseColor" :font-dark="newCourseFontDark" :name="state.newCourseName" />
               </div>
@@ -988,13 +989,13 @@ function removeCourseFromNewPupils(id) {
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Schließen
+                {{ $t("abort") }}
               </button>
               <button type="button" class="btn btn-primary" @click.prevent="addNewCourse()"
                 :disabled="state.newCourseName.length < 2 || state.newCourseName.length > 30">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                   v-if="state.courseLoading"></span>
-                Neuen Kurs erstellen
+                {{ $t("create_new_course") }}
               </button>
             </div>
           </div>
@@ -1006,29 +1007,33 @@ function removeCourseFromNewPupils(id) {
       <div class="modal-dialog">
         <div class="modal-content dark-text">
           <div class="modal-header">
-            <h1 class="modal-title fs-5">Kurs <b>{{ state.oldCourseName }}</b> bearbeiten</h1>
+            <h1 class="modal-title fs-5">
+              <i18n-t keypath="edit_course_x" tag="span">
+                <b>{{ state.oldCourseName }}</b>
+              </i18n-t>
+            </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3 row">
-              <label for="coursename" class="col-sm-4 col-form-label">Kursname</label>
+              <label for="coursename" class="col-sm-4 col-form-label">{{ $t("course_name") }}</label>
               <div class="col-sm-8">
-                <input type="text" class="form-control" id="coursename" placeholder="Kursname"
+                <input type="text" class="form-control" id="coursename" :placeholder="$t('course_name')"
                   v-model="state.editCourseName" />
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="coursebackgroundcolor" class="col-sm-4 col-form-label">Hintergrundfarbe</label>
+              <label for="coursebackgroundcolor" class="col-sm-4 col-form-label">{{ $t("background_color") }}</label>
               <div class="col-sm-8">
                 <input type="color" class="form-control form-control-color" id="coursebackgroundcolor"
-                  v-model="state.editCourseColor" title="Farbe wählen" />
+                  v-model="state.editCourseColor" :title="$t('choose_color')" />
               </div>
             </div>
 
             <hr />
 
             <div class="mb-3 row">
-              <label for="coursepreview" class="col-sm-4 col-form-label"><b>Vorschau</b></label>
+              <label for="coursepreview" class="col-sm-4 col-form-label"><b>{{ $t("preview") }}</b></label>
               <div class="col-sm-2" style="margin-top: auto; margin-bottom: auto">
                 <CourseBadge :color="state.editCourseColor" :font-dark="editCourseFontDark"
                   :name="state.editCourseName" />
@@ -1037,13 +1042,13 @@ function removeCourseFromNewPupils(id) {
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Schließen
+                {{ $t("abort") }}
               </button>
               <button type="button" class="btn btn-primary" @click.prevent="editCourse()"
                 :disabled="state.editCourseName.length < 2 || state.editCourseName > 30">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                   v-if="state.courseLoading"></span>
-                Änderungen speichern
+                {{ $t("save_changes") }}
               </button>
             </div>
           </div>
@@ -1056,7 +1061,7 @@ function removeCourseFromNewPupils(id) {
       <div class="modal-dialog">
         <div class="modal-content dark-text">
           <div class="modal-header">
-            <h1 class="modal-title fs-5">Passwort ändern</h1>
+            <h1 class="modal-title fs-5">{{ $t("change_password") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
@@ -1067,29 +1072,29 @@ function removeCourseFromNewPupils(id) {
             </h4>
 
             <form @submit.prevent="changePassword()">
-              <PasswordInput v-model="state.newPassword" description="Neues Passwort" />
+              <PasswordInput v-model="state.newPassword" :description="$t('new_password')" />
             </form>
 
             <PasswordInfo />
 
 
             <div v-if="showChangePasswordTooShort" class="alert alert-danger alert-dismissible" role="alert">
-              Passwort muss mindestens 8 Zeichen lang sein!
+              {{ $t("password_at_least_8") }}
             </div>
 
             <div v-if="state.showPasswordInvalid" class="alert alert-danger alert-dismissible" role="alert">
-              Das Password erfüllt nicht die oberen Kriterien.
+              {{ $t("password_doesnt_fullfill_requirements") }}
             </div>
 
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                Schließen
+                {{ $t("abort") }}
               </button>
               <button type="button" class="btn btn-primary" @click.prevent="changePassword()" :disabled="state.changePasswordLoading || state.newPassword.length < 8
                 ">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                   v-if="state.changePasswordLoading"></span>
-                Neues Passwort speichern
+                {{ $t("save_new_password") }}
               </button>
             </div>
           </div>
@@ -1101,14 +1106,15 @@ function removeCourseFromNewPupils(id) {
       <div class="modal-dialog">
         <div class="modal-content dark-text">
           <div class="modal-header">
-            <h1 class="modal-title fs-5">Benutzer löschen</h1>
+            <h1 class="modal-title fs-5">{{ $t("delete_user") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
             <h4>
-              Folgenden
-              <u><span v-if="state.deleteUserIsTeacher">Lehrer</span><span v-else>Schüler</span></u>
-              wirklich löschen?<br />
+              <i18n-t keypath="delete_pupil_or_teacher_confirm" tag="span">
+                <u v-if="state.deleteUserIsTeacher">Lehrer</u><u v-else>Schüler</u>
+              </i18n-t>
+              <br />
               <b>{{ state.deleteUserFullname }} ({{
                 state.deleteUserUsername
               }})</b>
@@ -1116,10 +1122,10 @@ function removeCourseFromNewPupils(id) {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Schließen
+              {{ $t("abort") }}
             </button>
             <button type="button" class="btn btn-primary" @click.prevent="deleteUser()">
-              Benutzer löschen
+              {{ $t("delete_user") }}
             </button>
           </div>
         </div>
@@ -1131,25 +1137,25 @@ function removeCourseFromNewPupils(id) {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            Passwort bestätigen
+            {{ $t("confirm_password") }}
           </div>
           <div class="modal-body">
             <form @submit.prevent="confirmPassword()">
-              <PasswordInput v-model="state.confirmPassword" description="Passwort" />
+              <PasswordInput v-model="state.confirmPassword" :description="$t('password')" />
             </form>
             <div v-if="state.confirmPasswordInvalid" class="alert alert-danger">
-              Passwort ist ungültig!
+              {{ $t("password_invalid") }}
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click.prevent="$router.back()" data-bs-dismiss="modal">
-              Zurück
+              {{ $t("back") }}
             </button>
             <button :disabled="!state.confirmPassword.length || state.isConfirmingPassword" type="button"
               class="btn btn-primary" @click.prevent="confirmPassword()">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                 v-if="state.isConfirmingPassword"></span>
-              <span v-else>Weiter</span>
+              <span v-else>{{ $t("continue") }}</span>
             </button>
           </div>
         </div>
@@ -1162,7 +1168,7 @@ function removeCourseFromNewPupils(id) {
         <div class="modal-content dark-text">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="addPupilsModalLabel">
-              Schüler-Accounts hinzufügen
+              {{ $t("create_pupil_accounts") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -1171,21 +1177,21 @@ function removeCourseFromNewPupils(id) {
               <PasswordInfo />
 
               <div class="d-flex flex-row align-items-center my-2">
-                <label for="useUnifiedPassword">Dasselbe Passwort für alle Accounts</label>
+                <label for="useUnifiedPassword">{{ $t("same_password_for_all_accounts") }}</label>
                 <div class="mx-2 form-switch form-check">
                   <input class="form-check-input" type="checkbox" role="switch" id="useUnifiedPassword"
                     v-model="state.useUnifiedPassword" checked />
                 </div>
                 <div class="flex-fill form-floating"
                   :style="{ visibility: state.useUnifiedPassword ? 'visible' : 'hidden' }">
-                  <input v-model="state.unifiedPassword" type="text" class="form-control"
-                    placeholder="Einheitliches Passwort für alle Accounts" id="unifiedPasswordLabel" />
-                  <label for="unifiedPasswordLabel">Einheitliches Passwort für alle Accounts</label>
+                  <input v-model="state.unifiedPassword" type="text" class="form-control" placeholder=""
+                    id="unifiedPasswordLabel" />
+                  <label for="unifiedPasswordLabel">{{ $t("same_password_for_all_accounts") }}</label>
                 </div>
               </div>
             </div>
 
-            <div class="row mb-3" v-for="(pupil, index) in newPupils" :key="index">
+            <div class="row mb-3" v-for="(   pupil, index   ) in    newPupils   " :key="index">
               <div class="form-group col-md-1 text-center">
                 <label></label>
                 <div>
@@ -1207,64 +1213,64 @@ function removeCourseFromNewPupils(id) {
               <div class="col">
                 <div class="form-floating">
                   <input v-model="pupil.fullname" :id="'fullname_' + index" type="text" class="form-control"
-                    placeholder="Vor- und Nachname" />
-                  <label :for="'fullname_' + index">Vor- und Nachname</label>
+                    placeholder="" />
+                  <label :for="'fullname_' + index">{{ $t("full_name") }}</label>
                 </div>
               </div>
               <div class="col">
                 <div class="form-floating">
-                  <input v-model="pupil.username" type="text" class="form-control" placeholder="Benutzername"
+                  <input v-model="pupil.username" type="text" class="form-control" placeholder=""
                     :id="'username_' + index" />
-                  <label :for="'username_' + index">Benutzername</label>
+                  <label :for="'username_' + index">{{ $t("username") }}</label>
                 </div>
               </div>
               <div class="col">
                 <div class="form-floating" v-if="!state.useUnifiedPassword">
-                  <input v-model="pupil.password" type="text" class="form-control" placeholder="Passwort"
+                  <input v-model="pupil.password" type="text" class="form-control" placeholder=""
                     :id="'password_' + index" />
-                  <label :for="'password_' + index">Passwort</label>
+                  <label :for="'password_' + index">{{ $t("password") }}</label>
                 </div>
               </div>
             </div>
             <div v-if="state.showUnifiedPasswordMissing" class="alert alert-danger alert-dismissible" role="alert">
-              Kein einheitliches Passwort festgelegt!
+              {{ $t("no_uniform_password_set") }}
               <button type="button" class="btn-close" aria-label="Close"
                 @click.prevent="state.showUnifiedPasswordMissing = false"></button>
             </div>
             <div v-if="state.showUniquePasswordMissing" class="alert alert-danger alert-dismissible" role="alert">
-              Ein einzelnes Passwort fehlt!
+              {{ $t("unique_passwords_are_missing") }}
               <button type="button" class="btn-close" aria-label="Close"
                 @click.prevent="state.showUniquePasswordMissing = false"></button>
             </div>
             <div v-if="state.showPasswordTooShort" class="alert alert-danger alert-dismissible" role="alert">
-              Passwort muss mindestens 8 Zeichen lang sein!
+              {{ $t("password_at_least_8") }}
               <button type="button" class="btn-close" aria-label="Close"
                 @click.prevent="state.showPasswordTooShort = false"></button>
             </div>
             <div v-if="state.showUsernameWhitespaceWarning" class="alert alert-danger alert-dismissible" role="alert">
-              Benutzernamen dürfen keine Leerzeichen enthalten!
+              {{ $t("whitespace_in_username_not_allowed") }}
               <button type="button" class="btn-close" aria-label="Close"
                 @click.prevent="state.showUsernameWhitespaceWarning = false"></button>
             </div>
           </div>
 
           <div class="alert alert-info text-center" role="alert">
-            Nur Zeilen mit grünem Haken
-            <span><font-awesome-layers>
-                <font-awesome-icon icon="fa-circle" style="color: var(--bs-success)" />
-                <font-awesome-icon icon="fa-check" transform="shrink-5" style="color: white" />
-              </font-awesome-layers></span>
-            werden berücksichtigt!
+            <i18n-t keypath="only_those_lines_accepted">
+              <span><font-awesome-layers>
+                  <font-awesome-icon icon="fa-circle" style="color: var(--bs-success)" />
+                  <font-awesome-icon icon="fa-check" transform="shrink-5" style="color: white" />
+                </font-awesome-layers></span>
+            </i18n-t>
           </div>
 
           <div class="container">
             <div class="d-flex flex-row align-items-center mb-2">
               <label class="me-2" for="">
-                <b>Optional:</b> Schüler direkt folgenden Gruppen zuweisen:
+                <span v-html="$t('directly_add_pupils_to_courses')"></span>
               </label>
 
-              <CourseBadge v-for="c in state.newPupilsToCourses" :color="c.color" :font-dark="c.fontDark" :name="c.name"
-                :is-deletable="true" @remove="removeCourseFromNewPupils(c.id)" />
+              <CourseBadge v-for="   c    in    state.newPupilsToCourses   " :color="c.color" :font-dark="c.fontDark"
+                :name="c.name" :is-deletable="true" @remove="removeCourseFromNewPupils(c.id)" />
               <div class="btn-group">
                 <a class="btn-round btn" data-bs-toggle="dropdown">
                   <font-awesome-layers class="fa-lg">
@@ -1275,7 +1281,7 @@ function removeCourseFromNewPupils(id) {
                   </font-awesome-layers>
                 </a>
                 <ul class="dropdown-menu">
-                  <li v-for="c in allCourses">
+                  <li v-for="   c    in    allCourses   ">
                     <a class="dropdown-item btn" @click.prevent="addCourseToNewPupils(c.id)">
                       <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
                     </a>
@@ -1287,38 +1293,37 @@ function removeCourseFromNewPupils(id) {
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Schließen
+              {{ $t("abort") }}
             </button>
             <button type="button" class="btn btn-primary" @click.prevent="createPupilAccounts()"
               :disabled="state.addNewPupilsLoading">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"
                 v-if="state.addNewPupilsLoading"></span>
-              Accounts erstellen
+              {{ $t("create_accounts") }}
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <h1 class="text-center">Benutzerverwaltung</h1>
+    <h1 class="text-center">{{ $t("users_title") }}</h1>
     <div class="btn-group non-flex text-center m-4" role="group">
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCoursesModal"
         @click="prepareAddCoursesModal()">
-        Kurse erstellen
+        {{ $t("create_courses") }}
         <font-awesome-icon icon="fa-solid fa-users" />
       </button>
       <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPupilsModal"
         @click="preparePupilModal()">
-        <font-awesome-icon icon="fa-solid fa-user-plus" /> Schüler-Accounts
-        erstellen
+        <font-awesome-icon icon="fa-solid fa-user-plus" /> {{ $t("create_pupil_accounts") }}
       </button>
     </div>
 
     <div class="container">
       <div class="row mb-4 ms-1">
-        Kurse:
+        {{ $t("courses") }}:
         <div class="col">
-          <CourseBadge v-for="c in allCourses" :color="c.color" :font-dark="c.fontDark" :name="c.name"
+          <CourseBadge v-for="   c    in    allCourses   " :color="c.color" :font-dark="c.fontDark" :name="c.name"
             :is-deletable="true" :is-editable="true" @remove="openModalRemoveCourse(c.id)"
             @edit="openModalEditCourse(c.id)" />
         </div>
@@ -1330,8 +1335,8 @@ function removeCourseFromNewPupils(id) {
               <font-awesome-icon icon="fa-solid fa-user" /></span>
             <div class="form-floating">
               <input type="text" id="floatingInputSearchPerson" class="form-control round-right"
-                v-model="state.searchName" placeholder="Personensuche" />
-              <label for="floatingInputSearchPerson">Personensuche</label>
+                v-model="state.searchName" placeholder="" />
+              <label for="floatingInputSearchPerson">{{ $t("search_users") }}</label>
             </div>
           </div>
         </div>
@@ -1340,16 +1345,17 @@ function removeCourseFromNewPupils(id) {
       <table class="table table-striped table-hover align-middle">
         <thead>
           <tr>
-            <th scope="col">#id</th>
-            <th scope="col">Name</th>
-            <th scope="col">Username</th>
-            <th scope="col">Kurse</th>
-            <th scope="col">Rolle</th>
-            <th scope="col">Einstellungen</th>
+            <th scope="col">{{ $t("database_id") }}</th>
+            <th scope="col">{{ $t("name") }}</th>
+            <th scope="col">{{ $t("username") }}</th>
+            <th scope="col">{{ $t("courses") }}</th>
+            <th scope="col">{{ $t("role") }}</th>
+            <th scope="col">{{ $t("settings") }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="py-1" v-for="x in allUsersFilteredSorted" @mouseover="selectUser(x)" @mouseleave="unselectUser()">
+          <tr class="py-1" v-for="   x    in    allUsersFilteredSorted   " @mouseover="selectUser(x)"
+            @mouseleave="unselectUser()">
             <th scope="row">{{ x.id }}</th>
             <td>
               <div v-if="!(state.edit_user_id == x.id && state.edit_user_property === 'name')">{{ x.full_name
@@ -1392,7 +1398,7 @@ function removeCourseFromNewPupils(id) {
               </div>
             </td>
             <td>
-              <CourseBadge v-for="c in x.courses" :color="c.color" :font-dark="c.fontDark" :name="c.name"
+              <CourseBadge v-for="   c    in    x.courses   " :color="c.color" :font-dark="c.fontDark" :name="c.name"
                 :is-deletable="true" @remove="removeCourseFromUser(x.id, c.id)" />
               <div class="btn-group" v-if="x.role === 'pupil'">
                 <a class="btn-round btn" data-bs-toggle="dropdown">
@@ -1404,7 +1410,7 @@ function removeCourseFromNewPupils(id) {
                   </font-awesome-layers>
                 </a>
                 <ul class="dropdown-menu courseDropdown" data-bs-theme="light">
-                  <li v-for="c in allCourses">
+                  <li v-for="   c    in    allCourses   ">
                     <a class="dropdown-item btn" @click.prevent="addCourseToUser(x.id, c.name)">
                       <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
                     </a>
