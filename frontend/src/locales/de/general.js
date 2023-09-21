@@ -1,6 +1,6 @@
 export const general_de = {
     locale: "de",
-    long_date_format: "E dd.MM.yyyy, HH:mm",
+    long_date_format: "E dd.MM.yyyy, HH:mm", // E is abbreviated weekday, e.g. "Mon"
     name: "Name",
     username: "Username",
     password: "Passwort",
@@ -29,8 +29,20 @@ export const general_de = {
     change_password: "Passwort ändern",
     back: "Zurück",
     continue: "Weiter",
+    course: "Kurs",
     courses: "Kurse",
     database_id: "#id",
     role: "Rolle",
     settings: "Einstellungen",
+    edit_settings: "Einstellungen bearbeiten",
+    deadline: "Abgabefrist",
+    UTC: "UTC",
+    editing_time: "Bearbeitungszeit",
+    days: "Tage",
+    hours: "Stunden",
+    seconds: "Sekunden",
+    computation_time: "Rechenzeit",
+    computation_time_description: "Lege fest, wie viele <b>Sekunden</b> Rechenzeit (bzw. genauer: Laufzeit) auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.",
+    result: "Ergebnis",
+    open: "Öffnen",
 }

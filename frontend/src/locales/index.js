@@ -4,6 +4,7 @@ import {navbar_de} from "./de/navbar.js"
 import {login_de} from "./de/login.js"
 import {new_project_de} from "./de/new_project.js"
 import {users_de} from "./de/users.js"
+import {homework_de} from "./de/homework.js"
 
 import login_en from "./en/login.json"
 
@@ -14,6 +15,7 @@ const de = {
     ...login_de,
     ...new_project_de,
     ...users_de,
+    ...homework_de,
 }
 
 const en = {

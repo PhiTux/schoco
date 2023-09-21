@@ -6,6 +6,9 @@ import CourseBadge from "../components/CourseBadge.vue";
 import { Modal, Popover, Toast } from "bootstrap";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
+import { useI18n } from 'vue-i18n'
+
+const i18n = useI18n()
 
 const route = useRoute()
 
@@ -47,7 +50,7 @@ onBeforeMount(() => {
         },
         error => {
             console.log(error.response)
-            document.title = "Unbekannte Hausaufgabe"
+            document.title = i18n.t("unknown_assignment")
         }
     )
 })
@@ -120,7 +123,7 @@ function updateSettings() {
                 aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
-                        Fehler beim Ändern der Einstellungen.
+                        {{ $t("error_on_changing_settings") }}
                     </div>
                 </div>
             </div>
@@ -129,7 +132,7 @@ function updateSettings() {
                 aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
-                        Einstellungen aktualisiert.
+                        {{ $t("settings_updated") }}
                     </div>
                 </div>
             </div>
@@ -140,21 +143,20 @@ function updateSettings() {
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Einstellungen bearbeiten</h1>
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("edit_settings") }}</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3 row">
                             <label for="coursename" class="col-sm-4 col-form-label">
                                 <font-awesome-icon icon="fa-square-check" style="color: var(--bs-success)" />
-                                Kurs:
+                                {{ $t("course") }}:
                             </label>
                             <div class="col-sm-8 d-flex align-items-center">
                                 <CourseBadge :color="state.course_color" :font-dark="state.course_font_dark"
                                     :name="state.course_name" />
                                 <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
-                                    title="Kurs ändern"
-                                    data-bs-content="Du kannst bei einer bereits erstellten Hausaufgabe den Kurs <b>nicht mehr ändern</b>!<br/>Du kannst die Hausaufgabe nur in <a href='/'>Home</a> löschen und anschließend für einen anderen Kurs neu erstellen.">
+                                    title="Kurs ändern" :data-bs-content="i18n.t('cant_change_course_of_assignment')">
                                     <font-awesome-icon icon="fa-circle-exclamation" size="lg"
                                         style="color: var(--bs-primary)" />
                                 </a>
@@ -165,20 +167,20 @@ function updateSettings() {
                                 <font-awesome-icon v-if="newSettings.deadlineDate > new Date()" icon="fa-square-check"
                                     style="color: var(--bs-success)" />
                                 <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
-                                Abgabefrist:
+                                {{ $t("deadline") }}:
                             </label>
                             <div class="col-sm-8">
                                 <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
                                 <VueDatePicker v-model="newSettings.deadlineDate" placeholder="Start Typing ..." text-input
                                     auto-apply :min-date="new Date()" prevent-min-max-navigation locale="de"
-                                    format="E dd.MM.yyyy, HH:mm" />
-                                UTC: <em>{{ newSettings.deadlineDate.toISOString() }}</em><br>
-                                Bearbeitungszeit: <em v-if="newSettings.deadlineDate > new Date()"><b>{{
+                                    :format="$t('long_date_format')" />
+                                {{ $t("UTC") }}: <em>{{ newSettings.deadlineDate.toISOString() }}</em><br>
+                                {{ $t("editing_time") }}: <em v-if="newSettings.deadlineDate > new Date()"><b>{{
                                     Math.floor((newSettings.deadlineDate
                                         -
-                                        new Date()) / (1000 * 3600 * 24)) }} Tage,
+                                        new Date()) / (1000 * 3600 * 24)) }} {{ $t("days") }},
                                         {{ Math.floor((newSettings.deadlineDate - new Date()) / (1000 * 3600) % 24) }}
-                                        Stunden</b></em>
+                                        {{ $t("hours") }}</b></em>
                             </div>
                         </div>
                         <div class="mb-3 row">
@@ -186,29 +188,31 @@ function updateSettings() {
                                 <font-awesome-icon
                                     v-if="newSettings.computationTime >= 3 && Number.isInteger(Number(newSettings.computationTime))"
                                     icon="fa-square-check" style="color: var(--bs-success)" />
-                                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Rechenzeit:
-                                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
-                                    title="Rechenzeit"
-                                    data-bs-content="Lege fest, wie viele <b>Sekunden</b> Rechenzeit (bzw. genauer: Laufzeit) auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.">
+                                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
+                                {{ $t("computation_time") }}:
+                                <a class="btn-round btn" tabindex="0" @click.prevent="openComputationTimePopover()"
+                                    data-bs-toggle="popover" title="Rechenzeit" data-bs-trigger="focus"
+                                    :data-bs-content="$t('computation_time_description')">
                                     <font-awesome-icon icon="fa-circle-question" size="lg"
                                         style="color: var(--bs-primary)" />
                                 </a>
+
                             </label>
                             <div class="col-sm-8">
                                 <input class="hwTimeInput" :value="newSettings.computationTime"
                                     @input="event => newSettings.computationTime = event.target.value" type="number" min="3"
-                                    step="1" placeholder="Mindestens 3, Standard 10" data-bs-theme="light" />
+                                    step="1" :placeholder="$t('at_least_3_default_10')" data-bs-theme="light" />
                                 <br>
-                                {{ newSettings.computationTime }} Sekunden
+                                {{ newSettings.computationTime }} {{ $t("seconds") }}
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("abort") }}</button>
                         <button type="button" class="btn btn-primary" @click.prevent="updateSettings()"
                             :disabled="newSettings.deadlineDate <= new Date() || !(newSettings.computationTime >= 3 && Number.isInteger(Number(newSettings.computationTime)))">
                             <div v-if="!state.isUpdatingHomework">
-                                Speichern
+                                {{ $t("save") }}
                             </div>
                             <div v-else class="spinner-border spinner-border-sm" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -230,17 +234,17 @@ function updateSettings() {
                     <div class="my-3 form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" id="showDetails"
                             v-model="state.showDetails">
-                        <label class="form-check-label disable-select" for="showDetails">Zeige Ergebnisse</label>
+                        <label class="form-check-label disable-select" for="showDetails">{{ $t("show_results") }}</label>
                     </div>
                 </div>
                 <div class="ms-auto p-2">
                     <a class="btn btn-secondary" @click="prepareEditHomeworkModal()">
-                        <font-awesome-icon icon="fa-solid fa-gear" fixed-width /> Einstellungen
+                        <font-awesome-icon icon="fa-solid fa-gear" fixed-width /> {{ $t("settings") }}
                     </a>
                 </div>
                 <div class="p-2">
                     <a class="btn btn-secondary" :href="'#/ide/' + state.uuid + '/0'">
-                        <font-awesome-icon icon="fa-solid fa-code" fixed-width /> Vorlage bearbeiten
+                        <font-awesome-icon icon="fa-solid fa-code" fixed-width /> {{ $t("edit_template") }}
                     </a>
                 </div>
             </div>
@@ -249,21 +253,21 @@ function updateSettings() {
             <table class="table table-striped table-hover align-middle">
                 <thead>
                     <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Username</th>
+                        <th scope="col">{{ $t("name") }}</th>
+                        <th scope="col">{{ $t("username") }}</th>
                         <th scope="col"></th>
-                        <th scope="col">Ergebnis</th>
-                        <th scope="col"># Kompilierungen</th>
-                        <th scope="col"># Ausführungen</th>
-                        <th scope="col"># Tests</th>
+                        <th scope="col">{{ $t("result") }}</th>
+                        <th scope="col">{{ $t("number_of_compilations") }}</th>
+                        <th scope="col">{{ $t("number_of_runs") }}</th>
+                        <th scope="col">{{ $t("number_of_tests") }}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="p in state.pupils">
+                    <tr v-for=" p  in  state.pupils ">
                         <td>{{ p.name }}</td>
                         <td>{{ p.username }}</td>
                         <td><a class="btn btn-primary" v-if="p.uuid !== ''"
-                                :href="'#/ide/' + p.uuid + '/' + p.branch">Öffnen</a></td>
+                                :href="'#/ide/' + p.uuid + '/' + p.branch">{{ $t("open") }}</a></td>
                         <td><span v-if="state.showDetails && p.result"
                                 :class="{ resultRed: calc_result_color(p.result) == 1, resultYellow: calc_result_color(p.result) == 2, resultGreen: calc_result_color(p.result) == 3 }">{{
                                     calc_result(p.result) }} %</span><span v-else-if="state.showDetails">0

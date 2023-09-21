@@ -982,7 +982,7 @@ function addSolution() {
         <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld
           @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid"
           :description="h.description" :branch="h.branch" :id="h.id" :deadline="h.deadline"
-          @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+          :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" />
       </div>
 
       <h1 v-if="state.myProjects.length">
