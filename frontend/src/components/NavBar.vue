@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from "../stores/auth.store.js";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { Modal, Toast } from "bootstrap";
 import { reactive, computed } from "vue";
 import UserService from "../services/user.service.js"
@@ -10,7 +10,6 @@ import ColorModeSwitch from "./ColorModeSwitch.vue";
 
 const authStore = useAuthStore();
 const route = useRoute();
-const router = useRouter();
 
 let state = reactive({
   oldPassword: "",
@@ -100,7 +99,7 @@ function changePassword() {
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
-          Fehler beim Ändern des Passworts.
+          {{ $t("error_changing_password") }}
         </div>
       </div>
     </div>
@@ -109,7 +108,7 @@ function changePassword() {
       aria-live="assertive" aria-atomic="true">
       <div class="d-flex">
         <div class="toast-body">
-          Passwort erfolgreich geändert.
+          {{ $t("success_changing_password") }}
         </div>
       </div>
     </div>
@@ -120,36 +119,34 @@ function changePassword() {
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Passwort ändern</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("change_password") }}</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
 
-          <PasswordInput v-model="state.oldPassword" description="Altes Passwort" id="pwd1" focus />
+          <PasswordInput v-model="state.oldPassword" :description="$t('current_password')" id="pwd1" focus />
 
           <PasswordInfo />
 
-          <PasswordInput v-model="state.newPassword1" description="Neues Passwort" id="pwd2" />
+          <PasswordInput v-model="state.newPassword1" :description="$t('new_password')" id="pwd2" />
 
-          <PasswordInput v-model="state.newPassword2" description="Neues Passwort" id="pwd3" />
+          <PasswordInput v-model="state.newPassword2" :description="$t('new_password')" id="pwd3" />
 
           <div v-if="passwordTooShort" class="alert alert-danger" role="alert">
-            Passwort muss mindestens 8 Zeichen enthalten.
+            {{ $t("password_at_least_8") }}
           </div>
 
           <div v-if="!passwordsEqual" class="alert alert-danger" role="alert">
-            Passwörter nicht identisch.
+            {{ $t("passwords_not_identical") }}
           </div>
 
-          <div v-if="state.passwordInvalidResponse" class="alert alert-danger" role="alert">
-            Eingabe ungültig!
-            Stelle sicher, dass dein altes Passwort korrekt ist und dass dein neues Passwort die oberen Kriterien erfüllt.
-          </div>
+          <div v-if="state.passwordInvalidResponse" class="alert alert-danger" role="alert"
+            v-html="$t('password_change_invalid')" />
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("abort") }}</button>
           <button :disabled="passwordInvalid" type="button" class="btn btn-primary" @click.prevent="changePassword()">
-            <span v-if="!state.isChangingPassword">Speichern</span>
+            <span v-if="!state.isChangingPassword">{{ $t("save") }}</span>
             <div v-else class="spinner-border spinner-border-sm" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
@@ -161,19 +158,16 @@ function changePassword() {
 
   <nav class="navbar fixed-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-      <router-link class="navbar-brand" to="/home">{🍫}</router-link>
+      <router-link class="navbar-brand" to="/home">{🍫}<span class="ms-2">{{ $t("home_title") }}</span></router-link>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item me-4">
-            <router-link class="nav-link active" aria-current="page" to="/home">Home</router-link>
-          </li>
 
-          <router-link v-if="authStore.isTeacher() && route.name !== 'users'" class="btn btn-outline-secondary"
-            to='/users'> <!-- href="/#/users" -->
+          <router-link v-if="authStore.isTeacher() && route.name !== 'users'" class="btn btn-outline-secondary ms-2"
+            to='/users'>
             <font-awesome-icon icon="fa-solid fa-users" /> {{ $t("usermanagement") }}
           </router-link>
         </ul>
@@ -188,13 +182,13 @@ function changePassword() {
           <ul class="dropdown-menu dropdown-menu-end" data-bs-theme="light">
             <li>
               <a class="dropdown-item" @click.prevent="openPasswordModal()">
-                <font-awesome-icon icon="fa-solid fa-key" /> Passwort ändern
+                <font-awesome-icon icon="fa-solid fa-key" fixed-width /> {{ $t("change_password") }}
               </a>
             </li>
             <li class="dropdown-divider"></li>
             <li>
               <a class="dropdown-item" @click.prevent="logout()">
-                <font-awesome-icon icon="fa-solid fa-right-from-bracket" /> Logout
+                <font-awesome-icon icon="fa-solid fa-right-from-bracket" fixed-width /> {{ $t("logout") }}
               </a>
             </li>
           </ul>

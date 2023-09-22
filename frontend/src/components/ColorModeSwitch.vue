@@ -66,17 +66,17 @@ function auto() {
         <ul class="dropdown-menu dropdown-menu-end" data-bs-theme="light">
             <li>
                 <a class="dropdown-item" :class="{ active: mode === 'light' }" @click.prevent="manualLight()">
-                    <font-awesome-icon icon="fa-solid fa-sun" fixed-width /> Light
+                    <font-awesome-icon icon="fa-solid fa-sun" fixed-width /> {{ $t('light') }}
                 </a>
             </li>
             <li>
                 <a class="dropdown-item" :class="{ active: mode === 'dark' }" @click.prevent="manualDark()">
-                    <font-awesome-icon icon="fa-solid fa-moon" fixed-width /> Dark
+                    <font-awesome-icon icon="fa-solid fa-moon" fixed-width /> {{ $t("dark") }}
                 </a>
             </li>
             <li>
                 <a class="dropdown-item" :class="{ active: mode === 'auto' }" @click.prevent="manualAuto()">
-                    <font-awesome-icon icon="fa-solid fa-circle-half-stroke" fixed-width /> Auto
+                    <font-awesome-icon icon="fa-solid fa-circle-half-stroke" fixed-width /> {{ $t("auto") }}
                 </a>
             </li>
         </ul>

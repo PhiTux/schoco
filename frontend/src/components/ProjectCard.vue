@@ -49,10 +49,13 @@ onMounted(() => {
 
 <template>
     <div class="card m-2" :class="{ homeworkBorder: isHomework, old_homework: isOld }">
-        <div v-if="isHomework" class="card-header">HA | Abgabe bis <span class="deadline">{{ new
-            Date(deadline).toLocaleString("default", {
-                weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-            }) }}</span></div>
+        <div v-if="isHomework" class="card-header"> 💡 |
+            {{ $t("submit_until") }}
+            <span class="deadline">{{ new
+                Date(deadline).toLocaleString("default", {
+                    weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+                }) }}</span>
+        </div>
         <div class="card-body">
 
             <div class="d-flex align-items-center">
@@ -65,25 +68,25 @@ onMounted(() => {
                 <ul class="dropdown-menu" data-bs-theme="light">
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('renameProject', uuid, name)"><font-awesome-icon icon="fa-solid fa-pencil"
-                                fixed-width /> Umbenennen</a></li>
+                                fixed-width /> {{ $t("rename") }}</a></li>
                     <li v-if="isHomework && isTeacher"><a class="dropdown-item"
                             @click="$emit('renameHomework', id, name)"><font-awesome-icon icon="fa-solid fa-pencil"
-                                fixed-width /> Umbenennen</a></li>
+                                fixed-width /> {{ $t("rename") }}</a></li>
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('duplicateProject', uuid)"><font-awesome-icon icon="fa-solid fa-copy"
-                                fixed-width /> Duplizieren</a></li>
+                                fixed-width /> {{ $t("duplicate") }}</a></li>
                     <li v-if="!isHomework"><a class="dropdown-item"
                             @click="$emit('downloadProject', uuid)"><font-awesome-icon icon="fa-solid fa-download"
-                                fixed-width /> Download</a></li>
+                                fixed-width /> {{ $t("download") }}</a></li>
                     <li v-if="isHomework && isTeacher"><a class="dropdown-item"
                             @click.prevent="$emit('deleteHomework', id, name)"><font-awesome-icon icon="fa-solid fa-trash"
-                                fixed-width /> Löschen</a></li>
+                                fixed-width /> {{ $t("delete") }}</a></li>
                     <li v-else-if="isHomework && !isTeacher"><a class="dropdown-item"
                             @click.prevent="$emit('deleteHomeworkBranch', uuid, branch, name)"><font-awesome-icon
-                                icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
+                                icon="fa-solid fa-trash" fixed-width /> {{ $t("delete") }}</a></li>
                     <li v-else><a class="dropdown-item"
                             @click.prevent="$emit('deleteProject', uuid, branch, name)"><font-awesome-icon
-                                icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
+                                icon="fa-solid fa-trash" fixed-width /> {{ $t("delete") }}</a></li>
                 </ul>
             </div>
 
@@ -91,22 +94,20 @@ onMounted(() => {
                 :text="description" :max-lines="2">
                 <template #after="{ toggle, clamped }">
                     <a v-if="state.showToggle" class="description-toggle" @click="toggle">
-                        {{ clamped == true ? "mehr" : "weniger" }}
+                        {{ clamped == true ? $t("more") : $t("less") }}
                     </a>
                 </template>
             </text-clamp>
 
             <div class="mt-2 d-flex align-items-center">
                 <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
-                    class="btn btn-primary">🌟Hausaufgabe
-                    beginnen</a>
+                    class="btn btn-primary">🌟{{ $t("begin_assignment") }}</a>
                 <router-link v-else-if="!isTeacher && isHomework && isEditing" :to="'/ide/' + uuid + '/' + branch"
-                    class="btn btn-primary">Hausaufgabe
-                    bearbeiten</router-link>
-                <router-link v-else-if="isTeacher && isHomework" :to="'/homework/' + id" class="btn btn-primary">Details
-                    zeigen</router-link>
-                <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">Projekt
-                    öffnen</router-link>
+                    class="btn btn-primary">{{ $t("edit_assignment") }}</router-link>
+                <router-link v-else-if="isTeacher && isHomework" :to="'/homework/' + id" class="btn btn-primary">{{
+                    $t("show_details") }}</router-link>
+                <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">{{
+                    $t("open_project") }}</router-link>
 
                 <div v-if="isTeacher && isHomework" class="ms-auto input-group" style="width: inherit;">
                     <div class="p-1 border border-success input-group-text" v-if="isHomework && solution_id != 0">
@@ -119,8 +120,8 @@ onMounted(() => {
 
                     <a @click.prevent="$emit('addSolution', id)" class="btn btn-outline-success"
                         :class="{ borderDashed: solution_id == 0 }">
-                        <span v-if="solution_id == 0">Lösung hinzufügen</span>
-                        <span v-else>Lösung<br>ändern</span>
+                        <span v-if="solution_id == 0">{{ $t("add_solution") }}</span>
+                        <span v-else v-html="$t('change_solution')"></span>
                     </a>
                     <a v-if="solution_id != 0" @click.prevent="$emit('deleteSolution', id)"
                         class="btn btn-outline-danger d-flex align-items-center">
@@ -128,8 +129,8 @@ onMounted(() => {
                     </a>
                 </div>
                 <div v-else-if="!isTeacher && isHomework && solution_uuid !== ''" class="ms-auto">
-                    <router-link :to="'/ide/' + solution_uuid + '/0'" class="btn btn-success">Lösung
-                        öffnen</router-link>
+                    <router-link :to="'/ide/' + solution_uuid + '/0'"
+                        class="btn btn-success">{{ $t("open_solution") }}</router-link>
                 </div>
             </div>
         </div>
@@ -137,6 +138,10 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+.think_img {
+    height: 1em;
+}
+
 .borderDashed {
     border-style: dashed;
 }
