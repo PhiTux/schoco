@@ -225,7 +225,7 @@ onBeforeMount(() => {
     },
     (error) => {
       console.log(error);
-      document.title = i18n.t("ide_title_dummy")
+      document.title = i18n.t("project")
     }
   );
 

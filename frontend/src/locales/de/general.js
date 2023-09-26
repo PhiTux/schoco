@@ -67,4 +67,5 @@ export const general_de = {
     input: "Eingabe",
     send: "Senden",
     project: "Projekt",
+    usermanagement: "User management"
 }

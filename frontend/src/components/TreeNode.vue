@@ -53,17 +53,17 @@ function deleteDirectory() {
             <ul v-if="Object.keys(props.value).length === 0" class="dropdown-menu" data-bs-theme="light">
                 <li v-if="renameAllowed"><a class="dropdown-item"
                         @click="$emit('renameFile', props.path)"><font-awesome-icon icon="fa-solid fa-pencil" fixed-width />
-                        Umbenennen</a></li>
+                        {{ $t("rename") }}</a></li>
                 <li v-if="deleteAllowed"><a class="dropdown-item"
                         @click="$emit('deleteFile', props.path)"><font-awesome-icon icon="fa-solid fa-trash" fixed-width />
-                        Löschen</a></li>
+                        {{ $t("delete") }}</a></li>
             </ul>
             <!-- if directory -->
             <ul v-else class="dropdown-menu" data-bs-theme="light">
                 <li v-if="renameAllowed"><a class="dropdown-item" @click="$emit('renameDirectory')"><font-awesome-icon
-                            icon="fa-solid fa-pencil" fixed-width /> Umbenennen</a></li>
+                            icon="fa-solid fa-pencil" fixed-width /> {{ $t("rename") }}</a></li>
                 <li v-if="deleteAllowed"><a class="dropdown-item" @click="$emit('deleteDirectory')"><font-awesome-icon
-                            icon="fa-solid fa-trash" fixed-width /> Löschen</a></li>
+                            icon="fa-solid fa-trash" fixed-width /> {{ $t("delete") }}</a></li>
             </ul>
         </div>
     </li>

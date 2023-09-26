@@ -1,5 +1,4 @@
 export const ide_de = {
-    ide_title_dummy: "Projekt",
     server_was_overloaded_try_again: "Der Server war vermutlich gerade überlastet 😥 Bitte versuche es erneut!",
     no_live_output_result_to_follow: "Live-Ausgabe nicht möglich, Ergebnis folgt gleich...",
     compilation_successful: "Erfolgreich kompiliert 🎉", 

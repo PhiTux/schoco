@@ -532,7 +532,7 @@ onMounted(() => {
   const modal = new Modal(document.getElementById("confirmPasswordModal"));
   modal.show();
 
-  document.title = i18n.t("users_title")
+  document.title = i18n.t("usermanagement")
 });
 
 function calculateFontDark(color) {
