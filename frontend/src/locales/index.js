@@ -8,6 +8,7 @@ import {homework_de} from "./de/homework.js"
 import { color_mode_switch_de } from "./de/color_mode_switch.js"
 import { password_info_de } from "./de/password_info.js"
 import { project_card_de } from "./de/project_card.js"
+import { ide_de } from "./de/ide.js"
 
 import login_en from "./en/login.json"
 
@@ -22,6 +23,7 @@ const de = {
     ...color_mode_switch_de,
     ...password_info_de,
     ...project_card_de,
+    ...ide_de,
 }
 
 const en = {

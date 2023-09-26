@@ -18,6 +18,9 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import ColorModeSwitch from "../components/ColorModeSwitch.vue";
 import { debounce } from "lodash";
+import { useI18n } from 'vue-i18n'
+
+const i18n = useI18n()
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -222,7 +225,7 @@ onBeforeMount(() => {
     },
     (error) => {
       console.log(error);
-      document.title = "Projekt"
+      document.title = i18n.t("ide_title_dummy")
     }
   );
 
@@ -502,8 +505,7 @@ function compile() {
 
       if (response.data.success == false) {
         state.isCompiling = false;
-        results.value =
-          "Der Server war leider gerade überlastet 😥 Bitte erneut versuchen!";
+        results.value = i18n.t("server_was_overloaded_try_again");
         return;
       }
 
@@ -538,8 +540,7 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
       }
 
       if (response.data.status === "connect_error") {
-        results.value =
-          'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
+        results.value = i18n.t("server_was_overloaded_try_again");
         state.actionGoal = ""
         return;
       }
@@ -549,14 +550,14 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
           compile()
           return;
         } else if (response.data.exitCode == 0 && (response.data.stdout === "" || response.data.stdout === "\n")) {
-          results.value = "Erfolgreich kompiliert 🎉";
+          results.value = i18n.t("compilation_successful");
         } else {
           results.value = response.data.stdout;
           return;
         }
       }
       else if (response.data.exitCode == 0 && !state.receivedWS) {
-        results.value = "Erfolgreich kompiliert 🎉";
+        results.value = i18n.t("compilation_successful");
       }
 
       if (state.actionGoal === "execute") {
@@ -628,7 +629,7 @@ function connectWebsocket(id) {
     state.websocket_open = false;
     state.websocket_working = false;
     if (state.isCompiling || state.isExecuting || state.isTesting) {
-      results.value = "Live-Ausgabe nicht möglich, Ergebnis folgt gleich..."
+      results.value = i18n.t("no_live_output_result_to_follow");
     }
   };
 
@@ -636,13 +637,13 @@ function connectWebsocket(id) {
     state.websocket_open = true;
     state.websocket_working = true;
     if (state.isCompiling) {
-      results.value = "Kompilierung gestartet... 🛠";
+      results.value = i18n.t("compilation_started");
     } else if (state.isExecuting) {
-      results.value = "Programm wird ausgeführt...";
+      results.value = i18n.t("program_running");
     }
     //not used at the moment, since testing doesn't require WS...
     else if (state.isTesting) {
-      results.value = "Programm wird getestet 📝➡️✅ bitte warten..."
+      results.value = i18n.t("program_testing");
     }
   };
 
@@ -674,8 +675,7 @@ function execute(just_compiled) {
   CodeService.prepareExecute(route.params.project_uuid, route.params.user_id).then(
     async (response) => {
       if (response.data.executable == false) {
-        results.value =
-          "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
+        results.value = i18n.t("no_executables_found");
         state.isExecuting = false;
         compile()
         return;
@@ -726,13 +726,12 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
       state.actionGoal = ""
 
       if (state.websocket_working && state.receivedWS == false) {
-        results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
+        results.value = i18n.t("program_exited_without_output");
       }
 
       if (response.data.status === "connect_error") {
         if (!state.aborted) {
-          results.value =
-            'Interner Verbindungsfehler ⚡ Vermutlich war der "Worker" (Teil des Servers, der u. a. kompiliert) einfach noch nicht soweit... \nBitte direkt erneut probieren 😊';
+          results.value = i18n.t("server_was_overloaded_try_again");
         }
 
         state.actionGoal = ""
@@ -744,7 +743,7 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
           execute()
           return;
         } else if (response.data.exitCode == 0 && (response.data.stdout === "" || response.data.stdout === "\n")) {
-          results.value = "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔";
+          results.value = i18n.t("program_exited_without_output");
         } else {
           results.value = response.data.stdout;
           return;
@@ -754,7 +753,7 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
     },
     (error) => {
       if (state.receivedWS == false) {
-        results.value = "Programm wurde (vermutlich fehlerhaft) beendet! ❌";
+        results.value = i18n.t("program_exited_probably_with_error");
       }
       state.isExecuting = false;
       state.actionGoal = ""
@@ -783,13 +782,12 @@ function test(just_compiled) {
   state.receivedWS = false;
 
   // using this line here (instead at opening WS), since Testing does not start a WS-connection
-  results.value = "Programm wird getestet 📝➡️✅ bitte warten..."
+  results.value = i18n.t("program_testing")
 
   CodeService.prepareTest(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.data.executable == false) {
-        results.value =
-          "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙";
+        results.value = i18n.t("no_executables_found")
         state.isTesting = false;
         compile();
         return;
@@ -823,7 +821,7 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
       results.value = ""
 
       if (response.data.status === "security_error") {
-        results.value = "💥🙈 es gab wohl einen Sicherheitsfehler beim Testen deines Programms. Scheinbar hat dein Programm versucht, Dinge auszuführen, die nicht erlaubt sind. Korrigiere dies zuerst.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden."
+        results.value = i18n.t("security_error");
         return
       }
 
@@ -832,25 +830,25 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
       results.value += "\n\n==================\n\n"
 
       if (response.data.exitCode == 143) {
-        results.value += "❌ Programm wurde frühzeitig beendet! Die Rechenzeit ist vermutlich abgelaufen. Hast du irgendwo eine Endlosschleife?"
+        results.value += i18n.t("computation_time_exceeded")
       }
       else if (response.data.failed_tests == 0 && response.data.passed_tests > 0) {
-        results.value += "Alle Tests bestanden 🎉🤩\n\nDu kannst nun höchstens noch versuchen, deinen Quellcode zu \"verschönern\" ;-)"
+        results.value += i18n.t("all_tests_passed")
       } else if (response.data.passed_tests == 0) {
-        results.value += "Ups 🧐 Scheinbar wurde kein einziger Test bestanden! Vielleicht hilft dir die obere Ausgabe, um den Fehlern auf die Schliche zu kommen 🤗"
+        results.value += i18n.t("no_test_passed")
       } else if (response.data.passed_tests == 0 && response.data.failed_tests == 0) {
-        results.value += "❌ Es gab beim Testen wohl irgendeinen Fehler. Überprüfe nochmals dein Programm."
+        results.value += i18n.t("error_during_testing")
       } else if (state.aborted) {
-        results.value += "❌ Der Test wurde durch den User abgebrochen."
+        results.value += i18n.t("error_aborted")
       }
       else {
         let percent = Math.round((response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100 * 10) / 10
-        results.value += `Du hast ${percent}% der Tests bestanden. Vielleicht hilft dir die obere Ausgabe, um die restlichen Tests auch noch zu bestehen 🤗`
+        results.value += i18n.t("x_percent_of_tests_passed", { percent: percent })
       }
 
     },
     (error) => {
-      results.value = "💥🙈 es gab wohl einen Fehler beim Testen deines Programms. Probiere es erneut!\nStelle zunächst sicher, dass dein Programm ausgeführt werden kann.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden."
+      results.value = i18n.t("error_during_testing");
       state.isTesting = false;
       state.actionGoal = "";
       console.log(error.response);
@@ -1487,7 +1485,7 @@ function stopContainer() {
       state.isStopping = false;
 
       if (response.data.success) {
-        results.value += "\nProgramm wurde vom User beendet! ✔";
+        results.value += i18n.t("stopped_by_user");
       } else {
         // show toast
         const toast = new Toast(
@@ -1515,7 +1513,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Laden des Projekts. Bitte zurück oder neu laden.
+            {{ $t("error_loading_project") }}
           </div>
         </div>
       </div>
@@ -1524,7 +1522,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Download des Projekts.
+            {{ $t("toastDownloadProjectError") }}
           </div>
         </div>
       </div>
@@ -1533,7 +1531,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Speichern!
+            {{ $t("error_on_saving") }}
           </div>
         </div>
       </div>
@@ -1542,7 +1540,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Datei konnte nicht umbenannt werden!
+            {{ $t("couldnt_rename_file") }}
           </div>
         </div>
       </div>
@@ -1551,7 +1549,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Datei erfolgreich umbenannt!
+            {{ $t("file_rename_successful") }}
           </div>
         </div>
       </div>
@@ -1560,7 +1558,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Speichern der Projektbeschreibung!
+            {{ $t("error_saving_project_description") }}
           </div>
         </div>
       </div>
@@ -1569,7 +1567,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Speichern des Projektnamens!
+            {{ $t("toastRenameProjectError") }}
           </div>
         </div>
       </div>
@@ -1578,7 +1576,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Projektname darf nicht leer sein!
+            {{ $t("error_project_name_empty") }}
           </div>
         </div>
       </div>
@@ -1587,7 +1585,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Projekt existiert nicht, oder du hast keinen Zugriff darauf!
+            {{ $t("project_not_existing_or_no_access") }}
           </div>
         </div>
       </div>
@@ -1596,7 +1594,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Erstellen der Hausaufgabe!
+            {{ $t("error_creating_homework") }}
           </div>
         </div>
       </div>
@@ -1605,7 +1603,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Hausaufgabe erfolgreich erstellt!
+            {{ $t("homework_created_successfully") }}
           </div>
         </div>
       </div>
@@ -1614,7 +1612,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Datei erfolgreich erstellt!
+            {{ $t("file_created_successfully") }}
           </div>
         </div>
       </div>
@@ -1623,7 +1621,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Erstellen der Datei!
+            {{ $t("error_creating_file") }}
           </div>
         </div>
       </div>
@@ -1632,7 +1630,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Löschen der Datei!
+            {{ $t("error_deleting_file") }}
           </div>
         </div>
       </div>
@@ -1641,7 +1639,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Fehler beim Zurücksetzen der Hausaufgabe!
+            {{ $t("error_reseting_homework_progress") }}
           </div>
         </div>
       </div>
@@ -1650,7 +1648,7 @@ function stopContainer() {
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-            Programm konnte nicht beendet werden!
+            {{ $t("error_stopping_program") }}
           </div>
         </div>
       </div>
@@ -1663,25 +1661,14 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Änderung der Vorlage kann zu Inkonsistenzen führen!</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("changing_template_may_lead_to_inconsistencies") }}
+            </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            Du bearbeitest gerade die <u>Vorlage</u> einer Hausaufgabe! Wenn du Änderungen am <b>Code</b> durchführst
-            und
-            speicherst,
-            dann kann dies zu Inkonsistenzen bei den verschiedenen SuS führen:
-            <ul>
-              <li>Bei SuS, welche diese Hausaufgabe bereits bearbeiten, werden diese Änderungen <b>nicht ankommen</b>,
-                solange sie ihren Fortschritt nicht löschen und die HA anschließend neu starten.</li>
-              <li>SuS, welche diese Hausaufgabe noch nicht gestartet haben, werden beim erstmaligen Öffnen immer den zu
-                diesem Zeitpunkt aktuellsten Code dieser Vorlage verwenden.</li>
-            </ul>
-            Änderungen des <b>Titels oder der Projektbeschreibung</b> sind hingegen kein Problem, können jederzeit
-            geändert werden und werden beim Neuladen der IDE bei den SuS aktualisiert.
-          </div>
+          <div class="modal-body" v-html="$t('description_of_inconsistencies_when_changing_template')" />
+
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ $t("got_it") }}</button>
           </div>
         </div>
       </div>
@@ -1692,18 +1679,18 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Änderungen speichern?</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("question_save_changes") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Möchtest du die Änderungen vor dem Schließen speichern?
+            {{ $t("save_changes_before_closing") }}
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-              @click.prevent="state.closeIDEAfterSaving ? exit() : (state.closeTabAfterSaving && closeTab(state.closeTabID))">Nicht
-              speichern</button>
+              @click.prevent="state.closeIDEAfterSaving ? exit() : (state.closeTabAfterSaving && closeTab(state.closeTabID))">{{
+                $t("dont_save") }}</button>
             <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click.prevent="saveAllBtn()">
-              Speichern
+              {{ $t("save") }}
             </button>
           </div>
         </div>
@@ -1715,20 +1702,11 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Neue Datei hinzufügen</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("add_new_file") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Gib den neuen Dateinamen für die Datei ein. Denke an die Dateiendung
-            (typischerweise <code>.java</code>)! <br> <br>
-            Wenn du einen Order anlegen möchtest, dann musst du gleichzeitig auch eine Datei innerhalb des neuen Ordners
-            angeben. <br>
-            <br>
-            <b><u>Beispiel:</u></b><br>
-            Wenn du den Ordner "<code>neu</code>" anlegen möchtest, dann musst du auch eine Datei innerhalb des Ordners
-            angeben (z. B. <code>MeineKlasse.java</code>). Gib daher als vollen Dateinamen
-            <code>neu/MeineKlasse.java</code> an.
-
+            <span v-html="$t('description_new_file')"></span>
 
             <div class="input-group my-3">
               <input type="text" class="form-control" id="addFilenameInput" v-model="state.newFileName"
@@ -1736,14 +1714,14 @@ function stopContainer() {
             </div>
 
             <div v-if="state.newFileNameInvalid" class="alert alert-danger" role="alert">
-              Dateiname ist ungültig (enthält Leerzeichen oder der Name existiert bereits)!
+              {{ $t("filename_is_invalid") }}
             </div>
 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("close") }}</button>
             <button type="button" class="btn btn-primary" @click.prevent="addFile()">
-              <span v-if="!state.isAddingFile">Hinzufügen</span>
+              <span v-if="!state.isAddingFile">{{ $t("add") }}</span>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
@@ -1758,16 +1736,18 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Datei löschen?</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("question_delete_file") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Möchtest du die Datei <b><u>{{ state.deleteFilePath }}</u></b> wirklich löschen?
+            <i18n-t keypath="ask_delete_file_x" tag="span">
+              <code>{{ state.deleteFilePath }}</code>
+            </i18n-t>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("close") }}</button>
             <button type="button" class="btn btn-primary" @click.prevent="deleteFile()">
-              <span v-if="!state.isDeletingFile">Löschen</span>
+              <span v-if="!state.isDeletingFile">{{ $t("delete") }}</span>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
@@ -1783,15 +1763,13 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Ordner löschen</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("delete_folder") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            Ordner können leider <b>nicht</b> direkt gelöscht werden. Du kannst allerdings sämtlichen Inhalt des
-            Ordners löschen, dann wird der Ordner automatisch mitgelöscht.
+          <div class="modal-body" v-html="$t('delete_folder_description')">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ $t("got_it") }}</button>
           </div>
         </div>
       </div>
@@ -1803,23 +1781,13 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Ordner umbenennen</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("rename_folder") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
-            Ordner können leider <b>nicht</b> direkt umbenannt werden. Du kannst allerdings sämtlichen Inhalt
-            des Ordners umbenennen, dann entsteht automatisch ein neuer Ordner mit neuem Namen und der jetzige Ordner wird
-            automatisch gelöscht.
-            <br> <br>
-            <u><b>Beispiel:</b></u><br>
-            Du hast einen Ordner <code>old</code>, in dem sich die beiden Dateien <code>First.java</code> und
-            <code>Second.java</code> befinden. Mit vollem Namen lauten diese Dateien <code>old/First.java</code> und
-            <code>old/Second.java</code>. Wenn du die Dateien nacheinander in <code>new/First.java</code> und
-            <code>new/Second.java</code>
-            umbenennst, entspricht das dem Umbenennen des Ordners von <code>old</code> zu <code>new</code>.
+          <div class="modal-body" v-html="$t('rename_folder_description')">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Verstanden</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ $t("got_it") }}</button>
           </div>
         </div>
       </div>
@@ -1830,12 +1798,14 @@ function stopContainer() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Datei umbenennen</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("rename_file") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Gib den neuen Dateinamen für die Datei <u>{{ state.renameFilePath }}</u> ein. Denke an die Dateiendung
-            (typischerweise <i>.java</i>)!
+            <i18n-t keypath="rename_file_description" tag="span">
+              <u>{{ state.renameFilePath }}</u>
+              <i>.java</i>
+            </i18n-t>
 
             <div class="input-group my-3">
               <input type="text" class="form-control" id="renameFilenameInput" :placeholder="state.renameFilePath"
@@ -1843,13 +1813,13 @@ function stopContainer() {
             </div>
 
             <div v-if="state.newFileNameInvalid" class="alert alert-danger" role="alert">
-              Dateiname ist ungültig (enthält Leerzeichen oder der Name existiert bereits)!
+              {{ $t("rename_file_invalid") }}
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("close") }}</button>
             <button type="button" class="btn btn-primary" @click.prevent="renameFile()">
-              <span v-if="!state.isRenamingFile">Umbenennen</span>
+              <span v-if="!state.isRenamingFile">{{ $t("rename") }}</span>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
@@ -1865,35 +1835,33 @@ function stopContainer() {
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Hausaufgabe erstellen</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("create_assignment") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <div class="alert alert-warning">⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig
-              abgeschlossen sein,
-              <b>bevor</b>
-              du daraus eine Hausaufgabe erstellst. Nach diesem Schritt sollten Änderungen vermieden werden, da die
-              Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.
+            <div class="alert alert-warning" v-html="$t('create_assignment_description_1')">
             </div>
-            <hr>
+            <div class="alert alert-info" v-html="$t('create_assignment_description_2')">
+            </div>
             <div v-if="existingHomeworkCourses.length">
               <div class="alert alert-success">
-                Aus diesem Projekt wurde bereits eine Hausaufgabe erstellt für folgende Kurse: <br>
-                <CourseBadge v-for="c in existingHomeworkCourses" :color="c.color" :font-dark="c.fontDark"
+                {{ $t("assignment_already_created") }} <br>
+                <CourseBadge v-for=" c  in  existingHomeworkCourses " :color="c.color" :font-dark="c.fontDark"
                   :name="c.name" />
               </div>
-              <hr>
             </div>
+            <hr>
 
 
             <div class="mb-3 row">
               <label for="coursename" class="col-sm-4 col-form-label">
                 <font-awesome-icon v-if="Object.keys(homework.selectedCourse).length !== 0" icon="fa-square-check"
                   style="color: var(--bs-success)" />
-                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Kurs wählen:</label>
+                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
+                {{ $t("choose_course") }}:</label>
               <div class="col-sm-8 d-flex align-items-center">
                 <div v-if="!allCourses.length" class="alert alert-danger">
-                  Du musst zuerst in der Benutzerverwaltung einen Kurs anlegen (idealerweise mit Schülern)!
+                  {{ $t("create_course_in_usermanagement") }}
                 </div>
                 <div v-else>
                   <CourseBadge v-if="homework.selectedCourse" :color="homework.selectedCourse.color"
@@ -1907,7 +1875,7 @@ function stopContainer() {
                     </font-awesome-layers>
                   </a>
                   <ul class="dropdown-menu courseDropdown" data-bs-theme="light">
-                    <li v-for="c in allCourses">
+                    <li v-for=" c  in  allCourses ">
                       <a class="dropdown-item btn" @click.prevent="homework.selectedCourse = c">
                         <CourseBadge :color="c.color" :font-dark="c.fontDark" :name="c.name" />
                       </a>
@@ -1921,17 +1889,19 @@ function stopContainer() {
               <label for="deadline" class="col-sm-4 col-form-label">
                 <font-awesome-icon v-if="homework.deadlineDate > new Date()" icon="fa-square-check"
                   style="color: var(--bs-success)" />
-                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Abgabefrist:</label>
+                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
+                {{ $t("deadline") }}:</label>
               <div class="col-sm-8">
                 <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
                 <VueDatePicker v-model="homework.deadlineDate" placeholder="Start Typing ..." text-input auto-apply
                   :min-date="new Date()" prevent-min-max-navigation locale="de" format="E dd.MM.yyyy, HH:mm" />
-                UTC: <em>{{ homework.deadlineDate.toISOString() }}</em><br>
-                Bearbeitungszeit: <em v-if="homework.deadlineDate > new Date()"><b>{{ Math.floor((homework.deadlineDate
-                  -
-                  new
-                    Date()) / (1000 * 3600 * 24)) }} Tage,
-                    {{ Math.floor((homework.deadlineDate - new Date()) / (1000 * 3600) % 24) }} Stunden</b></em>
+                {{ $t("utc") }}: <em>{{ homework.deadlineDate.toISOString() }}</em><br>
+                {{ $t("editing_time") }}: <em v-if="homework.deadlineDate > new Date()"><b>{{
+                  Math.floor((homework.deadlineDate
+                    -
+                    new
+                      Date()) / (1000 * 3600 * 24)) }} {{ $t("days") }},
+                    {{ Math.floor((homework.deadlineDate - new Date()) / (1000 * 3600) % 24) }} {{ $t("hours") }}</b></em>
               </div>
             </div>
             <div class="mb-3 row">
@@ -1939,26 +1909,27 @@ function stopContainer() {
                 <font-awesome-icon
                   v-if="homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime))"
                   icon="fa-square-check" style="color: var(--bs-success)" />
-                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" /> Rechenzeit:
-                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover" title="Rechenzeit"
-                  data-bs-content="Lege fest, wie viele <b>Sekunden</b> Rechenzeit (bzw. genauer: Laufzeit) auf dem Server pro Aktion zur Verfügung stehen. Als Aktion gilt:<ul><li>Kompilieren</li><li>Ausführen</li><li>Testen</li></ul>Der Standardwert beträgt 10 Sekunden, welchen Schüler/innen in eigenen Projekten auch <b>nicht</b> verändern können, da der Server mit endlos laufenden Programmen lahm gelegt werden könnte. Unter Umständen kann es aber sinnvoll sein, bei Hausaufgaben die Laufzeit zu verlängern, z. B. wenn ein Programm auf Benutzereingaben warten muss, welche auch ihre Zeit brauchen.">
+                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
+                {{ $t("computation_time") }}:
+                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
+                  :title="$t('computation_time')" :data-bs-content="$t('computation_time_description')">
                   <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
                 </a></label>
               <div class="col-sm-8">
                 <input class="hwTimeInput" :value="homework.computationTime"
                   @input="event => homework.computationTime = event.target.value" type="number" min="3" step="1"
-                  placeholder="Mindestens 3, Standard 10" />
+                  :placeholder="$t('at_least_3_default_10')" />
                 <br>
-                {{ homework.computationTime }} Sekunden
+                {{ homework.computationTime }} {{ $t("seconds") }}
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("close") }}</button>
             <button type="button" class="btn btn-primary" @click.prevent="createHomework()"
               :disabled="Object.keys(homework.selectedCourse).length === 0 || homework.deadlineDate <= new Date() || !(homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime)))">
               <div v-if="!state.isCreatingHomework">
-                Hausaufgabe erstellen
+                {{ $t("create_assignment") }}
               </div>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -1975,20 +1946,19 @@ function stopContainer() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Hausaufgabe neu beginnen?
+              {{ $t("question_restart_assignment") }}
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Möchtest du deinen bisherigen Fortschritt löschen und anschließend wieder in
-            einem "sauberen" Projekt von vorne beginnen?
+            {{ $t("restart_assignment_description") }}
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Abbrechen
+              {{ $t("abort") }}
             </button>
             <button @click.prevent="deleteHomework()" type="button" class="btn btn-primary">
-              <span v-if="!state.isResettingHomework">Neu beginnen</span>
+              <span v-if="!state.isResettingHomework">{{ $t("restart") }}</span>
               <span v-else>
                 <div class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
@@ -2013,27 +1983,26 @@ function stopContainer() {
             <li class="nav-item dropdown mx-3">
               <a class="dropdown-toggle btn btn-outline-secondary" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
-                Projekt
+                {{ $t("project") }}
               </a>
               <ul class="dropdown-menu" data-bs-theme="light">
                 <li>
                   <a v-if="!state.isSolution" class="dropdown-item"
                     @click.prevent="prepareAddFileModal()"><font-awesome-icon icon="fa-solid fa-file-circle-plus"
                       fixed-width />
-                    Neue Datei
+                    {{ $t("new_file") }}
                   </a>
                 </li>
                 <li class="dropdown-divider"></li>
                 <li v-if="state.isHomework && route.params.user_id != 0">
                   <a class="dropdown-item" @click.prevent="prepareDeleteHomework()">
-                    <font-awesome-icon icon="fa-solid fa-trash" fixed-width /> Hausaufgabe neu beginnen
+                    <font-awesome-icon icon="fa-solid fa-trash" fixed-width /> {{ $t("restart_assignment") }}
                   </a>
                 </li>
                 <li v-if="!(state.isHomework && route.params.user_id != 0) && !state.isSolution">
                   <!-- anyone except pupils in homeworks -->
                   <a class="dropdown-item" @click.prevent="downloadProject(route.params.project_uuid)"><font-awesome-icon
-                      icon="fa-solid fa-download" fixed-width /> Projekt
-                    herunterladen</a>
+                      icon="fa-solid fa-download" fixed-width /> {{ $t("download_project") }}</a>
                 </li>
               </ul>
             </li>
@@ -2051,39 +2020,39 @@ function stopContainer() {
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
               <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
                 :disabled="state.tabsWithChanges.length == 0 || state.isSolution" data-bs-trigger="hover"
-                data-bs-toggle="tooltip" data-bs-title="Strg + s" data-bs-delay='{"show":500,"hide":0}'
+                data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_s')" data-bs-delay='{"show":500,"hide":0}'
                 data-bs-placement="bottom">
                 <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
-                Speichern
+                {{ $t("save") }}
               </button>
               <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow" data-bs-trigger="hover"
-                data-bs-toggle="tooltip" data-bs-title="Strg + 1" data-bs-delay='{"show":500,"hide":0}'
+                data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_1')" data-bs-delay='{"show":500,"hide":0}'
                 data-bs-placement="bottom">
                 <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
-                Kompilieren
+                {{ $t("compile") }}
               </button>
               <button @click.prevent="executeBtn()" type="button" class="btn btn-blue" data-bs-trigger="hover"
-                data-bs-toggle="tooltip" data-bs-title="Strg + 2" data-bs-delay='{"show":500,"hide":0}'
+                data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_2')" data-bs-delay='{"show":500,"hide":0}'
                 data-bs-placement="bottom">
                 <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
-                Ausführen
+                {{ $t("execute") }}
               </button>
               <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
-                class="btn btn-indigo" data-bs-trigger="hover" data-bs-toggle="tooltip" data-bs-title="Strg + 3"
+                class="btn btn-indigo" data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_3')"
                 data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
-                <font-awesome-icon v-else icon="fa-solid fa-list-check" /> Testen
+                <font-awesome-icon v-else icon="fa-solid fa-list-check" /> {{ $t("test") }}
               </button>
             </div>
             <button :class="{ hidden: !state.isExecuting && !state.isTesting }" @click.prevent="stopContainer()"
@@ -2091,23 +2060,28 @@ function stopContainer() {
               <div v-if="state.isStopping" class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <font-awesome-icon v-else icon="fa-solid fa-ban" /> Abbrechen
+              <font-awesome-icon v-else icon="fa-solid fa-ban" /> {{ $t("abort") }}
             </button>
             <button v-if="authStore.isTeacher() && !state.isHomework" @click.prevent="prepareHomeworkModal()"
               type="button" data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
-              <font-awesome-icon icon="fa-solid fa-share-nodes" /> Hausaufgabe erstellen
+              <font-awesome-icon icon="fa-solid fa-share-nodes" /> {{ $t("create_assignment") }}
             </button>
-            <div class="d-flex align-items-center homework-badge px-2" v-if="state.isHomework">HA | <span
-                v-if="authStore.isTeacher() && route.params.user_id == 0">Vorlage</span><span
-                v-else-if="authStore.isTeacher() && route.params.user_id != 0">{{ state.fullUserName }}</span><span
-                v-else-if="!authStore.isTeacher()">Abgabe: {{ new
-                  Date(state.deadline).toLocaleString("default", {
-                    weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
-                  }) }}</span></div>
+            <div class="d-flex align-items-center homework-badge px-2" v-if="state.isHomework">💡 |
+              <span v-if="authStore.isTeacher() && route.params.user_id == 0">{{ $t("template") }}
+              </span>
+              <span v-else-if="authStore.isTeacher() && route.params.user_id != 0">
+                {{ state.fullUserName }}
+              </span>
+              <span v-else-if="!authStore.isTeacher()">{{ $t("deadline") }}: {{ new
+                Date(state.deadline).toLocaleString("default", {
+                  weekday: "long", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+                }) }}
+              </span>
+            </div>
           </ul>
           <ColorModeSwitch @setLight="setLight" class="ms-auto me-2" />
-          <a class=" btn btn-primary" @click.prevent="checkExit()">Schließen <font-awesome-icon icon="fa-solid fa-xmark"
-              size="xl" /></a>
+          <a class=" btn btn-primary" @click.prevent="checkExit()">{{ $t("close") }} <font-awesome-icon
+              icon="fa-solid fa-xmark" size="xl" /></a>
         </div>
       </div>
     </nav>
@@ -2201,7 +2175,7 @@ function stopContainer() {
             <pane>
               <div class="editor-relative d-flex flex-column">
                 <ul class="nav nav-tabs pt-2">
-                  <li class="nav-item" v-for="f in state.openFiles">
+                  <li class="nav-item" v-for=" f  in  state.openFiles ">
                     <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
                       active: f.tab == state.activeTab,
                     }">
@@ -2237,12 +2211,12 @@ function stopContainer() {
               <pre ref="resultsElement">{{ results }}</pre>
             </div>
             <div class="input align-items-center d-flex flex-row">
-              <label for="inputMessage" class="px-2 col-form-label">Eingabe:</label>
+              <label for="inputMessage" class="px-2 col-form-label">{{ $t("input") }}:</label>
               <input class="rounded flex-fill" :disabled="!state.websocket_open" @keyup.enter="sendMessage()" type="text"
-                id="inputMessage" v-model="state.sendMessage" placeholder="Eingabe (Entertaste zum Senden)" />
+                id="inputMessage" v-model="state.sendMessage" :placeholder="$t('placeholder_for_input')" />
               <button :disabled="!state.websocket_open" @click.prevent="sendMessage()" type="button"
                 class="btn btn-light btn-sm mx-2" id="messageSendButton">
-                Senden
+                {{ $t("send") }}
               </button>
             </div>
           </div>
