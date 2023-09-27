@@ -99,17 +99,18 @@ onMounted(() => {
                 </template>
             </text-clamp>
 
-            <div class="mt-2 d-flex align-items-center">
-                <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
-                    class="btn btn-primary">🌟{{ $t("begin_assignment") }}</a>
-                <router-link v-else-if="!isTeacher && isHomework && isEditing" :to="'/ide/' + uuid + '/' + branch"
-                    class="btn btn-primary">{{ $t("edit_assignment") }}</router-link>
-                <router-link v-else-if="isTeacher && isHomework" :to="'/homework/' + id" class="btn btn-primary">{{
-                    $t("show_details") }}</router-link>
-                <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">{{
-                    $t("open_project") }}</router-link>
-
-                <div v-if="isTeacher && isHomework" class="ms-auto input-group" style="width: inherit;">
+            <div class="mt-2 d-flex align-items-center flex-wrap">
+                <div class="">
+                    <a v-if="!isTeacher && isHomework && !isEditing" @click.prevent="$emit('startHomework', id)"
+                        class="btn btn-primary">🌟{{ $t("begin_assignment") }}</a>
+                    <router-link v-else-if="!isTeacher && isHomework && isEditing" :to="'/ide/' + uuid + '/' + branch"
+                        class="btn btn-primary">{{ $t("edit_assignment") }}</router-link>
+                    <router-link v-else-if="isTeacher && isHomework" :to="'/homework/' + id" class="btn btn-primary">{{
+                        $t("show_details") }}</router-link>
+                    <router-link v-else-if="!isHomework" :to="'/ide/' + uuid + '/' + 0" class="btn btn-primary">{{
+                        $t("open_project") }}</router-link>
+                </div>
+                <div v-if="isTeacher && isHomework" class="ms-auto input-group solution" style="width: auto;">
                     <div class="p-1 border border-success input-group-text" v-if="isHomework && solution_id != 0">
                         {{ solution_name }}<br>
                         {{ new Date(solution_start_showing).toLocaleString("default", {
@@ -129,8 +130,8 @@ onMounted(() => {
                     </a>
                 </div>
                 <div v-else-if="!isTeacher && isHomework && solution_uuid !== ''" class="ms-auto">
-                    <router-link :to="'/ide/' + solution_uuid + '/0'"
-                        class="btn btn-success">{{ $t("open_solution") }}</router-link>
+                    <router-link :to="'/ide/' + solution_uuid + '/0'" class="btn btn-success">{{ $t("open_solution")
+                    }}</router-link>
                 </div>
             </div>
         </div>
@@ -138,6 +139,20 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+@media (max-width: 1199px) {
+    .solution {
+        width: 100% !important;
+        justify-content: center !important;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 991px) {
+    .card {
+        width: 100% !important;
+    }
+}
+
 .think_img {
     height: 1em;
 }
@@ -191,6 +206,7 @@ onMounted(() => {
 
 
 .card {
+    /* min-width: 536px; */
     width: 48%;
     transition: all 0.3s ease;
 

@@ -573,6 +573,15 @@ function addSolution() {
         </div>
       </div>
 
+      <div class="toast align-items-center text-bg-success border-0" id="toastDeleteSolutionSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("toastDeleteSolutionSuccess") }}
+          </div>
+        </div>
+      </div>
+
       <div class="toast align-items-center text-bg-success border-0" id="toastAddSolutionSuccess" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -927,7 +936,7 @@ function addSolution() {
     </div>
 
     <div class="container main">
-      <div class="d-flex flex-row flex-wrap align-items-center justify-content-center">
+      <div class="d-flex flex-row flex-wrap align-items-center justify-content-center headrow">
         <div class="flex-div">
           <a class="btn btn-outline-success my-3 sticky-content " type="submit" href="/#/newProject">
             {{ $t("new_project") }} <font-awesome-icon icon="fa-solid fa-plus" />
@@ -952,7 +961,7 @@ function addSolution() {
       </div>
 
       <h1 v-if="state.new_homework.length">{{ $t("current_assignment") }}</h1>
-      <div class="d-flex align-content-start flex-wrap">
+      <div class="d-flex align-content-start flex-wrap cards">
         <!-- if teacher: -->
         <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  newHomeworkFiltered " :key="`${index}-${h.id}`"
           isHomework isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
@@ -969,7 +978,7 @@ function addSolution() {
       </div>
 
       <h1 v-if="state.old_homework.length">{{ $t("previous_assignments") }}</h1>
-      <div class="d-flex align-content-start flex-wrap">
+      <div class="d-flex align-content-start flex-wrap cards">
         <!-- if teacher: -->
         <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  oldHomeworkFiltered " :key="`${index}-${h.id}`"
           isHomework isOld isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
@@ -991,7 +1000,7 @@ function addSolution() {
           <span class="visually-hidden">Loading...</span>
         </div>
       </h1>
-      <div class="d-flex align-content-start flex-wrap">
+      <div class="d-flex align-content-start flex-wrap cards">
         <ProjectCard v-for="( p, index ) in  myProjectsFiltered " :name="p.name" :description="p.description"
           :uuid="p.uuid" :key="`${index}-${p.uuid}`" @renameProject="askRenameProject"
           @duplicateProject="duplicateProject" @downloadProject="downloadProject" @deleteProject="askDeleteProject" />
@@ -1001,6 +1010,18 @@ function addSolution() {
 </template>
 
 <style scoped>
+@media (max-width: 1199px) {
+  .cards {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .headrow {
+    flex-direction: column !important;
+  }
+}
+
 .flex-div {
   flex: 1;
   display: flex;
@@ -1011,9 +1032,6 @@ function addSolution() {
   margin-right: auto;
 }
 
-/* .flex-div:last-child {
-  margin-left: auto;
-} */
 
 .searchProject {
   width: inherit !important;

@@ -2018,7 +2018,7 @@ function stopContainer() {
             </div>
 
             <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green"
+              <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
                 :disabled="state.tabsWithChanges.length == 0 || state.isSolution" data-bs-trigger="hover"
                 data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_s')" data-bs-delay='{"show":500,"hide":0}'
                 data-bs-placement="bottom">
@@ -2026,33 +2026,34 @@ function stopContainer() {
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
-                {{ $t("save") }}
+                <span class="ms-1 hideOnSmall">{{ $t("save") }}</span>
               </button>
-              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow" data-bs-trigger="hover"
-                data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_1')" data-bs-delay='{"show":500,"hide":0}'
-                data-bs-placement="bottom">
+              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center"
+                data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_1')"
+                data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
-                {{ $t("compile") }}
+                <span class="ms-1 hideOnSmall">{{ $t("compile") }}</span>
               </button>
-              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue" data-bs-trigger="hover"
-                data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_2')" data-bs-delay='{"show":500,"hide":0}'
-                data-bs-placement="bottom">
+              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center"
+                data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_2')"
+                data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
-                {{ $t("execute") }}
+                <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
               </button>
               <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
-                class="btn btn-indigo" data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_3')"
-                data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                class="btn btn-indigo d-flex align-items-center" data-bs-trigger="hover" data-bs-toggle="tooltip"
+                :data-bs-title="$t('ctrl_3')" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
                 <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
-                <font-awesome-icon v-else icon="fa-solid fa-list-check" /> {{ $t("test") }}
+                <font-awesome-icon v-else icon="fa-solid fa-list-check" />
+                <span class="ms-1 hideOnSmall">{{ $t("test") }}</span>
               </button>
             </div>
             <button :class="{ hidden: !state.isExecuting && !state.isTesting }" @click.prevent="stopContainer()"
@@ -2080,8 +2081,9 @@ function stopContainer() {
             </div>
           </ul>
           <ColorModeSwitch @setLight="setLight" class="ms-auto me-2" />
-          <a class=" btn btn-primary" @click.prevent="checkExit()">{{ $t("close") }} <font-awesome-icon
-              icon="fa-solid fa-xmark" size="xl" /></a>
+          <a class=" btn btn-primary" @click.prevent="checkExit()">
+            <span class="me-2 hideOnSmall">{{ $t("close") }}</span><font-awesome-icon icon="fa-solid fa-xmark"
+              size="xl" /></a>
         </div>
       </div>
     </nav>
@@ -2228,6 +2230,12 @@ function stopContainer() {
 
 
 <style scoped lang="scss">
+@media (max-width: 1280px) {
+  .hideOnSmall {
+    display: none;
+  }
+}
+
 .hidden {
   visibility: hidden;
 }
