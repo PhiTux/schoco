@@ -549,6 +549,37 @@ function addSolution() {
   );
 
 }
+
+function collapseNewHomework() {
+  const newHomeworkHeader = document.getElementById("newHomeworkHeader");
+  const arrowNewHomework = document.getElementById("arrowNewHomework");
+  if (newHomeworkHeader.classList.contains("collapsed")) {
+    arrowNewHomework.classList.remove("arrowDown");
+  } else {
+    arrowNewHomework.classList.add("arrowDown");
+  }
+}
+
+function collapseOldHomework() {
+  const oldHomeworkHeader = document.getElementById("oldHomeworkHeader");
+  const arrowOldHomework = document.getElementById("arrowOldHomework");
+  if (oldHomeworkHeader.classList.contains("collapsed")) {
+    arrowOldHomework.classList.remove("arrowDown");
+  } else {
+    arrowOldHomework.classList.add("arrowDown");
+  }
+}
+
+function collapseMyProjects() {
+  const myProjectsHeader = document.getElementById("myProjectsHeader");
+  const arrowMyProjects = document.getElementById("arrowMyProjects");
+  if (myProjectsHeader.classList.contains("collapsed")) {
+    arrowMyProjects.classList.remove("arrowDown");
+  } else {
+    arrowMyProjects.classList.add("arrowDown");
+  }
+}
+
 </script>
 
 <template>
@@ -960,56 +991,84 @@ function addSolution() {
         <div class="flex-div"><!-- Don't remove (necessary for middle-positioning) --></div>
       </div>
 
-      <h1 v-if="state.new_homework.length">{{ $t("current_assignment") }}</h1>
-      <div class="d-flex align-content-start flex-wrap cards">
-        <!-- if teacher: -->
-        <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  newHomeworkFiltered " :key="`${index}-${h.id}`"
-          isHomework isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
-          :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
-          :solution_name="h.solution_name" :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
-          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
-          @deleteSolution="openDeleteSolutionModal" />
+      <h2 v-if="state.new_homework.length" data-bs-toggle="collapse" href="#newHomework" id="newHomeworkHeader"
+        @click.prevent="collapseNewHomework()" class="noSelect">
+        <div class="arrow arrowDown" id="arrowNewHomework">➤</div> {{ $t("current_assignment") }}
+      </h2>
+      <div class="collapse show" id="newHomework">
+        <div class="d-flex align-content-start flex-wrap cards">
+          <!-- if teacher: -->
+          <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  newHomeworkFiltered "
+            :key="`${index}-${h.id}`" isHomework isTeacher :name="h.name" :description="h.description" :id="h.id"
+            :deadline="h.deadline" :courseName="h.course_name" :courseColor="h.course_color"
+            :courseFontDark="h.course_font_dark" :solution_name="h.solution_name"
+            :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
+            @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
+            @deleteSolution="openDeleteSolutionModal" />
 
-        <!-- else -->
-        <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
-          @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :description="h.description"
-          :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline" :solution_uuid="h.solution_uuid"
-          @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+          <!-- else -->
+          <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
+            @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :description="h.description"
+            :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline" :solution_uuid="h.solution_uuid"
+            @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+        </div>
       </div>
 
-      <h1 v-if="state.old_homework.length">{{ $t("previous_assignments") }}</h1>
-      <div class="d-flex align-content-start flex-wrap cards">
-        <!-- if teacher: -->
-        <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  oldHomeworkFiltered " :key="`${index}-${h.id}`"
-          isHomework isOld isTeacher :name="h.name" :description="h.description" :id="h.id" :deadline="h.deadline"
-          :courseName="h.course_name" :courseColor="h.course_color" :courseFontDark="h.course_font_dark"
-          :solution_name="h.solution_name" :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
-          @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
-          @deleteSolution="openDeleteSolutionModal" />
+      <h2 v-if="state.old_homework.length" data-bs-toggle="collapse" href="#oldHomework" id="oldHomeworkHeader"
+        @click.prevent="collapseOldHomework()" class="noSelect">
+        <div class="arrow arrowDown" id="arrowOldHomework">➤</div> {{ $t("previous_assignments") }}
+      </h2>
+      <div class="collapse show" id="oldHomework">
+        <div class="d-flex align-content-start flex-wrap cards">
+          <!-- if teacher: -->
+          <ProjectCard v-if="authStore.isTeacher()" v-for="( h, index ) in  oldHomeworkFiltered "
+            :key="`${index}-${h.id}`" isHomework isOld isTeacher :name="h.name" :description="h.description" :id="h.id"
+            :deadline="h.deadline" :courseName="h.course_name" :courseColor="h.course_color"
+            :courseFontDark="h.course_font_dark" :solution_name="h.solution_name"
+            :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
+            @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
+            @deleteSolution="openDeleteSolutionModal" />
 
-        <!-- else -->
-        <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld
-          @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid"
-          :description="h.description" :branch="h.branch" :id="h.id" :deadline="h.deadline"
-          :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+          <!-- else -->
+          <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld
+            @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid"
+            :description="h.description" :branch="h.branch" :id="h.id" :deadline="h.deadline"
+            :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+        </div>
       </div>
 
-      <h1 v-if="state.myProjects.length">
-        {{ $t("my_projects") }}
+      <h2 v-if="state.myProjects.length" data-bs-toggle="collapse" href="#myProjects" id="myProjectsHeader"
+        @click.prevent="collapseMyProjects()" class="noSelect">
+        <div class="arrow arrowDown" id="arrowMyProjects">➤</div> {{ $t("my_projects") }}
         <div v-if="state.isDuplicating" class="spinner-border text-success" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-      </h1>
-      <div class="d-flex align-content-start flex-wrap cards">
-        <ProjectCard v-for="( p, index ) in  myProjectsFiltered " :name="p.name" :description="p.description"
-          :uuid="p.uuid" :key="`${index}-${p.uuid}`" @renameProject="askRenameProject"
-          @duplicateProject="duplicateProject" @downloadProject="downloadProject" @deleteProject="askDeleteProject" />
+      </h2>
+      <div class="collapse show" id="myProjects">
+        <div class="d-flex align-content-start flex-wrap cards">
+          <ProjectCard v-for="( p, index ) in  myProjectsFiltered " :name="p.name" :description="p.description"
+            :uuid="p.uuid" :key="`${index}-${p.uuid}`" @renameProject="askRenameProject"
+            @duplicateProject="duplicateProject" @downloadProject="downloadProject" @deleteProject="askDeleteProject" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.noSelect {
+  user-select: none;
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+.arrowDown {
+  transform: rotate(90deg);
+}
+
 @media (max-width: 1199px) {
   .cards {
     justify-content: center;
