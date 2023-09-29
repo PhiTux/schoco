@@ -122,7 +122,7 @@ onMounted(() => {
                     <a @click.prevent="$emit('addSolution', id)" class="btn btn-outline-success"
                         :class="{ borderDashed: solution_id == 0 }">
                         <span v-if="solution_id == 0">{{ $t("add_solution") }}</span>
-                        <span v-else v-html="$t('change_solution')"></span>
+                        <span v-else v-html="$t('change_solution_line_break')"></span>
                     </a>
                     <a v-if="solution_id != 0" @click.prevent="$emit('deleteSolution', id)"
                         class="btn btn-outline-danger d-flex align-items-center">

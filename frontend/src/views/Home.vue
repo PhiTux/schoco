@@ -10,6 +10,7 @@ import 'vue-select/dist/vue-select.css';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import { useI18n } from 'vue-i18n'
+import CourseBadge from "../components/CourseBadge.vue";
 
 const i18n = useI18n()
 
@@ -36,6 +37,8 @@ let state = reactive({
   addSolutionInputInvalid: false,
   deleteSolutionHomeworkId: 0,
   isDeletingSolution: false,
+  coursesInHomework: [],
+  filter_course_id: null,
 });
 
 onBeforeMount(() => {
@@ -49,7 +52,13 @@ onBeforeMount(() => {
 });
 
 function filterForSearchString(array, searchstring) {
+
   return array.filter((project) => {
+    // filter for selected courses as teacher
+    if (state.filter_course_id !== null && project.course_id !== undefined && project.course_id != state.filter_course_id) {
+      return false;
+    }
+
     if (!searchstring.length) return true;
 
     return (
@@ -73,12 +82,34 @@ const oldHomeworkFiltered = computed(() => {
   return filterForSearchString(state.old_homework, state.searchProject)
 });
 
+function getCoursesOutOfHomework(homework) {
+  homework.forEach((h) => {
+    let found = false
+    for (let i = 0; i < state.coursesInHomework.length; i++) {
+      if (state.coursesInHomework[i].id == h.course_id) {
+        found = true
+        break
+      }
+    }
+    if (!found) {
+      state.coursesInHomework.push({
+        id: h.course_id,
+        name: h.course_name,
+        color: h.course_color,
+        fontDark: h.course_font_dark
+      })
+    }
+  })
+}
+
 function getProjectsAsTeacher() {
   CodeService.getProjectsAsTeacher().then(
     (response) => {
       state.myProjects = response.data.projects;
       state.new_homework = [];
       state.old_homework = [];
+
+      getCoursesOutOfHomework(response.data.homework)
 
       response.data.homework.forEach((h) => {
         if (new Date(h.deadline) > new Date()) {
@@ -866,8 +897,7 @@ function collapseMyProjects() {
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5">
-              <span v-if="state.solution_id == null">{{ $t("add_solution") }}</span>
-              <span v-else>{{ $t("change_solution") }}</span>
+              <span>{{ $t("add_solution") }}</span>
             </h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -889,7 +919,7 @@ function collapseMyProjects() {
               </button>
               <span class="mx-2"><b>{{ $t("or") }}</b></span>
               <VueDatePicker class="flex-fill" v-model="state.solution_start_showing" :placeholder="$t('select_date')"
-                text-input auto-apply :min-date="new Date()" prevent-min-max-navigation :locale="$t('locale')"
+                text-input auto-apply prevent-min-max-navigation :locale="$t('locale')"
                 :format="$t('long_date_format')" />
             </div>
             <font-awesome-icon icon="fa-solid fa-arrow-right" fixed-width />
@@ -988,12 +1018,23 @@ function collapseMyProjects() {
             </span>
           </div>
         </div>
-        <div class="flex-div"><!-- Don't remove (necessary for middle-positioning) --></div>
+        <div class="flex-div w-100"><!-- Don't remove (necessary for middle-positioning) -->
+          <div class="w-50 my-3" id="courseFilter" v-if="authStore.isTeacher()">
+            <v-select :options="state.coursesInHomework" v-model="state.filter_course_id" key="name" label="name"
+              :placeholder="$t('filter_courses')" :reduce="c => c.id">
+              <template #option="option">
+                <CourseBadge :name="option.name" :color="option.color" :fontDark="option.fontDark" />
+              </template>
+            </v-select>
+          </div>
+        </div>
       </div>
 
-      <h2 v-if="state.new_homework.length" data-bs-toggle="collapse" href="#newHomework" id="newHomeworkHeader"
-        @click.prevent="collapseNewHomework()" class="noSelect">
-        <div class="arrow arrowDown" id="arrowNewHomework">➤</div> {{ $t("current_assignment") }}
+      <h2 v-if="state.new_homework.length" class="noSelect">
+        <div class="fit-content" data-bs-toggle="collapse" href="#newHomework" id="newHomeworkHeader"
+          @click.prevent="collapseNewHomework()">
+          <div class="arrow arrowDown" id="arrowNewHomework">➤</div> {{ $t("current_assignment") }}
+        </div>
       </h2>
       <div class="collapse show" id="newHomework">
         <div class="d-flex align-content-start flex-wrap cards">
@@ -1014,9 +1055,11 @@ function collapseMyProjects() {
         </div>
       </div>
 
-      <h2 v-if="state.old_homework.length" data-bs-toggle="collapse" href="#oldHomework" id="oldHomeworkHeader"
-        @click.prevent="collapseOldHomework()" class="noSelect">
-        <div class="arrow arrowDown" id="arrowOldHomework">➤</div> {{ $t("previous_assignments") }}
+      <h2 v-if="state.old_homework.length" class="noSelect">
+        <div class="fit-content" id="oldHomeworkHeader" data-bs-toggle="collapse" href="#oldHomework"
+          @click.prevent="collapseOldHomework()">
+          <div class="arrow arrowDown" id="arrowOldHomework">➤</div> {{ $t("previous_assignments") }}
+        </div>
       </h2>
       <div class="collapse show" id="oldHomework">
         <div class="d-flex align-content-start flex-wrap cards">
@@ -1037,9 +1080,11 @@ function collapseMyProjects() {
         </div>
       </div>
 
-      <h2 v-if="state.myProjects.length" data-bs-toggle="collapse" href="#myProjects" id="myProjectsHeader"
-        @click.prevent="collapseMyProjects()" class="noSelect">
-        <div class="arrow arrowDown" id="arrowMyProjects">➤</div> {{ $t("my_projects") }}
+      <h2 v-if="state.myProjects.length" class="noSelect">
+        <div class="fit-content" data-bs-toggle="collapse" href="#myProjects" id="myProjectsHeader"
+          @click.prevent="collapseMyProjects()">
+          <div class="arrow arrowDown" id="arrowMyProjects">➤</div> {{ $t("my_projects") }}
+        </div>
         <div v-if="state.isDuplicating" class="spinner-border text-success" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
@@ -1055,7 +1100,23 @@ function collapseMyProjects() {
   </div>
 </template>
 
+<style lang="scss">
+[data-bs-theme=dark] {
+  #courseFilter>div>div {
+    border-color: gray;
+  }
+
+  #courseFilter>div>div>.vs__selected-options>span {
+    color: lightgray;
+  }
+}
+</style>
+
 <style scoped>
+.fit-content {
+  width: fit-content;
+}
+
 .noSelect {
   user-select: none;
 }

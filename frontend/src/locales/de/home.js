@@ -40,4 +40,5 @@ export const home_de = {
     delete_solution_confirm: "Möchtest du die Verlinkung zur Lösung wirklich löschen? Dein privates Projekt bleibt davon unberührt.",
     toastDeleteSolutionError: "Fehler beim Löschen der Lösung.",
     toastDeleteSolutionSuccess: "Die Lösung wurde gelöscht.",
+    filter_courses: "Kurse filtern",
 }

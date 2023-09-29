@@ -233,7 +233,7 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
                     solution_name = solution_project.name
 
                 homework.append({"deadline": h.deadline, "name": p.name, "description": p.description, "id": h.id,
-                                "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
+                                "course_id": h.course_id, "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
                                  "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing})
                 # TODO append "edited by X/Y pupils" and "average points of solutions"
                 break

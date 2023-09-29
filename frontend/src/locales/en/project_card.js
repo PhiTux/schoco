@@ -5,6 +5,7 @@ export const project_card_en = {
     show_details: "Show details",
     open_project: "Open project",
     add_solution: "Add solution",
-    change_solution: "Change<br>solution",
     open_solution: "Open solution",
+    change_solution_line_break: "Change<br>solution",
+
 }
