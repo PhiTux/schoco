@@ -1,7 +1,7 @@
 export const ide_de = {
     server_was_overloaded_try_again: "Der Server war vermutlich gerade überlastet 😥 Bitte versuche es erneut!",
     no_live_output_result_to_follow: "Live-Ausgabe nicht möglich, Ergebnis folgt gleich...",
-    compilation_successful: "Erfolgreich kompiliert 🎉", 
+    compilation_successful: "Erfolgreich kompiliert 🎉",
     compilation_started: "Kompilierung gestartet... 🛠",
     program_running: "Programm wird ausgeführt...",
     program_testing: "Programm wird getestet 📝➡️✅ bitte warten...",
@@ -47,7 +47,7 @@ export const ide_de = {
     rename_file_invalid: "Dateiname ist ungültig (enthält Leerzeichen oder der Name existiert bereits)!",
     create_assignment: "Aufgabe erstellen",
     create_assignment_description_1: "⚠️<b>Wichtig:</b> Die Konfiguration eines Projektes sollte vollständig abgeschlossen sein, <b>bevor</b> du daraus eine Aufgabe erstellst. Nach diesem Schritt sollten Änderungen vermieden werden, da die Schüler/innen andernfalls u. U. unterschiedliche Versionen bearbeiten.",
-    create_assignment_description_2: "Beim Erstellen einer Aufgabe wird der <b>jetzige Zustand</b> deines Projekts kopiert und im Hintergrund \"unsichtbar\" als Vorlage für die Schüler/innen gespeichert. Nach dem Erstellen werden weitere Änderungen an diesem privaten Projekt von dir also <b>nicht</b> in der Aufgabe bei den Schüler/innen sichtbar. Du könntest dieses private Projekt also anschließend auch gefahrlos löschen und die Aufgabe würde weiterhin bestehen bleiben.",
+    create_assignment_description_2: "Beim Erstellen einer Aufgabe wird der <b>jetzige Zustand</b> deines Projekts kopiert und im Hintergrund \"unsichtbar\" als Vorlage für die Schüler/innen gespeichert. Nach dem Erstellen werden weitere Änderungen an diesem privaten Projekt von dir also <b>nicht</b> in der Aufgabe bei den Schüler/innen sichtbar. Du könntest dieses private Projekt also z. B. anschließend auch gefahrlos löschen und die Aufgabe würde weiterhin bestehen bleiben. <b>Wichtig:</b> Die Schüler/innen können den Einstiegspunkt (= Klasse mit main-Methode) weder ändern noch umbenennen!",
     assignment_already_created: "Aus diesem Projekt wurde bereits eine Aufgabe erstellt für folgende Kurse:",
     choose_course: "Kurs wählen",
     create_course_in_usermanagement: "Du musst zuerst in der Benutzerverwaltung einen Kurs anlegen (idealerweise mit Schülern)!",

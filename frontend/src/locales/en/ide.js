@@ -1,7 +1,7 @@
 export const ide_en = {
     server_was_overloaded_try_again: "The server was probably overloaded 😥 Please try again!",
     no_live_output_result_to_follow: "Live output not possible, result will follow shortly...",
-    compilation_successful: "Compilation successful 🎉", 
+    compilation_successful: "Compilation successful 🎉",
     compilation_started: "Compilation started... 🛠",
     program_running: "Program running...",
     program_testing: "Program testing 📝➡️✅ please wait...",
@@ -47,7 +47,7 @@ export const ide_en = {
     rename_file_invalid: "Filename is invalid (contains spaces or the name already exists)!",
     create_assignment: "Create assignment",
     create_assignment_description_1: "⚠️<b>Important:</b> The configuration of a project should be fully completed <b>before</b> creating an assignment from it. After this step, changes should be avoided, as students may otherwise work on different versions.",
-    create_assignment_description_2: "When creating an assignment, the <b>current state</b> of your project is copied and saved as a template for the students in the background. After creation, further changes to this private project by you will <b>not</b> be visible in the assignment for the students. E.g. you can safely delete this private project afterwards, and the assignment will still exist.",
+    create_assignment_description_2: "When creating an assignment, the <b>current state</b> of your project is copied and saved as a template for the students in the background. After creation, further changes to this private project by you will <b>not</b> be visible in the assignment for the students. E.g. you can safely delete this private project afterwards, and the assignment will still exist. <b>Important:</b> Students cannot change or rename the entry point (= class with main method)!",
     assignment_already_created: "An assignment has already been created from this project for the following courses:",
     choose_course: "Choose course",
     create_course_in_usermanagement: "You must first create a course in the user management (ideally with students)!",

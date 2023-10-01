@@ -1,6 +1,9 @@
 <script setup>
 import { onMounted, watch } from "vue";
 import { Tooltip } from "bootstrap";
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 
 
 const props = defineProps({
@@ -69,8 +72,8 @@ watch(() => props.entryPoint, () => {
             <a v-else>
                 <div class="name px-1">{{ props.name }}</div>
             </a>
-            <a v-if="props.path !== 'Tests.java/'" class="file-dropdown dropdown-toggle dropdown-toggle-split"
-                data-bs-toggle="dropdown"></a>
+            <a v-if="(route.params.user_id == 0 && props.path == 'Schoco.java/') || (props.path !== 'Tests.java/' && props.path !== 'Schoco.java/')"
+                class="file-dropdown dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></a>
             <!-- if file -->
             <ul v-if="Object.keys(props.value).length === 0" class="dropdown-menu" data-bs-theme="light">
                 <li v-if="renameAllowed"><a class="dropdown-item"
@@ -79,7 +82,7 @@ watch(() => props.entryPoint, () => {
                 <li v-if="deleteAllowed"><a class="dropdown-item"
                         @click="$emit('deleteFile', props.path)"><font-awesome-icon icon="fa-solid fa-trash" fixed-width />
                         {{ $t("delete") }}</a></li>
-                <li>
+                <li v-if="route.params.user_id == 0">
                     <a class="dropdown-item" @click="$emit('setEntryPoint', props.path)">
                         <font-awesome-icon icon="fa-solid fa-house" fixed-width /> {{ $t("set_as_entry_point") }}
                     </a>
@@ -95,8 +98,8 @@ watch(() => props.entryPoint, () => {
         </div>
     </li>
     <ul v-if="Object.keys(props.value).length !== 0">
-        <TreeNode v-for="[newKey, newValue] of Object.entries(props.value)" :entryPoint="props.entryPoint" :name="newKey"
-            :value="newValue" :path="props.path + newKey + '/'" :rename-allowed="renameAllowed"
+        <TreeNode v-for=" [newKey, newValue]  of  Object.entries(props.value) " :entryPoint="props.entryPoint"
+            :name="newKey" :value="newValue" :path="props.path + newKey + '/'" :rename-allowed="renameAllowed"
             :delete-allowed="deleteAllowed" @openFile="openFile" @renameFile="renameFile" @deleteFile="deleteFile"
             @renameDirectory="renameDirectory" @deleteDirectory="deleteDirectory" @setEntryPoint="setEntryPoint">
         </TreeNode>
