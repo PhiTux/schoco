@@ -433,7 +433,7 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
     original_project_id = project.id
 
     new_project = models_and_schemas.Project(
-        uuid=template_project_uuid, name=project.name, description=project.description, owner_id=project.owner_id, computation_time=create_homework.computation_time)
+        uuid=template_project_uuid, name=project.name, description=project.description, owner_id=project.owner_id, computation_time=create_homework.computation_time, main_class=project.main_class)
     if not crud.create_project(db=db, project=new_project):
         # delete git repo
         git.remove_repo(project_uuid=template_project_uuid)
