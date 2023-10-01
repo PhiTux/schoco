@@ -37,7 +37,7 @@ export const ide_en = {
     description_new_file: "Enter the new file name for the file. Remember to include the file extension (typically <code>.java</code>)! <br> <br>If you want to create a folder, you must also specify a file within the new folder. <br><br><b><u>Example:</u></b><br>If you want to create the folder \"<code>new</code>\", you must also specify a file within the folder (e.g. <code>MyClass.java</code>). Therefore, enter the full file name as <code>new/MyClass.java</code>.",
     filename_is_invalid: "Filename is invalid (contains spaces or the name already exists)!",
     question_delete_file: "Delete file?",
-    ask_delete_file_x: "Do you really want to delete the file \"{0}\"?",
+    ask_delete_file_x: "Do you really want to delete the file {0}?",
     delete_folder: "Delete folder",
     delete_folder_description: "Unfortunately, folders cannot be deleted directly. However, you can delete all the contents of the folder, and the folder will be deleted automatically.",
     rename_folder: "Rename folder",
@@ -64,4 +64,7 @@ export const ide_en = {
     execute: "Execute",
     test: "Test",
     placeholder_for_input: "Input (press Enter to send)",
+    set_as_entry_point: "Set as entry point",
+    error_main_class_not_found: "No main method was found in the main/initial class (with 🏠). Make sure that a method with the following signature exists there:\npublic static void main(String[] args)",
+    tooltip_entry_point: "The main/initial class of the program, which must also contain the main method.",
 }

@@ -3,9 +3,9 @@ import { computed } from "vue";
 import TreeNode from "./TreeNode.vue"
 
 
-const emit = defineEmits(['openFile', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory'])
+const emit = defineEmits(['openFile', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory', 'setEntryPoint'])
 
-const props = defineProps(["files", "renameAllowed", "deleteAllowed"]);
+const props = defineProps(["files", "renameAllowed", "deleteAllowed", "entryPoint"]);
 
 const nestedFiles = computed(() => {
   let f = [];
@@ -53,10 +53,10 @@ function deleteDirectory() {
   emit('deleteDirectory')
 }
 
-function toggleFolder(path, event) {
-  console.log(path)
-  console.log(event.target)
+function setEntryPoint(path) {
+  emit('setEntryPoint', path)
 }
+
 </script>
 
 <template>
@@ -71,10 +71,10 @@ function toggleFolder(path, event) {
   </div>
   <div class="tree">
     <ul id="root">
-      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :name="newKey" :value="newValue"
-        :path="newKey + '/'" :renameAllowed="renameAllowed" :deleteAllowed="deleteAllowed" @toggleFolder="toggleFolder"
+      <TreeNode v-for="[newKey, newValue] of Object.entries(nestedFiles)" :entryPoint="props.entryPoint" :name="newKey"
+        :value="newValue" :path="newKey + '/'" :renameAllowed="renameAllowed" :deleteAllowed="deleteAllowed"
         @openFile="openFile" @renameFile="renameFile" @deleteFile="deleteFile" @renameDirectory="renameDirectory"
-        @deleteDirectory="deleteDirectory">
+        @deleteDirectory="deleteDirectory" @setEntryPoint="setEntryPoint">
       </TreeNode>
     </ul>
   </div>

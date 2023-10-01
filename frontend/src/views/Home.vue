@@ -1109,6 +1109,11 @@ function collapseMyProjects() {
   #courseFilter>div>div>.vs__selected-options>span {
     color: lightgray;
   }
+
+  #courseFilter>div>div>.vs__actions>button>svg,
+  #courseFilter>div>div>.vs__actions>svg {
+    fill: lightgray;
+  }
 }
 </style>
 

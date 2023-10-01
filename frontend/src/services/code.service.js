@@ -153,6 +153,14 @@ class CodeService {
     deleteSolution(homework_id) {
         return axiosAuth.post('deleteSolution', {'homework_id': homework_id})
     }
+
+    loadEntryPoint(project_uuid, user_id) {
+        return axiosAuth.get(`loadEntryPoint/${project_uuid}/${user_id}`)
+    }
+
+    setEntryPoint(project_uuid, user_id, path) {
+        return axiosAuth.post(`setEntryPoint/${project_uuid}/${user_id}`, {'entry_point': path})
+    }
 }
 
 export default new CodeService()

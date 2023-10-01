@@ -708,3 +708,34 @@ def check_if_uuid_is_solution(db: Session, uuid: str):
         return False
 
     return True
+
+
+def get_entry_point_by_project_uuid(db: Session, project_uuid: str):
+    # get project
+    project = get_project_by_project_uuid(db, project_uuid)
+    if project is None:
+        return ""
+
+    return project.main_class
+
+
+def set_entry_point_by_project_uuid(db: Session, project_uuid: str, entry_point: str):
+    # add slash to end if missing
+    if entry_point[-1] != "/":
+        entry_point += "/"
+
+    # get project
+    project = get_project_by_project_uuid(db, project_uuid)
+    if project is None:
+        return False
+
+    # update entry point
+    project.main_class = entry_point
+    try:
+        db.add(project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True

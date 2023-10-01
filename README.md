@@ -203,14 +203,12 @@ The <ins>git-repo</ins> (gitea) is naturally running in it's own original and un
 Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use containers!
 
 ## Progress
-**Progress is far (around 90% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
+**Progress is far (around 95% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
 
 **From now on, there are just a few more features missing (and some polishing here and there of course...)**
 Especially the following things are planned to be adressed until September 2023
 - [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
-- [ ] Provide a way to make teacher's solution visible to students AFTER the deadline has passed
 - [ ] Mark projects as templates (when being a teacher)
-- [ ] Perhaps some possibility to link a teacher's solution to a previous homework after the deadline has passed?!
 - [ ] Perhaps some possibility to view pupil's private projects as teacher?!
 
 **Below are the things, that are already working**
@@ -225,13 +223,15 @@ Especially the following things are planned to be adressed until September 2023
     - [x] Compilation
     - [x] Running/Executing (Input and output can be send via Websocket ✔)
     - [x] JUnit-Testing
-- [x] Make homework out of projects with deadlines, submitting, view pupils solutions as teacher, ...
+- [x] Make assigment out of projects with deadlines, submitting, view pupils solutions as teacher, ...
 - [x] Save amount of compilations, executions,... per project and make them visible
 - [x] Import/export projects as zip
 - [x] Automatic saving and compilation (if necessary) before executing/testing
 - [x] Automatically switching to http-response (no live-output), if websocket-connection fails and back to WS if working again.
 - [x] Add/rename/remove (Java-)Files and folders to Project
 - [x] Stop compilation/execution button
+- [x] Pupils can see a teachers' solution of an assignment after a configurable start-date
+- [x] Users can change entry-point of project (main-class)
 
 # Start developing
 

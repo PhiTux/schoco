@@ -100,7 +100,9 @@ public class Java_api {
 					String stdout = "";
 
 					try {
-						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -Djava.security.manager=default -cp /app/tmp Schoco' " 
+						String[] command = { "sh", "-c", "bash /app/cookies.sh 'java -Djava.security.manager=default -cp /app/tmp " 
+						+ postData.get("entry_point")
+						+ "' "
 						+ postData.get("timeout_cpu") 
 						+ " " 
 						+ postData.get("timeout_session") 

@@ -73,6 +73,7 @@ let state = reactive({
   aborted: false,
   isStopping: false,
   isSolution: false,
+  entry_point: "",
 });
 
 let homework = reactive({
@@ -169,9 +170,11 @@ onBeforeMount(() => {
   CodeService.loadAllFiles(route.params.project_uuid, route.params.user_id).then(
     (response) => {
       if (response.status == 200) {
-        state.files = response.data;
+        state.files = response.data.files;
       }
-      openFile("Schoco.java");
+      state.entry_point = response.data.entry_point;
+      let entry_point_without_slash = state.entry_point.endsWith("/") ? state.entry_point.slice(0, -1) : state.entry_point
+      openFile(entry_point_without_slash);
     },
     (error) => {
       if (
@@ -292,11 +295,15 @@ onMounted(async () => {
 
   // enable tooltips (wait until test-button is rendered after getProjectInfo())
   setTimeout(() => {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
+    enableTooltips()
   }, 500)
 
 })
+
+function enableTooltips() {
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
+}
 
 function setLight(light) {
   if (document.getElementById('editor') == null) return
@@ -749,6 +756,9 @@ function startExecute(ip, port, uuid, project_uuid, user_id) {
           return;
         }
       }
+      else if (results.value.startsWith("Error: Could not find or load main class")) {
+        results.value += "\n============\n\n" + i18n.t("error_main_class_not_found")
+      }
 
     },
     (error) => {
@@ -1046,6 +1056,19 @@ function renameFileModal(path) {
   })
 }
 
+function loadEntryPoint() {
+  CodeService.loadEntryPoint(route.params.project_uuid, route.params.user_id).then(
+    (response) => {
+      if (response.data) {
+        state.entry_point = response.data.entry_point
+      } else {
+        state.entry_point = ""
+      }
+    }, (error) => {
+      console.log(error.response)
+    })
+}
+
 function renameFile() {
 
   if (state.renameFileNewName.trim() === "" || state.renameFileNewName.trim().includes(" ")) {
@@ -1080,6 +1103,9 @@ function renameFile() {
           document.getElementById("toastRenameFileSuccess")
         );
         toast.show();
+
+        // load new entry_point class
+        loadEntryPoint()
 
         //update file list
         for (let i = 0; i < state.files.length; i++) {
@@ -1503,6 +1529,18 @@ function stopContainer() {
     })
 }
 
+function setEntryPoint(path) {
+  CodeService.setEntryPoint(route.params.project_uuid, route.params.user_id, path).then(
+    (response) => {
+      if (response.data.success) {
+        state.entry_point = path
+      } else {
+        state.entry_point = ""
+      }
+    }, (error) => {
+      console.log(error.response)
+    })
+}
 </script>
 
 <template>
@@ -1803,7 +1841,7 @@ function stopContainer() {
           </div>
           <div class="modal-body">
             <i18n-t keypath="rename_file_description" tag="span">
-              <u>{{ state.renameFilePath }}</u>
+              <code>{{ state.renameFilePath }}</code>
               <i>.java</i>
             </i18n-t>
 
@@ -2131,10 +2169,10 @@ function stopContainer() {
                       </div>
                     </div>
                   </div>
-                  <IDEFileTree :files="state.files" :rename-allowed="!state.isSolution"
+                  <IDEFileTree :files="state.files" :entryPoint="state.entry_point" :rename-allowed="!state.isSolution"
                     :delete-allowed="!state.isSolution" @openFile="openFile" @renameFile="renameFileModal"
                     @deleteFile="deleteFileModal" @renameDirectory="renameDirectoryModal"
-                    @deleteDirectory="deleteDirectoryModal" />
+                    @deleteDirectory="deleteDirectoryModal" @setEntryPoint="setEntryPoint" />
                 </pane>
                 <!-- Description -->
                 <pane min-size="30" size="50" max-size="70">

@@ -11,6 +11,9 @@ BEFORE creating the model, make sure, that your old DB has included the metadata
 
 Then edit the models and create a new revision:
 -> call: alembic -c alembic_dev.ini revision --autogenerate -m "EXCPLAIN WHAT YOU CHANGED"
+
+Afterwards actually update the dev-database:
+-> call: alembic -c alembic_dev.ini upgrade head
 """
 
 # database models
@@ -68,6 +71,7 @@ class Project(SQLModel, table=True):
     description: str
     owner_id: int = Field(foreign_key="user.id")
     computation_time: Optional[int] = 10
+    main_class: str
 
     owner: "User" = Relationship(back_populates="projects")
 
@@ -252,3 +256,7 @@ class AddSolution(BaseModel):
 
 class DeleteSolution(BaseModel):
     homework_id: int
+
+
+class EntryPoint(BaseModel):
+    entry_point: str

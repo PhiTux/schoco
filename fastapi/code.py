@@ -29,7 +29,7 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
     project_uuid = str(uuid.uuid4())
     user = crud.get_user_by_username(db=db, username=username)
     project = models_and_schemas.Project(
-        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id, computation_time=DEFAULT_COMPUTATION_TIME)
+        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id, computation_time=DEFAULT_COMPUTATION_TIME, main_class="Schoco.java/")
 
     # create git repo
     if not git.create_repo(project_uuid):
@@ -144,7 +144,10 @@ def loadAllFiles(project_uuid: str = Path(), user_id: int = Path(), db: Session 
     res = recursively_download_all_files(
         project_uuid=project_uuid, id=user_id, path="/", is_solution=is_solution)
 
-    return res
+    entry_point = crud.get_entry_point_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+
+    return {'files': res, 'entry_point': entry_point}
 
 
 @ code.post('/updateDescription/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
@@ -358,8 +361,14 @@ def startExecute(startExecute: models_and_schemas.startExecute, background_tasks
 
     computation_time = getComputationTime(db=db, project_uuid=project_uuid)
 
+    entry_point = crud.get_entry_point_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+
+    # remove everything behind last dot
+    entry_point = entry_point[:entry_point.rfind('.')]
+
     result = cookies_api.start_execute(
-        startExecute.container_uuid, startExecute.port, computation_time, startExecute.save_output)
+        startExecute.container_uuid, startExecute.port, computation_time, startExecute.save_output, entry_point)
 
     if user_id != 0:
         crud.increase_runs(db=db, uuid=project_uuid, user_id=user_id)
@@ -596,6 +605,16 @@ def renameFile(file: models_and_schemas.RenameFile, project_uuid: str = Path(), 
     if not git.renameFile(file.old_path, file.new_path, project_uuid, user_id, file.content, file.sha):
         raise HTTPException(
             status_code=500, detail="Error on renaming file.")
+
+    # update entry_point if old_path was entry_point
+    entry_point = crud.get_entry_point_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+    print(entry_point, file.old_path)
+
+    if entry_point == file.old_path or entry_point == file.old_path + "/":
+        if not crud.set_entry_point_by_project_uuid(db=db, project_uuid=project_uuid, entry_point=file.new_path):
+            raise HTTPException(
+                status_code=500, detail="Error on setting entry point.")
 
     return {'success': True}
 
@@ -848,5 +867,32 @@ def deleteSolution(deleteSolution: models_and_schemas.DeleteSolution, db: Sessio
     if not crud.delete_solution_from_homework(db=db, homework=homework):
         raise HTTPException(
             status_code=500, detail="Error on deleting solution.")
+
+    return {'success': True}
+
+
+@code.get('/loadEntryPoint/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def loadEntryPoint(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    main_project_uuid = project_uuid
+
+    if user_id != 0:
+        main_project_uuid = crud.get_template_project_of_editing_homework_by_uuid(
+            db, project_uuid).uuid
+
+    entry_point = crud.get_entry_point_by_project_uuid(
+        db=db, project_uuid=main_project_uuid)
+
+    return {'entry_point': entry_point}
+
+
+@code.post('/setEntryPoint/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def setEntryPoint(entryPoint: models_and_schemas.EntryPoint, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    entry_point = entryPoint.entry_point
+    if not entry_point.endswith('/'):
+        entry_point += '/'
+
+    if not crud.set_entry_point_by_project_uuid(db=db, project_uuid=project_uuid, entry_point=entry_point):
+        raise HTTPException(
+            status_code=500, detail="Error on setting entry point.")
 
     return {'success': True}

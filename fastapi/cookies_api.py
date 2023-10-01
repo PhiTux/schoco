@@ -154,7 +154,7 @@ def createNewContainer():
     client = docker.from_env()
     nproc_limit = docker.types.Ulimit(name="nproc", soft=3700, hard=5000)
     new_container = client.containers.run(
-        "phitux/schoco-cookies:1.1.1", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
+        "phitux/schoco-cookies:1.2.0", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
     ip = apiclient.inspect_container(new_name)[
@@ -343,7 +343,7 @@ def prepare_execute(project_uuid: str, user_id: int):
     return c
 
 
-def start_execute(uuid: str, port: int, computation_time: int, save_output: bool):
+def start_execute(uuid: str, port: int, computation_time: int, save_output: bool, entry_point: str):
 
     # pycurl to cookies-java-server "/execute"
     buffer = BytesIO()
@@ -356,7 +356,8 @@ def start_execute(uuid: str, port: int, computation_time: int, save_output: bool
 
     post_data = {'timeout_cpu': computation_time,
                  'timeout_session': computation_time,
-                 'save_output': save_output}
+                 'save_output': save_output,
+                 'entry_point': entry_point}
 
     # Why the 7? 🤷‍♂️ Probability and trial and error...
     tries = 7

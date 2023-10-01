@@ -1,20 +1,21 @@
 <script setup>
+import { onMounted, watch } from "vue";
+import { Tooltip } from "bootstrap";
+
+
 const props = defineProps({
     path: String,
     name: String,
     value: Object,
     renameAllowed: Boolean,
     deleteAllowed: Boolean,
+    entryPoint: String,
 })
 
-const emit = defineEmits(['openFile', 'toggleFolder', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory'])
+const emit = defineEmits(['openFile', 'renameFile', 'deleteFile', 'renameDirectory', 'deleteDirectory', 'setEntryPoint'])
 
 function openFile(path) {
     emit('openFile', path)
-}
-
-function toggleFolder(path, event) {
-    emit('toggleFolder', path, event)
 }
 
 function renameFile(path) {
@@ -33,6 +34,25 @@ function deleteDirectory() {
     emit('deleteDirectory')
 }
 
+function setEntryPoint(path) {
+    emit('setEntryPoint', path)
+}
+
+function updateTooltip() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
+}
+
+onMounted(() => {
+    updateTooltip();
+})
+
+watch(() => props.entryPoint, () => {
+    setTimeout(() => {
+        updateTooltip();
+    }, 250);
+})
+
 </script>
 
 <template>
@@ -42,13 +62,15 @@ function deleteDirectory() {
         <font-awesome-icon v-else icon="fa-solid fa-file" class="mx-1 treeItem" fixed-width />
         <div class="btn-group">
             <a v-if="Object.keys(props.value).length === 0" @click="$emit('openFile', props.path)">
+                <div class="d-flex name px-1"><font-awesome-icon v-if="props.entryPoint === props.path"
+                        data-bs-toggle="tooltip" data-bs-placement="top" :data-bs-title="$t('tooltip_entry_point')"
+                        icon="fa-solid fa-house" class="mx-1 treeItem my-auto" fixed-width /> {{ props.name }}</div>
+            </a>
+            <a v-else>
                 <div class="name px-1">{{ props.name }}</div>
             </a>
-            <a v-else @click="$emit('toggleFolder', props.path, $event)">
-                <div class="name px-1">{{ props.name }}</div>
-            </a>
-            <a v-if="props.path !== 'Schoco.java/' && props.path !== 'Tests.java/'"
-                class="file-dropdown dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></a>
+            <a v-if="props.path !== 'Tests.java/'" class="file-dropdown dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown"></a>
             <!-- if file -->
             <ul v-if="Object.keys(props.value).length === 0" class="dropdown-menu" data-bs-theme="light">
                 <li v-if="renameAllowed"><a class="dropdown-item"
@@ -57,6 +79,11 @@ function deleteDirectory() {
                 <li v-if="deleteAllowed"><a class="dropdown-item"
                         @click="$emit('deleteFile', props.path)"><font-awesome-icon icon="fa-solid fa-trash" fixed-width />
                         {{ $t("delete") }}</a></li>
+                <li>
+                    <a class="dropdown-item" @click="$emit('setEntryPoint', props.path)">
+                        <font-awesome-icon icon="fa-solid fa-house" fixed-width /> {{ $t("set_as_entry_point") }}
+                    </a>
+                </li>
             </ul>
             <!-- if directory -->
             <ul v-else class="dropdown-menu" data-bs-theme="light">
@@ -68,10 +95,10 @@ function deleteDirectory() {
         </div>
     </li>
     <ul v-if="Object.keys(props.value).length !== 0">
-        <TreeNode v-for="[newKey, newValue] of Object.entries(props.value)" :name="newKey" :value="newValue"
-            :path="props.path + newKey + '/'" :rename-allowed="renameAllowed" :delete-allowed="deleteAllowed"
-            @toggleFolder="toggleFolder" @openFile="openFile" @renameFile="renameFile" @deleteFile="deleteFile"
-            @renameDirectory="renameDirectory" @deleteDirectory="deleteDirectory">
+        <TreeNode v-for="[newKey, newValue] of Object.entries(props.value)" :entryPoint="props.entryPoint" :name="newKey"
+            :value="newValue" :path="props.path + newKey + '/'" :rename-allowed="renameAllowed"
+            :delete-allowed="deleteAllowed" @openFile="openFile" @renameFile="renameFile" @deleteFile="deleteFile"
+            @renameDirectory="renameDirectory" @deleteDirectory="deleteDirectory" @setEntryPoint="setEntryPoint">
         </TreeNode>
     </ul>
 </template>

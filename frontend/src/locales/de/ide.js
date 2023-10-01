@@ -37,7 +37,7 @@ export const ide_de = {
     description_new_file: "Gib den neuen Dateinamen für die Datei ein. Denke an die Dateiendung (typischerweise <code>.java</code>)! <br> <br>Wenn du einen Order anlegen möchtest, dann musst du gleichzeitig auch eine Datei innerhalb des neuen Ordners angeben. <br><br><b><u>Beispiel:</u></b><br>Wenn du den Ordner \"<code>neu</code>\" anlegen möchtest, dann musst du auch eine Datei innerhalb des Ordners angeben (z. B. <code>MeineKlasse.java</code>). Gib daher als vollen Dateinamen <code>neu/MeineKlasse.java</code> an.",
     filename_is_invalid: "Dateiname ist ungültig (enthält Leerzeichen oder der Name existiert bereits)!",
     question_delete_file: "Datei löschen?",
-    ask_delete_file_x: "Möchtest du die Datei \"{0}\" wirklich löschen?",
+    ask_delete_file_x: "Möchtest du die Datei {0} wirklich löschen?",
     delete_folder: "Ordner löschen",
     delete_folder_description: "Ordner können leider <b>nicht</b> direkt gelöscht werden. Du kannst allerdings sämtlichen Inhalt des Ordners löschen, dann wird der Ordner automatisch mitgelöscht.",
     rename_folder: "Ordner umbenennen",
@@ -64,4 +64,7 @@ export const ide_de = {
     execute: "Ausführen",
     test: "Testen",
     placeholder_for_input: "Eingabe (Entertaste zum Senden)",
+    set_as_entry_point: "Als Einstiegspunkt setzen",
+    error_main_class_not_found: "In der Haupt-/Einstiegsklasse (mit 🏠) wurde keine main-Methode gefunden. Stelle sicher, dass dort eine Methode mit folgender Signatur existiert:\npublic static void main(String[] args)",
+    tooltip_entry_point: "Die Haupt/Einstiegsklasse des Programms, welche auch die main-Methode enthalten muss."
 }
