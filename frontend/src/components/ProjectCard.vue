@@ -2,6 +2,7 @@
 import { onMounted, reactive } from "vue";
 import CourseBadge from "./CourseBadge.vue"
 import TextClamp from "vue3-text-clamp";
+import Submission from "./Submission.vue";
 
 let state = reactive({
     showToggle: false
@@ -28,7 +29,8 @@ const props = defineProps({
     solution_uuid: String,
     solution_name: String,
     solution_id: Number,
-    solution_start_showing: String
+    solution_start_showing: String,
+    submission: String,
 });
 
 onMounted(() => {
@@ -134,6 +136,11 @@ onMounted(() => {
                     }}</router-link>
                 </div>
             </div>
+        </div>
+        <div v-if="isHomework && !isTeacher" class="card-footer">
+            <i18n-t keypath="percent_solved" tag="span">
+                <Submission :submission="submission"></Submission>
+            </i18n-t>
         </div>
     </div>
 </template>

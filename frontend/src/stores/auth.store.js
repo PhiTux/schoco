@@ -6,11 +6,11 @@ const API_URL = import.meta.env.VITE_API_URL
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
-         
+
         // initialize state from local storage to enable user to stay logged in
         user: JSON.parse(localStorage.getItem('user')),
         returnUrl: null
-    
+
     }),
     actions: {
         async login(username, password) {
@@ -27,17 +27,17 @@ export const useAuthStore = defineStore({
                 return err
             }
             this.$router.push(this.returnUrl || '/home');
-            return 
+            return
         },
         logout() {
             this.user = null;
-            localStorage.removeItem('user');
             this.$router.push('/login');
+            localStorage.removeItem('user');
         },
         logout_token_expired() {
             this.user = null;
             localStorage.removeItem('user');
-            this.$router.push({path: '/login', query: {token_expired: true}});
+            this.$router.push({ path: '/login', query: { token_expired: true } });
         },
         isTeacher() {
             return (this.user && this.user.role == 'teacher')

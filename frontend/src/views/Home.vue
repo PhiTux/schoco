@@ -1051,7 +1051,7 @@ function collapseMyProjects() {
           <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
             @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :description="h.description"
             :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline" :solution_uuid="h.solution_uuid"
-            @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+            @deleteHomeworkBranch="askDeleteHomeworkBranch" :submission="h.submission" />
         </div>
       </div>
 
@@ -1076,7 +1076,7 @@ function collapseMyProjects() {
           <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld
             @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid"
             :description="h.description" :branch="h.branch" :id="h.id" :deadline="h.deadline"
-            :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" />
+            :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" :submission="h.submission" />
         </div>
       </div>
 

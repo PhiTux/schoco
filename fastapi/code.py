@@ -292,14 +292,14 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
                 already_edited = True
                 uuid = crud.get_uuid_of_homework(
                     db=db, homework_id=h['id'])
-
+                
                 homework.append({"is_editing": True, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                                "id": h["id"], "uuid": uuid, "branch": user.id, "solution_uuid": solution_uuid})
+                                "id": h["id"], "uuid": uuid, "branch": user.id, "solution_uuid": solution_uuid, "submission": e.submission})
                 break
         # ... and those, which are not yet started by the pupil
         if not already_edited:
             homework.append({"is_editing": False, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                             "id": h["id"], "solution_uuid": solution_uuid})
+                             "id": h["id"], "solution_uuid": solution_uuid, "submission": ""})
 
     return {"homework": homework, "projects": all_projects}
 
@@ -519,7 +519,7 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
 
         if not found:
             pupils_results.append({"name": p.full_name, "username": p.username, "uuid": "",
-                                  "best_result": "", "compilations": 0, "runs": 0, "tests": 0})
+                                  "result": "", "compilations": 0, "runs": 0, "tests": 0})
 
     result['pupils_results'] = pupils_results
 

@@ -3,6 +3,7 @@ import { onBeforeMount, reactive } from "vue";
 import { useRoute } from "vue-router";
 import CodeService from "../services/code.service.js";
 import CourseBadge from "../components/CourseBadge.vue";
+import Submission from "../components/Submission.vue";
 import { Modal, Popover, Toast } from "bootstrap";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
@@ -54,20 +55,6 @@ onBeforeMount(() => {
         }
     )
 })
-
-function calc_result(input_string) {
-    let input = JSON.parse(input_string)
-    return Math.round(input.passed_tests / (input.passed_tests + input.failed_tests) * 100 * 10) / 10
-}
-
-function calc_result_color(input_string) {
-    let result = calc_result(input_string)
-    if (result <= 30)
-        return 1
-    if (result <= 90)
-        return 2
-    return 3
-}
 
 function prepareEditHomeworkModal() {
     newSettings.deadlineDate = homework.deadlineDate
@@ -266,12 +253,13 @@ function updateSettings() {
                     <tr v-for=" p  in  state.pupils ">
                         <td>{{ p.name }}</td>
                         <td>{{ p.username }}</td>
-                        <td><a class="btn btn-primary" v-if="p.uuid !== ''"
-                                :href="'#/ide/' + p.uuid + '/' + p.branch">{{ $t("open") }}</a></td>
-                        <td><span v-if="state.showDetails && p.result"
-                                :class="{ resultRed: calc_result_color(p.result) == 1, resultYellow: calc_result_color(p.result) == 2, resultGreen: calc_result_color(p.result) == 3 }">{{
-                                    calc_result(p.result) }} %</span><span v-else-if="state.showDetails">0
-                                %</span></td>
+                        <td><a class="btn btn-primary" v-if="p.uuid !== ''" :href="'#/ide/' + p.uuid + '/' + p.branch">{{
+                            $t("open") }}</a></td>
+                        <td>
+                            <div v-if="state.showDetails">
+                                <Submission :submission="p.result"></Submission> %
+                            </div>
+                        </td>
                         <td><span v-if="state.showDetails">{{ p.compilations }}</span></td>
                         <td><span v-if="state.showDetails">{{ p.runs }}</span></td>
                         <td><span v-if="state.showDetails">{{ p.tests }}</span></td>

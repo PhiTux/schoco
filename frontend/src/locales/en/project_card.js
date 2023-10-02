@@ -7,5 +7,5 @@ export const project_card_en = {
     add_solution: "Add solution",
     open_solution: "Open solution",
     change_solution_line_break: "Change<br>solution",
-
+    percent_solved: "Solved {0} %.",
 }
