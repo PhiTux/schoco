@@ -37,7 +37,6 @@ router.afterEach((to, from) => {
 </template>
 
 <style lang="scss">
-
 a {
   cursor: pointer;
 }
@@ -46,8 +45,16 @@ a {
   box-shadow: 0 0 white !important;
 }
 
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('fonts/NotoSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   overflow-x: hidden;
+  font-family: 'Noto Sans', sans-serif;
 }
 
 .fade-enter-active,

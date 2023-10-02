@@ -185,14 +185,14 @@ const registerPasswordTooShort = computed(() => {
       </a><!-- end github animated corner -->
       <div class="container-fluid flex-fill align-items-center d-flex justify-content-center">
         <div class="w-100 row text-center align-items-center">
-          <div class="col-6">
-            <div class="container-lg">
+          <div class="col-xs-12 col-lg-6 col-xxl-4">
+            <div class="container-lg mb-5">
               <div class="schoco-icon">{🍫}</div>
               SCHOCO<br />
               <b><u>SCH</u></b>ool <b><u>O</u></b>nline <b><u>CO</u></b>ding
             </div>
           </div>
-          <div class="col-6 col-xxl-4">
+          <div class="col-xs-12 col-lg-6 col-xxl-4">
             <div class="accordion" id="loginAccordion">
               <div class="accordion-item">
                 <h2 class="accordion-header" id="headingOne">
