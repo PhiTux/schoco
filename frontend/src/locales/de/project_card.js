@@ -8,4 +8,5 @@ export const project_card_de = {
     open_solution: "Lösung öffnen",
     change_solution_line_break: "Lösung<br>ändern",
     percent_solved: "Zu {0} % gelöst.",
+    pupils_editing: "Von {0} SuS bearbeitet.",
 }

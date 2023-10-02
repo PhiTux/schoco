@@ -31,6 +31,8 @@ const props = defineProps({
     solution_id: Number,
     solution_start_showing: String,
     submission: String,
+    pupils_editing: Number,
+    pupils_in_course: Number,
 });
 
 onMounted(() => {
@@ -141,6 +143,18 @@ onMounted(() => {
             <i18n-t keypath="percent_solved" tag="span">
                 <Submission :submission="submission"></Submission>
             </i18n-t>
+        </div>
+        <div v-if="isHomework && isTeacher" class="card-footer row">
+            <div class="col-6 border-end">
+                <i18n-t keypath="pupils_editing" tag="span">
+                    <u>{{ pupils_editing }} / {{ pupils_in_course }}</u>
+                </i18n-t>
+            </div>
+            <div class="col-6">
+                <i18n-t keypath="percent_solved" tag="span">
+                    <Submission :submission="submission"></Submission>
+                </i18n-t>
+            </div>
         </div>
     </div>
 </template>

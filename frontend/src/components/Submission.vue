@@ -14,6 +14,11 @@ const result = computed(() => {
     const submission = JSON.parse(props.submission);
     let passed_tests = submission.passed_tests;
     let failed_tests = submission.failed_tests;
+
+    if (passed_tests == 0 && failed_tests == 0) {
+        return 0;
+    }
+
     return (passed_tests / (passed_tests + failed_tests)) * 100;
 
 });

@@ -1045,7 +1045,8 @@ function collapseMyProjects() {
             :courseFontDark="h.course_font_dark" :solution_name="h.solution_name"
             :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
             @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
-            @deleteSolution="openDeleteSolutionModal" />
+            @deleteSolution="openDeleteSolutionModal" :pupils_editing="h.pupils_editing"
+            :pupils_in_course="h.pupils_in_course" :submission="h.submission" />
 
           <!-- else -->
           <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
@@ -1070,7 +1071,8 @@ function collapseMyProjects() {
             :courseFontDark="h.course_font_dark" :solution_name="h.solution_name"
             :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
             @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
-            @deleteSolution="openDeleteSolutionModal" />
+            @deleteSolution="openDeleteSolutionModal" :pupils_editing="h.pupils_editing"
+            :pupils_in_course="h.pupils_in_course" :submission="h.submission" />
 
           <!-- else -->
           <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld

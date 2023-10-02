@@ -209,6 +209,17 @@ def saveFileChanges(fileChanges: models_and_schemas.FileChangesList, project_uui
     return success
 
 
+def calc_all_submissions(editing_homework: list[models_and_schemas.EditingHomework]):
+    passed_tests = 0
+    failed_tests = 0
+    for e in editing_homework:
+        if e.submission != "":
+            submission = json.loads(e.submission)
+            passed_tests += submission["passed_tests"]
+            failed_tests += submission["failed_tests"]
+    return '{"passed_tests":' + str(passed_tests) + ', "failed_tests": ' + str(failed_tests) + '}'
+
+
 @code.get('/getProjectsAsTeacher', dependencies=[Depends(auth.check_teacher)])
 def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
     all_homework = crud.get_teachers_homework_by_username(
@@ -235,9 +246,20 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
                 else:
                     solution_name = solution_project.name
 
+                # get amount of pupils, that are editing this homework
+                editing_homework = crud.get_all_editing_homework_by_homework_id(
+                    db=db, id=h.id)
+                pupils_editing = len(editing_homework)
+                # get amount of pupils, that are in the course
+                pupils_in_course = len(
+                    crud.get_all_users_of_course_id(db=db, id=h.course_id))
+                
+                submission = calc_all_submissions(editing_homework)
+
                 homework.append({"deadline": h.deadline, "name": p.name, "description": p.description, "id": h.id,
                                 "course_id": h.course_id, "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
-                                 "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing})
+                                 "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing, 
+                                 "pupils_editing": pupils_editing, "pupils_in_course": pupils_in_course, "submission": submission})
                 # TODO append "edited by X/Y pupils" and "average points of solutions"
                 break
 
