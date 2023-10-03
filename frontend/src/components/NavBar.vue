@@ -7,6 +7,7 @@ import UserService from "../services/user.service.js"
 import PasswordInput from "./PasswordInput.vue";
 import PasswordInfo from "./PasswordInfo.vue";
 import ColorModeSwitch from "./ColorModeSwitch.vue";
+import { version } from "../../package.json"
 
 const authStore = useAuthStore();
 const route = useRoute();
@@ -17,6 +18,7 @@ let state = reactive({
   newPassword2: "",
   isChangingPassword: false,
   passwordInvalidResponse: false,
+  recentVersion: "1.0.0",
 })
 
 async function logout() {
@@ -168,9 +170,15 @@ function changePassword() {
 
           <router-link v-if="authStore.isTeacher() && route.name !== 'users'" class="btn btn-outline-secondary ms-2"
             to='/users'>
-            <font-awesome-icon icon="fa-solid fa-users" /> {{ $t("usermanagement") }}
+            <font-awesome-icon icon="fa-solid fa-users" fixed-width /> {{ $t("usermanagement") }}
           </router-link>
         </ul>
+
+        <button v-if="authStore.isTeacher() && version != state.recentVersion" type="button"
+          class="btn btn-outline-warning me-2 rounded-circle d-flex justify-content-center versionBtn">
+          <span><font-awesome-icon icon="fa-solid fa-triangle-exclamation" fixed-width />
+          </span>
+        </button>
 
         <ColorModeSwitch class="me-2" />
 
@@ -201,6 +209,10 @@ function changePassword() {
 </template>
 
 <style scoped>
+.versionBtn {
+  width: 38px;
+}
+
 .dropdown-item {
   cursor: pointer;
 }
