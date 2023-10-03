@@ -232,6 +232,7 @@ Especially the following things are planned to be adressed until September 2023
 - [x] Stop compilation/execution button
 - [x] Pupils can see a teachers' solution of an assignment after a configurable start-date
 - [x] Users can change entry-point of project (main-class)
+- [x] Teachers see automatic update notifications if a newer docker-image is available
 
 # Start developing
 
