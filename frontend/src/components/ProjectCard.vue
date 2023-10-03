@@ -144,7 +144,7 @@ onMounted(() => {
                 <Submission :submission="submission"></Submission>
             </i18n-t>
         </div>
-        <div v-if="isHomework && isTeacher" class="card-footer row">
+        <div v-if="isHomework && isTeacher" class="card-footer row mx-0">
             <div class="col-6 border-end">
                 <i18n-t keypath="pupils_editing" tag="span">
                     <u>{{ pupils_editing }} / {{ pupils_in_course }}</u>

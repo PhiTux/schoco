@@ -15,7 +15,7 @@
 
 SCHOCO stands for <ins>**SCH**</ins>ool <ins>**O**</ins>nline <ins>**CO**</ins>ding.
 
-The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github](https://github.com/codeboardio)). Since codeboard didn't receive any more updates since end of 2015 and as we need slightly other features, we now try to create a similar web-based IDE which fits to our needs for **learning (Java)-Programming explicitly at School**! 
+The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github](https://github.com/codeboardio)). Since codeboard didn't receive any more updates since end of 2015 and as we need slightly other features, I did now create a similar web-based IDE which fits to our needs for **learning (Java)-Programming explicitly at School**! 
 
 ---
 It is mainly developed to enable coding-homeworks for pupils what has failed so far in reality for two reasons:

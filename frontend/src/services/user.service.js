@@ -101,6 +101,14 @@ class UserService {
     confirmTeacherPassword(password) {
         return axiosAuth.post('confirmTeacherPassword', { 'password': password })
     }
+
+    getLatestVersion() {
+        return axiosAuth.get(API_URL + 'getLatestVersion')
+    }
+
+    skipLatestVersion(skip_version) {
+        return axiosAuth.post(API_URL + 'skipLatestVersion', { 'skip_version': skip_version })
+    }
 }
 
 export default new UserService()

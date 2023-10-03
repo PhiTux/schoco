@@ -260,3 +260,7 @@ class DeleteSolution(BaseModel):
 
 class EntryPoint(BaseModel):
     entry_point: str
+
+
+class SkipVersion(BaseModel):
+    skip_version: str

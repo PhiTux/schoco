@@ -1,4 +1,16 @@
 export const navbar_en = {
     password_change_invalid: "Input invalid!<br>Make sure your old password is correct and that your new password fulfills the above criteria.",
-    logout: "Logout"
+    logout: "Logout",
+    update_available: "Update available",
+    update_available_text: "A new version of Schoco is available",
+    current_version: "Current version",
+    latest_version: "Latest version",
+    new_version: "New version",
+    current_version: "Current version",
+    read_the_changelog: "Please read the {0} before updating!",
+    changelog: "changelog",
+    skip_version_warning: "You can disable the update information for the new version {0}. The update notice will then only be displayed again for the next higher version.",
+    skip_version_x: "Skip version {0}",
+    error_skipping_version: "Error skipping/hiding version {0}.",
+    success_skipping_version: "Version {0} will no longer be displayed.",
 }

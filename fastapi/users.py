@@ -1,3 +1,5 @@
+import re
+import requests
 from fastapi import APIRouter, Depends, Form, HTTPException
 import auth
 import database_config
@@ -6,6 +8,14 @@ import crud
 from sqlmodel import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from config import settings
+import json
+from datetime import datetime, timedelta
+
+
+if settings.PRODUCTION:
+    UPDATE_NOTIFICATION_FILE = "/app/data/update_notification.json"
+else:
+    UPDATE_NOTIFICATION_FILE = "./data/update_notification.json"
 
 
 users = APIRouter(prefix="/api")
@@ -249,3 +259,87 @@ def confirmTeacherPassword(password: models_and_schemas.Password, db: Session = 
         return {'success': True}
 
     return {'success': False}
+
+
+def major_minor_micro(version):
+    major, minor, micro = re.search('(\d+)\.(\d+)\.(\d+)', version).groups()
+
+    return int(major), int(minor), int(micro)
+
+
+def docker_api_get_latest_version():
+    r = requests.get(
+        'https://hub.docker.com/v2/repositories/phitux/schoco-nginx/tags')
+    r = r.json()
+    versions = [v['name'] for v in r['results'] if v['name']
+                != 'latest' and v['name'].count('.') == 2]
+
+    return max(versions, key=major_minor_micro)
+
+
+@users.get('/getLatestVersion', dependencies=[Depends(auth.check_teacher)])
+def get_latest_version():
+    '''
+    {
+        "latest_version": "1.0.0",
+        "last_update": "2021-08-01 12:00:00",
+        "skip_version": "0.0.0"
+    }
+    '''
+
+    latest_version = ""
+    last_update = ""
+    skip_version = "0.0.0"
+
+    # check if json file exists
+    try:
+        with open(UPDATE_NOTIFICATION_FILE) as f:
+            data = json.load(f)
+            if 'latest_version' in data:
+                latest_version = data.get('latest_version')
+            if 'last_update' in data:
+                last_update = data.get('last_update')
+            if 'skip_version' in data:
+                skip_version = data.get('skip_version')
+    except:
+        print("no json file found")
+
+    # check if data needs to be updated
+
+    # if last_update is older than 1h...
+    if last_update == "" or datetime.fromisoformat(last_update) < datetime.now() - timedelta(hours=1):
+        latest_version = docker_api_get_latest_version()
+
+        # save
+        with open(UPDATE_NOTIFICATION_FILE, 'w') as f:
+            json.dump({'latest_version': latest_version,
+                       'last_update': str(datetime.now().isoformat()),
+                       'skip_version': skip_version}, f)
+
+    # check if version is to be skipped
+    if latest_version == skip_version:
+        return {"skip_version": latest_version, "latest_version": latest_version}
+
+    # return
+    return {"skip_version": skip_version, "latest_version": latest_version}
+
+
+@users.post('/skipLatestVersion', dependencies=[Depends(auth.check_teacher)])
+def skip_latest_version(skip_version: models_and_schemas.SkipVersion):
+    # read json
+    try:
+        with open(UPDATE_NOTIFICATION_FILE) as f:
+            data = json.load(f)
+            if 'latest_version' in data:
+                latest_version = data.get('latest_version')
+            if 'last_update' in data:
+                last_update = data.get('last_update')
+    except:
+        return {"success": False}
+
+    with open(UPDATE_NOTIFICATION_FILE, 'w') as f:
+        json.dump({'latest_version': latest_version,
+                   'last_update': last_update,
+                   'skip_version': skip_version.skip_version}, f)
+
+    return {"success": True}
