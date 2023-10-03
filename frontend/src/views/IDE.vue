@@ -2044,68 +2044,79 @@ function setEntryPoint(path) {
                 </li>
               </ul>
             </li>
-            <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button :disabled="state.isSolution" @click.prevent="undo()" type="button"
-                class="btn btn-outline-secondary">
-                <font-awesome-icon icon="fa-solid fa-arrow-rotate-left" />
-              </button>
-              <button :disabled="state.isSolution" @click.prevent="redo()" type="button"
-                class="btn btn-outline-secondary">
-                <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
-              </button>
-            </div>
+            <li class="nav-item mx-3">
+              <div class="btn-group" role="group" aria-label="Basic example">
+                <button :disabled="state.isSolution" @click.prevent="undo()" type="button"
+                  class="btn btn-outline-secondary">
+                  <font-awesome-icon icon="fa-solid fa-arrow-rotate-left" />
+                </button>
+                <button :disabled="state.isSolution" @click.prevent="redo()" type="button"
+                  class="btn btn-outline-secondary">
+                  <font-awesome-icon icon="fa-solid fa-arrow-rotate-right" />
+                </button>
+              </div>
+            </li>
 
-            <div class="btn-group mx-3" role="group" aria-label="Basic example">
-              <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
-                :disabled="state.tabsWithChanges.length == 0 || state.isSolution" data-bs-trigger="hover"
-                data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_s')" data-bs-delay='{"show":500,"hide":0}'
-                data-bs-placement="bottom">
-                <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
-                <span class="ms-1 hideOnSmall">{{ $t("save") }}</span>
-              </button>
-              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center"
-                data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_1')"
-                data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
-                <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
-                <span class="ms-1 hideOnSmall">{{ $t("compile") }}</span>
-              </button>
-              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center"
-                data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_2')"
-                data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
-                <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
-                <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
-              </button>
-              <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
-                class="btn btn-indigo d-flex align-items-center" data-bs-trigger="hover" data-bs-toggle="tooltip"
-                :data-bs-title="$t('ctrl_3')" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
-                <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                <font-awesome-icon v-else icon="fa-solid fa-list-check" />
-                <span class="ms-1 hideOnSmall">{{ $t("test") }}</span>
-              </button>
-            </div>
+            <li class="nav-item mx-3">
+              <div class="btn-group h-100" role="group" aria-label="Basic example">
+                <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
+                  :disabled="state.tabsWithChanges.length == 0 || state.isSolution" data-bs-trigger="hover"
+                  data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_s')" data-bs-delay='{"show":500,"hide":0}'
+                  data-bs-placement="bottom">
+                  <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
+                  <span class="ms-1 hideOnSmall">{{ $t("save") }}</span>
+                </button>
+                <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center"
+                  data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_1')"
+                  data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                  <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
+                  <span class="ms-1 hideOnSmall">{{ $t("compile") }}</span>
+                </button>
+                <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center"
+                  data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_2')"
+                  data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                  <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
+                  <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
+                </button>
+                <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
+                  class="btn btn-indigo d-flex align-items-center" data-bs-trigger="hover" data-bs-toggle="tooltip"
+                  :data-bs-title="$t('ctrl_3')" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                  <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <font-awesome-icon v-else icon="fa-solid fa-list-check" />
+                  <span class="ms-1 hideOnSmall">{{ $t("test") }}</span>
+                </button>
+              </div>
+            </li>
+
+          </ul>
+          <div class="d-flex w-100">
+
             <button :class="{ hidden: !state.isExecuting && !state.isTesting }" @click.prevent="stopContainer()"
               type="button" class="btn btn-outline-danger me-3">
               <div v-if="state.isStopping" class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              <font-awesome-icon v-else icon="fa-solid fa-ban" /> {{ $t("abort") }}
+              <font-awesome-icon v-else icon="fa-solid fa-ban" /> <span class="hideOnMedium">{{ $t("abort") }}</span>
             </button>
+
             <button v-if="authStore.isTeacher() && !state.isHomework" @click.prevent="prepareHomeworkModal()"
               type="button" data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
               <font-awesome-icon icon="fa-solid fa-share-nodes" /> {{ $t("create_assignment") }}
             </button>
-            <div class="d-flex align-items-center homework-badge px-2" v-if="state.isHomework">💡 |
+
+            <div class="px-2 d-flex align-items-center homework-badge text-truncate smallBadge" v-if="state.isHomework">💡
+              |
               <span v-if="authStore.isTeacher() && route.params.user_id == 0">{{ $t("template") }}
               </span>
               <span v-else-if="authStore.isTeacher() && route.params.user_id != 0">
@@ -2117,11 +2128,16 @@ function setEntryPoint(path) {
                 }) }}
               </span>
             </div>
-          </ul>
-          <ColorModeSwitch @setLight="setLight" class="ms-auto me-2" />
-          <a class=" btn btn-primary" @click.prevent="checkExit()">
-            <span class="me-2 hideOnSmall">{{ $t("close") }}</span><font-awesome-icon icon="fa-solid fa-xmark"
-              size="xl" /></a>
+
+            <!-- <div class="flex-grow-1"></div> -->
+
+            <ColorModeSwitch @setLight="setLight" class="ms-auto me-2" />
+
+            <a class=" btn btn-primary" @click.prevent="checkExit()">
+              <span class="me-2 hideOnMedium">{{ $t("close") }}</span><font-awesome-icon icon="fa-solid fa-xmark"
+                size="xl" /></a>
+          </div>
+
         </div>
       </div>
     </nav>
@@ -2268,6 +2284,18 @@ function setEntryPoint(path) {
 
 
 <style scoped lang="scss">
+@media (max-width: 1368px) {
+  .smallBadge {
+    width: 150px;
+  }
+}
+
+@media (max-width: 1599px) {
+  .hideOnMedium {
+    display: none;
+  }
+}
+
 @media (max-width: 1280px) {
   .hideOnSmall {
     display: none;

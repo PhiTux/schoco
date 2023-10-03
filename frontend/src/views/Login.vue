@@ -185,6 +185,7 @@ const registerPasswordTooShort = computed(() => {
       </a><!-- end github animated corner -->
       <div class="container-fluid flex-fill align-items-center d-flex justify-content-center">
         <div class="w-100 row text-center align-items-center">
+          <div class="col-xxl-1"></div>
           <div class="col-xs-12 col-lg-6 col-xxl-4">
             <div class="container-lg mb-5">
               <div class="schoco-icon">{🍫}</div>
@@ -316,6 +317,7 @@ const registerPasswordTooShort = computed(() => {
               </div>
             </div>
           </div>
+          <div class="col-xxl-3"></div>
         </div>
         <div class="position-absolute bottom-0 end-0">
           <a href="https://hub.docker.com/r/phitux/schoco-backend/tags">Backend: {{ state.backendVersion }}</a><br />
