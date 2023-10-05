@@ -226,14 +226,15 @@ def change_name(db: Session, user_id: str, name: str):
 
 def change_username(db: Session, user_id: str, name: str):
     user = get_user_by_id(db=db, id=user_id)
+    last_username = user.username
     user.username = name
     try:
         db.add(user)
         db.commit()
     except:
         db.rollback()
-        return False
-    return True
+        return ""
+    return last_username
 
 
 def create_project(db: Session, project: models_and_schemas.Project):

@@ -37,7 +37,6 @@ onMounted(() => {
 })
 
 async function logout() {
-  const authStore = useAuthStore();
   return authStore.logout();
 }
 

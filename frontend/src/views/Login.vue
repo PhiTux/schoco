@@ -42,6 +42,12 @@ onMounted(() => {
     );
     toast.show();
   }
+  if (route.query.username_changed) {
+    const toast = new Toast(
+      document.getElementById("toastNeedReloginAfterUsernameChange")
+    );
+    toast.show();
+  }
   router.replace({ query: {} });
 
   document.title = "Login"
@@ -135,6 +141,15 @@ const registerPasswordTooShort = computed(() => {
         <div class="d-flex">
           <div class="toast-body">
             {{ $t("token_expired") }}
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastNeedReloginAfterUsernameChange" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("need_relogin_after_username_change") }}
           </div>
         </div>
       </div>

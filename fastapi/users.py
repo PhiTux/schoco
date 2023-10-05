@@ -233,7 +233,9 @@ def change_name(changeName: models_and_schemas.changeName, db: Session = Depends
 def change_username(changeName: models_and_schemas.changeName, db: Session = Depends(database_config.get_db)):
     if changeName.name.strip() == "" or " " in changeName.name.strip():
         return False
-    return crud.change_username(db=db, user_id=changeName.user_id, name=changeName.name.strip())
+    last_username = crud.change_username(
+        db=db, user_id=changeName.user_id, name=changeName.name.strip())
+    return {'last_username': last_username}
 
 
 @users.post('/checkExistingHomework', dependencies=[Depends(auth.check_teacher)])

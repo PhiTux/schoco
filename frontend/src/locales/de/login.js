@@ -8,5 +8,6 @@ export const login_de = {
     registration_successful: "Account erfolgreich erstellt. Bitte einloggen.",
     error_msg: "Fehlermeldung",
     registration_error: "Account konnte nicht erstellt werden. Möglicherweise stimmt das Lehrer-Passwort nicht, der Benutzer(-name) existiert bereits oder der Benutzername enthält Leerzeichen.",
-    token_expired: "Deine Sitzung ist abgelaufen. Du musst dich erneut anmelden."
+    token_expired: "Deine Sitzung ist abgelaufen. Du musst dich erneut anmelden.",
+    need_relogin_after_username_change: "Du musst dich nach dem Ändern des Usernamens erneut anmelden.",
 }

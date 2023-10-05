@@ -34,6 +34,11 @@ export const useAuthStore = defineStore({
             this.$router.push('/login');
             localStorage.removeItem('user');
         },
+        logout_username_changed() {
+            this.user = null;
+            localStorage.removeItem('user');
+            this.$router.push({ path: '/login', query: { username_changed: true } });
+        },
         logout_token_expired() {
             this.user = null;
             localStorage.removeItem('user');

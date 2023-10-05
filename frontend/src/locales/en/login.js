@@ -8,5 +8,6 @@ export const login_en = {
     registration_successful: "Account created successfully. Please log in.",
     error_msg: "Error message",
     registration_error: "Account could not be created. The teacher key may be incorrect, the username already exists, or the username contains spaces.",
-    token_expired: "Your session has expired. You need to log in again."
+    token_expired: "Your session has expired. You need to log in again.",
+    need_relogin_after_username_change: "You have to log in again after changing your username.",
 }

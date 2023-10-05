@@ -7,6 +7,7 @@ import CourseBadge from "../components/CourseBadge.vue";
 import PasswordInput from "../components/PasswordInput.vue";
 import PasswordInfo from "../components/PasswordInfo.vue";
 import { useI18n } from 'vue-i18n'
+const authStore = useAuthStore();
 
 const i18n = useI18n()
 
@@ -180,8 +181,7 @@ function createPupilAccounts() {
     },
     (error) => {
       if (error.response.status == 403) {
-        const user = useAuthStore();
-        user.logout();
+        authStore.logout();
       } else console.log(error);
     }
   );
@@ -445,8 +445,7 @@ function getAllCourses() {
     (error) => {
       if (error.response) {
         if (error.response.status == 403) {
-          const user = useAuthStore();
-          user.logout();
+          authStore.logout();
         } else console.log(error);
       }
     }
@@ -472,8 +471,7 @@ function getAllUsers() {
     (error) => {
       if (error.response) {
         if (error.response.status == 403) {
-          const user = useAuthStore();
-          user.logout();
+          authStore.logout();
         } else console.log(error);
       }
     }
@@ -633,12 +631,16 @@ function change_username(id) {
   state.changingUsername = true
   UserService.changeUsername(id, state.edited_username.trim()).then(
     response => {
-      if (response.data) {
+      if (response.data.last_username.length) {
         for (let i = 0; i < allUsers.value.length; i++) {
           if (allUsers.value[i].id == id) {
             allUsers.value[i].username = state.edited_username.trim()
             break
           }
+        }
+
+        if (response.data.last_username === authStore.user.username) {
+          authStore.logout_username_changed();
         }
       } else {
         const toast = new Toast(
