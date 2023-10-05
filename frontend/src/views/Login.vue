@@ -311,8 +311,9 @@ const registerPasswordTooShort = computed(() => {
 
       </div>
       <div class="sticky-bottom d-flex versionBottom">
-        <a class="ms-auto mb-1 me-1" href="https://github.com/phitux/schoco#changelog">{{ $t("version") }}: {{ version
-        }}</a>
+        <a class="ms-auto mb-1 me-1" href="https://github.com/phitux/schoco#changelog" target="_blank">{{ $t("version")
+        }}: {{ version
+}}</a>
       </div>
     </div>
   </div>

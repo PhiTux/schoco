@@ -67,4 +67,7 @@ export const ide_en = {
     set_as_entry_point: "Set as entry point",
     error_main_class_not_found: "No main method was found in the main/initial class (with 🏠). Make sure that a method with the following signature exists there:\npublic static void main(String[] args)",
     tooltip_entry_point: "The main/initial class of the program, which must also contain the main method.",
+    edit_computation_time: "Edit computation time",
+    success_setting_computation_time: "Computation time successfully set.",
+    error_setting_computation_time: "Error setting computation time.",
 }

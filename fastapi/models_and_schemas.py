@@ -264,3 +264,7 @@ class EntryPoint(BaseModel):
 
 class SkipVersion(BaseModel):
     skip_version: str
+
+
+class ComputationTime(BaseModel):
+    computation_time: int

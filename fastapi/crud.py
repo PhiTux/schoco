@@ -618,7 +618,7 @@ def get_template_project_by_homework_id(db: Session, id: int):
     return project
 
 
-def update_computation_time(db: Session, id: int, computation_time: int):
+def update_template_computation_time(db: Session, id: int, computation_time: int):
     # get template project
     template_project = get_template_project_by_homework_id(db, id)
     if template_project is None:
@@ -731,6 +731,24 @@ def set_entry_point_by_project_uuid(db: Session, project_uuid: str, entry_point:
 
     # update entry point
     project.main_class = entry_point
+    try:
+        db.add(project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def update_computation_time_by_project_uuid(db: Session, project_uuid: str, computation_time: int):
+    # get project
+    project = get_project_by_project_uuid(db, project_uuid)
+    if project is None:
+        return False
+
+    # update computation time
+    project.computation_time = computation_time
     try:
         db.add(project)
         db.commit()

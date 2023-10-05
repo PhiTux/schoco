@@ -253,12 +253,12 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
                 # get amount of pupils, that are in the course
                 pupils_in_course = len(
                     crud.get_all_users_of_course_id(db=db, id=h.course_id))
-                
+
                 submission = calc_all_submissions(editing_homework)
 
                 homework.append({"deadline": h.deadline, "name": p.name, "description": p.description, "id": h.id,
                                 "course_id": h.course_id, "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
-                                 "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing, 
+                                 "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing,
                                  "pupils_editing": pupils_editing, "pupils_in_course": pupils_in_course, "submission": submission})
                 # TODO append "edited by X/Y pupils" and "average points of solutions"
                 break
@@ -314,7 +314,7 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
                 already_edited = True
                 uuid = crud.get_uuid_of_homework(
                     db=db, homework_id=h['id'])
-                
+
                 homework.append({"is_editing": True, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
                                 "id": h["id"], "uuid": uuid, "branch": user.id, "solution_uuid": solution_uuid, "submission": e.submission})
                 break
@@ -850,7 +850,7 @@ def updateHomeworkSettings(homework: models_and_schemas.UpdateHomeworkSettings, 
         raise HTTPException(
             status_code=400, detail="Wrong input: Deadline is empty.")
 
-    if not crud.update_computation_time(db=db, id=homework.id, computation_time=homework.computation_time):
+    if not crud.update_template_computation_time(db=db, id=homework.id, computation_time=homework.computation_time):
         raise HTTPException(
             status_code=500, detail="Error on updating computation time.")
 
@@ -916,5 +916,32 @@ def setEntryPoint(entryPoint: models_and_schemas.EntryPoint, project_uuid: str =
     if not crud.set_entry_point_by_project_uuid(db=db, project_uuid=project_uuid, entry_point=entry_point):
         raise HTTPException(
             status_code=500, detail="Error on setting entry point.")
+
+    return {'success': True}
+
+
+@code.get('/getTeacherComputationTime/{project_uuid}/{user_id}', dependencies=[Depends(auth.check_teacher)])
+def getTeacherComputationTime(project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if (user_id != 0):
+        raise HTTPException(
+            status_code=405, detail="Not allowed. Only allowed to edit computation time in own projects.")
+
+    project = crud.get_project_by_project_uuid(
+        db=db, project_uuid=project_uuid)
+    if project != None:
+        return {'success': True, 'computation_time': project.computation_time}
+
+    return {'success': False}
+
+
+@code.post('/setTeacherComputationTime/{project_uuid}/{user_id}', dependencies=[Depends(auth.check_teacher)])
+def setComputationTime(computationTime: models_and_schemas.ComputationTime, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if (user_id != 0):
+        raise HTTPException(
+            status_code=405, detail="Not allowed. Only allowed to edit computation time in own projects.")
+
+    if not crud.update_computation_time_by_project_uuid(db=db, project_uuid=project_uuid, computation_time=computationTime.computation_time):
+        raise HTTPException(
+            status_code=500, detail="Error on updating computation time.")
 
     return {'success': True}

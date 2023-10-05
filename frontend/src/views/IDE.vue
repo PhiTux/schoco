@@ -74,6 +74,9 @@ let state = reactive({
   isStopping: false,
   isSolution: false,
   entry_point: "",
+  isGettingComputationTime: false,
+  teacherComputationTime: "",
+  isSettingComputationTime: false,
 });
 
 let homework = reactive({
@@ -1541,6 +1544,69 @@ function setEntryPoint(path) {
       console.log(error.response)
     })
 }
+
+function prepareComputationTimeModal() {
+  // prepare popover
+  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { html: true }))
+
+  // open modal
+  var modal = new Modal(document.getElementById("editComputationTimeModal"));
+  modal.show();
+
+  // load current computation time
+  state.isGettingComputationTime = true
+  CodeService.getTeacherComputationTime(route.params.project_uuid, route.params.user_id).then(
+    (response) => {
+      if (response.data.success) {
+        state.teacherComputationTime = response.data.computation_time
+      } else {
+        state.teacherComputationTime = 10
+      }
+      state.isGettingComputationTime = false
+    }, (error) => {
+      console.log(error.response)
+      state.teacherComputationTime = 10
+      state.isGettingComputationTime = false
+    })
+}
+
+function setComputationTime() {
+  if (state.isSettingComputationTime) return;
+  state.isSettingComputationTime = true
+
+  CodeService.setTeacherComputationTime(state.teacherComputationTime, route.params.project_uuid, route.params.user_id).then(
+    (response) => {
+      state.isSettingComputationTime = false
+
+      if (response.data.success) {
+        // show toast
+        const toast = new Toast(
+          document.getElementById("toastSetComputationTimeSuccess")
+        );
+        toast.show();
+      } else {
+        // show toast
+        const toast = new Toast(
+          document.getElementById("toastSetComputationTimeError")
+        );
+        toast.show();
+      }
+
+      // close modal
+      var elem = document.getElementById("editComputationTimeModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+    }, (error) => {
+      // close modal
+      var elem = document.getElementById("editComputationTimeModal");
+      var modal = Modal.getInstance(elem);
+      modal.hide();
+    }
+  )
+
+
+}
 </script>
 
 <template>
@@ -1687,6 +1753,24 @@ function setEntryPoint(path) {
         <div class="d-flex">
           <div class="toast-body">
             {{ $t("error_stopping_program") }}
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-success border-0" id="toastSetComputationTimeSuccess" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("success_setting_computation_time") }}
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastSetComputationTimeError" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("error_setting_computation_time") }}
           </div>
         </div>
       </div>
@@ -2008,6 +2092,56 @@ function setEntryPoint(path) {
       </div>
     </div>
 
+    <div class="modal fade" id="editComputationTimeModal" tabindex="-1" aria-labelledby="editComputationTimeModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">
+              {{ $t("edit_computation_time") }}
+            </h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3 row">
+              <label for="deadline" class="col-sm-4 col-form-label">
+                {{ $t("computation_time") }}:
+                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
+                  :title="$t('computation_time')" :data-bs-content="$t('computation_time_description')">
+                  <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
+                </a></label>
+              <div class="col-sm-8">
+                <div v-if="state.isGettingComputationTime" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div v-else>
+                  <input class="hwTimeInput" :value="state.teacherComputationTime"
+                    @input="event => state.teacherComputationTime = event.target.value" type="number" min="3" step="1"
+                    :placeholder="$t('at_least_3_default_10')" />
+                  <br>
+                  {{ state.teacherComputationTime }} {{ $t("seconds") }}
+                </div>
+
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              {{ $t("abort") }}
+            </button>
+            <button @click.prevent="setComputationTime()" type="button" class="btn btn-primary">
+              <span v-if="!state.isSettingComputationTime">{{ $t("save") }}</span>
+              <span v-else>
+                <div class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Navbar -->
     <nav class="navbar sticky-top navbar-expand-lg">
@@ -2030,6 +2164,11 @@ function setEntryPoint(path) {
                       fixed-width />
                     {{ $t("new_file") }}
                   </a>
+                </li>
+                <li v-if="!state.isHomework && authStore.isTeacher()">
+                  <!-- only teachers -->
+                  <a class="dropdown-item" @click.prevent="prepareComputationTimeModal()"><font-awesome-icon
+                      icon="fa-solid fa-stopwatch" fixed-width /> {{ $t("edit_computation_time") }}</a>
                 </li>
                 <li class="dropdown-divider"></li>
                 <li v-if="state.isHomework && route.params.user_id != 0">

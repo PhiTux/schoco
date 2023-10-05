@@ -161,6 +161,14 @@ class CodeService {
     setEntryPoint(project_uuid, user_id, path) {
         return axiosAuth.post(`setEntryPoint/${project_uuid}/${user_id}`, {'entry_point': path})
     }
+
+    getTeacherComputationTime(project_uuid, user_id) {
+        return axiosAuth.get(`getTeacherComputationTime/${project_uuid}/${user_id}`)
+    }
+
+    setTeacherComputationTime(computation_time, project_uuid, user_id) {
+        return axiosAuth.post(`setTeacherComputationTime/${project_uuid}/${user_id}`, {'computation_time': computation_time})
+    }
 }
 
 export default new CodeService()
