@@ -90,10 +90,6 @@ class UserService {
         return axiosAuth.post('changeUsername', { 'user_id': user_id, 'name': username })
     }
 
-    getVersion() {
-        return axios.get(API_URL + 'getVersion')
-    }
-
     checkExistingHomework(uuid) {
         return axiosAuth.post('checkExistingHomework', { 'uuid': uuid })
     }

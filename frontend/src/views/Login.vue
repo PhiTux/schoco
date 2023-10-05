@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, onBeforeMount } from "vue";
+import { reactive, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth.store.js";
 import UserService from "../services/user.service.js";
 import { useRoute, useRouter } from "vue-router";
@@ -15,7 +15,6 @@ const state = reactive({
   registerIncomplete: false,
   showLoginError: false,
   showRegistrationSuccess: false,
-  backendVersion: "",
   showRegistrationError: false,
   showRegistrationErrorMessage: false,
   registrationErrorMessage: "",
@@ -34,16 +33,6 @@ const register = reactive({
   password2: "",
 })
 
-onBeforeMount(() => {
-  UserService.getVersion().then(
-    (response) => {
-      state.backendVersion = response.data
-    }, (error) => {
-      console.log(error.response)
-      state.backendVersion = "unknown"
-    }
-  )
-})
 
 onMounted(() => {
   let route = useRoute()
@@ -150,7 +139,7 @@ const registerPasswordTooShort = computed(() => {
         </div>
       </div>
     </div>
-    <div class="center-fix d-flex flex-column">
+    <div class="center-fix d-flex flex-column ">
       <!-- begin github animated corner https://github.com/eugena/github-animated-corners/ --><a target="_blank"
         href="https://github.com/phitux/schoco" class="github-corner" aria-label="View source on GitHub"
         title="View source on GitHub"><svg xmlns="http://www.w3.org/2000/svg" style="position: absolute; right: 0"
@@ -183,7 +172,7 @@ const registerPasswordTooShort = computed(() => {
             style="transform-origin: 170px 100px;"></path>
         </svg>
       </a><!-- end github animated corner -->
-      <div class="container-fluid flex-fill align-items-center d-flex justify-content-center">
+      <div class="container-fluid flex-fill align-items-center d-flex justify-content-center z-1">
         <div class="w-100 row text-center align-items-center">
           <div class="col-xxl-1"></div>
           <div class="col-xs-12 col-lg-6 col-xxl-4">
@@ -319,16 +308,21 @@ const registerPasswordTooShort = computed(() => {
           </div>
           <div class="col-xxl-3"></div>
         </div>
-        <div class="position-absolute bottom-0 end-0">
-          <a href="https://hub.docker.com/r/phitux/schoco-backend/tags">Backend: {{ state.backendVersion }}</a><br />
-          <a href="https://hub.docker.com/r/phitux/schoco-nginx/tags">Frontend: {{ version }}</a>
-        </div>
+
+      </div>
+      <div class="sticky-bottom d-flex versionBottom">
+        <a class="ms-auto mb-1 me-1" href="https://github.com/phitux/schoco#changelog">{{ $t("version") }}: {{ version
+        }}</a>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
+.versionBottom {
+  z-index: 0 !important;
+}
+
 $fill: #fff;
 $color: #24292e;
 $fill2: #151513;

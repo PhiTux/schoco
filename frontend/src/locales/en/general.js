@@ -67,4 +67,5 @@ export const general_en = {
     input: "Input",
     send: "Send",
     project: "Project",
+    version: "Version",
 }

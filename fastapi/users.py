@@ -236,11 +236,6 @@ def change_username(changeName: models_and_schemas.changeName, db: Session = Dep
     return crud.change_username(db=db, user_id=changeName.user_id, name=changeName.name.strip())
 
 
-@users.get('/getVersion')
-def get_version():
-    return settings.BACKEND_VER
-
-
 @users.post('/checkExistingHomework', dependencies=[Depends(auth.check_teacher)])
 def checkExistingHomework(uuid: models_and_schemas.UUID, db: Session = Depends(database_config.get_db)):
     project = crud.get_project_by_project_uuid(db=db, project_uuid=uuid.uuid)
