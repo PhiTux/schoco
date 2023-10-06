@@ -266,7 +266,7 @@ def major_minor_micro(version):
 
 def docker_api_get_latest_version():
     r = requests.get(
-        'https://hub.docker.com/v2/repositories/phitux/schoco-nginx/tags')
+        'https://hub.docker.com/v2/repositories/phitux/schoco-frontend/tags')
     r = r.json()
     versions = [v['name'] for v in r['results'] if v['name']
                 != 'latest' and v['name'].count('.') == 2]

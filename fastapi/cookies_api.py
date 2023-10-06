@@ -139,7 +139,7 @@ def remove_compilation_result(project_uuid: str):
 
 
 def createNewContainer():
-    """Creates (and runs!) new container and returns the id, uuid, ip and port."""
+    """Creates (and runs!) new container and returns the id, uuid and port."""
     new_uuid = uuid.uuid4()
     new_name = f"schoco-cookies-{new_uuid}"
 
@@ -157,14 +157,15 @@ def createNewContainer():
         "phitux/schoco-cookies:1.2.0", detach=True, auto_remove=True, remove=True, mem_limit="512m", name=new_name, network="schoco", ports={'8080/tcp': ('127.0.0.1', None)}, stdin_open=True, stdout=True, stderr=True, stop_signal="SIGKILL", tty=True, ulimits=[nproc_limit], user=f"{os.getuid()}:{os.getgid()}", volumes=[f"{uuid_dir}:/app/tmp"])
 
     apiclient = docker.APIClient(base_url="unix://var/run/docker.sock")
-    ip = apiclient.inspect_container(new_name)[
-        'NetworkSettings']['Networks']['schoco']['IPAddress']
+    # ip = apiclient.inspect_container(new_name)[
+    #    'NetworkSettings']['Networks']['schoco']['IPAddress']
     port = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
 
     print("created: " + str(new_uuid) + " with port: " + str(port))
 
-    return {'id': new_container.id, 'uuid': str(new_uuid), 'ip': ip, 'port': port, 'in_use': False}
+    # 'ip': ip,
+    return {'id': new_container.id, 'uuid': str(new_uuid), 'port': port, 'in_use': False}
 
 
 def refillNewContainersQueue():

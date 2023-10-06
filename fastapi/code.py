@@ -260,7 +260,6 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
                                 "course_id": h.course_id, "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
                                  "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing,
                                  "pupils_editing": pupils_editing, "pupils_in_course": pupils_in_course, "submission": submission})
-                # TODO append "edited by X/Y pupils" and "average points of solutions"
                 break
 
         # ...otherwise its a regular project

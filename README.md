@@ -1,5 +1,3 @@
-> 🛠️️ This project sucessfully finished beta-testing and is under heavy development! It can already be used safely and will be 'finished' by ~September 2023 (only a few more convenience functions are missing)
-
 # Chapters
 - [What is schoco? {🍫}](#what-is-schoco-)
   - [Main-features](#main-features)
@@ -8,6 +6,7 @@
   - [How it works under the hood](#how-it-works-under-the-hood)
   - [FAQ](#faq)
   - [Progress](#progress)
+- [Changelog](#changelog)
 - [Start developing](#start-developing)
 - [Build and run schoco locally](#build-and-run-schoco-locally)
 
@@ -15,22 +14,30 @@
 
 SCHOCO stands for <ins>**SCH**</ins>ool <ins>**O**</ins>nline <ins>**CO**</ins>ding.
 
-The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github](https://github.com/codeboardio)). Since codeboard didn't receive any more updates since end of 2015 and as we need slightly other features, I did now create a similar web-based IDE which fits to our needs for **learning (Java)-Programming explicitly at School**! 
+Schoco is a web-based IDE for Java-Programming (Java 8) with a focus on learning programming at school. It's designed to be used by pupils and teachers in the classroom and at home. 
+
+Until now, it has hardly been possible to assign **programming homework** because the installation of the software at home may be difficult or cannot be presupposed and the submission and control of the results is cumbersome.
+
+Therefore the **core feature** of schoco is the possibility to create **coding-homework** for students, which can even be tested automatically by JUnit-Tests. The tool works completely online without the need of an offline installation of the JRE or any other software by any user.
+
+Schoco is definitely not intended to be used for professional software-development.
+
+The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github](https://github.com/codeboardio)). Since codeboard didn't receive any more updates since end of 2015 and as we need slightly other features, I did create this similar web-based IDE which fits to our needs for **learning (Java)-Programming explicitly at School**! 
 
 ---
-It is mainly developed to enable coding-homeworks for pupils what has failed so far in reality for two reasons:
- 1. Installation of the cumbersome JRE and IDEs
- 2. Saving and sharing the solutions via Mail/USB-Stick/Messenger??? WTF!?
----
- ![IDE](./readme/IDE.png)
+ ![IDE](./readme/schoco-promo.jpg)
   See all screenshots [here](./readme/README.md)!
 
 ---
 
+You wanna know more about schoco? Then I recommend to read the [main-features](#main-features), read the [FAQ](#faq) and take a look into the wiki (YET TO COME).
+
+
 ## Main-features
+
 - Web-based IDE for Java-Programming (Java 8), which is fully functional to Java <ins>except</ins> UIs (obviously), writing files to disk, accessing the internet and a few others. The restrictions are needed for security reasons and are provided by Java's security manager.
-- Each user can create private projects and teachers can convert them to homeworks, which are then editable by the pupils of the selected course.
-- Pupils directly see coding-homeworks when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
+- Each user can create private projects and teachers can convert their projects into homework, which are then editable by the pupils of the selected course.
+- Pupils directly see coding-homework when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
 - JUnit for automatic testing of the homework - the newest test-result (percent of how many JUnit-Tests passed successfully) of pupils is directly visible to the teacher.
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity of sending directories or files.
 - Pupils can only open their own project or homework - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
@@ -38,18 +45,15 @@ It is mainly developed to enable coding-homeworks for pupils what has failed so 
 
 
 # Installation
-🛑 At the moment there are first pre-release docker images available (tag-numbers below 1.0.0). See [schoco-nginx](https://hub.docker.com/r/phitux/schoco-nginx/tags) and [schoco-backend](https://hub.docker.com/r/phitux/schoco-backend/tags) for the newest tags.
-
-They already work quite well and support ALL main-features of schoco (see [Progress](#progress))
 
 Installation requires a few more steps than your average docker-service, but it's still pretty straight-forward, and only requires a few minutes.
 
   1. You need `docker` and `docker-compose` installed.
-  2. Make sure, that your normal user (not root / sudo) is member of the docker-group!
-  3. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
+  2. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
+  3. Make sure, that your normal user (not root / sudo) is member of the docker-group! If you created a separate user for schoco (previous step) than this rule applies to this user!
   4. Create the data-forder `data` where you want to store the DB and temporary code. This step must be done BEFORE starting up the docker containers.
      
-     ❗ <ins>YOU</ins> (or the user from step 3) must be the owner of this folder - not root (don't use sudo). ❗
+     ❗ <ins>YOU</ins> (or the user from step 2) must be the owner of this folder - not root (don't use sudo). ❗ 
   5. Prepare your Web-Server / Reverse-Proxy to forward requests to schoco. It requires special care for the websocket-connection to work! Here are two example configurations for Apache2 and NGINX (both assuming, that schoco is running on port 1234):
      - NGINX
       ```nginx
@@ -94,7 +98,7 @@ networks:
 services:
   schoco-backend:
     image: phitux/schoco-backend:<tag> 
-    # use the newest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
+    # use the latest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
     container_name: schoco-backend
     restart: always
     user: "1000:1000" 
@@ -115,9 +119,6 @@ services:
       - TEACHER_KEY=teacherkey 
       # this is the 'password' that is used to create new teacher-accounts. It must only be known to the teachers.
 
-      - COOKIES_TAG=1.0.0 (not yet implemented) 
-      # can be left away right now
-
       - GITEA_USERNAME=schoco 
       # this is the username of the gitea-user (see last image in this yaml-file) 
 
@@ -134,9 +135,9 @@ services:
       - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
 
-  schoco-nginx:
-    image: phitux/schoco-nginx:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-nginx/tags
-    container_name: schoco-nginx
+  schoco-frontend:
+    image: phitux/schoco-frontend:<tag> # use the latest tag, see https://hub.docker.com/r/phitux/schoco-frontend/tags
+    container_name: schoco-frontend
     restart: always
     group_add:
       - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
@@ -175,15 +176,15 @@ services:
 - The API is communicating with [Gitea](https://gitea.io/), SQLite and the workers [schoco-cookies](./cookies/)
 - The 'cookies' in 'schoco-cookies' stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Since it's part of schoco it's of course called 'schoco-cookies' 🍪🤭. They are docker-containers, that are running parallely at a configurable amount. They are doing the actual 'work' with the Java-code and are used for compiling, executing and testing all the code. Each container is only used for a single action and is then replaced by a new one. This is done for security-reasons, so that no code of a user can be executed in the same container as the code of other users. 
 - Gitea (a git repo, by default running as separate docker-container) is used to store the code. Each project has an own repository with an UUID as name, which is also visible in the browser-URL when opening a project. When editing a homework as pupil, each pupil gets it's own branch.
-- SQLite (a single-file DB) is used to store everything that is NOT code, like the users, courses, and meta-information about projects and homeworks.
+- SQLite (a single-file DB) is used to store everything that is NOT code, like the users, courses, and meta-information about projects and homework.
 - Nginx is included as mandatory gateway. Since the websocket-connection (to view the live-output of the code) connects to the Docker Socket (Docker-API), this whould be a major security issue. Therefore, the websocket-connection is proxied by Nginx, which only allows websocket-connections to Docker.
 
 ## FAQ
 
 - What happens after a homework deadline has passed? 
-> At the moment the pupils can continue using schoco just as before (edit, save, run, test,...). It's planned to implement a button for teachers to see the latest version BEFORE deadline.
+> At the moment the pupils can continue using schoco just as before (edit, save, run, test,...). At [progress](#progress) you can see, that there might be coming a button within the next months to see previous version of students' solutions, e.g. before deadline.
 - Can I code everything that's normally possible in Java? 
-> No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, homeworks can have a higher limit).
+> No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, homework can have a higher limit).
 - A teacher can change passwords of other teachers. Is this intended?
 > Yes! Since there is no mail-service included to send a password-reset-link, you need another possibility to login as teacher in case you lost your password. Since schoco will probably always be hosted individually for each educational institution, there is hopefully no hostility between colleagues.
 - Code execution and testing is quite fast, how does it come?
@@ -198,15 +199,14 @@ services:
 > Schoco will automatically switch to http-response (no live-output), if websocket-connection fails and back to WS when it's working again. Sadly there's only a single http-response, when the whole Java-program finished executing, therefore no live-output. Additionally right now, there's no way to send user-input to a running program, when websocket is not working. If this is a major issue for you, then please open an issue on github - perhaps there's a way to find a solution.
 - Why does schoco consist of four different docker images?
 > The <ins>backend</ins> (schoco-backend) is written in Python FastAPI. To make this thing fast, the docker image is based on [tiangolo/uvicorn-gunicorn-fastapi](https://github.com/tiangolo/uvicorn-gunicorn-fastapi-docker) which includes auto-tuning for the number of workers. Otherwise you would have to regulate the number of workers via more complex systems like kubernetes - but I want to keep things as simple as possible. Schoco is designed for educational institutions with a moderate number of simultaneous users.  
-The <ins>frontend</ins> ("schoco-nginx" - which is delivered by nginx), is then unfortunately not compatible with the special multi-process image of the backend. Therefore, the frontend runs in a separate docker image.  
+The <ins>frontend</ins> ("schoco-frontend" - which is delivered by nginx), is then unfortunately not compatible with the special multi-process image of the backend. Therefore, the frontend runs in a separate docker image.  
 The <ins>git-repo</ins> (gitea) is naturally running in it's own original and untouched docker image.  
 Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use containers!
 
-## Progress
-**Progress is far (around 95% ?)! <ins>All</ins> important and difficult key-features are working! The Online-IDE is working and projects can be transformed into homeworks which are then editable by the pupils. Teachers can see and view all pupils solutions and their results of JUnit-Tests ✨**
 
-**From now on, there are just a few more features missing (and some polishing here and there of course...)**
-Especially the following things are planned to be adressed until September 2023
+## Progress
+
+**There a few more features missing that might be implemented within the next months:**
 - [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
 - [ ] Mark projects as templates (when being a teacher)
 - [ ] Perhaps some possibility to view pupil's private projects as teacher?!
@@ -233,6 +233,17 @@ Especially the following things are planned to be adressed until September 2023
 - [x] Pupils can see a teachers' solution of an assignment after a configurable start-date
 - [x] Users can change entry-point of project (main-class)
 - [x] Teachers see automatic update notifications if a newer docker-image is available
+
+
+# Changelog
+I use [semver](https://semver.org/) for versioning!
+
+## 1.0.0
+(2023-10-xx)  
+````
+Initial release
+````
+
 
 # Start developing
 

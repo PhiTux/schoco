@@ -1,5 +1,4 @@
 export const users_de = {
-    users_title: "Benutzerverwaltung",
     error_confirming_password: "Fehler beim Überprüfen des Passworts!",
     name_must_not_be_empty: "Name darf nicht leer sein!",
     password_changed_success: "Passwort wurde geändert.",

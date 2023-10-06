@@ -66,6 +66,7 @@ export const general_en = {
     template: "Template",
     input: "Input",
     send: "Send",
-    project: "Project",
+    project: "Project",    
+    usermanagement: "User management",
     version: "Version",
 }

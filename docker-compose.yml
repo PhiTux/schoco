@@ -44,9 +44,9 @@ services:
       - ./data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
 
-  schoco-nginx:
-    image: phitux/schoco-nginx:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-nginx/tags
-    container_name: schoco-nginx
+  schoco-frontend:
+    image: phitux/schoco-frontend:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-frontend/tags
+    container_name: schoco-frontend
     restart: always
     group_add:
       - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)

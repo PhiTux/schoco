@@ -31,4 +31,11 @@ export const users_en = {
     delete_pupil_or_teacher_confirm: "Do you really want to delete the following {0}?",
     create_pupil_accounts: "Create student accounts",
     same_password_for_all_accounts: "Same password for all accounts",
+    no_uniform_password_set: "No uniform password set!",
+    unique_passwords_are_missing: "Individual passwords are missing!",
+    only_those_lines_accepted: "Only lines with green checkmark {0} will be accepted!",
+    directly_add_pupils_to_courses: "<b>Optional:</b> Directly add students to courses:",
+    create_accounts: "Create accounts",
+    create_courses: "Create courses",
+    search_users: "Search users",
 }

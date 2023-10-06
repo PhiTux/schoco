@@ -1308,7 +1308,7 @@ function removeCourseFromNewPupils(id) {
       </div>
     </div>
 
-    <h1 class="text-center">{{ $t("users_title") }}</h1>
+    <h1 class="text-center">{{ $t("usermanagement") }}</h1>
     <div class="btn-group non-flex text-center m-4" role="group">
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCoursesModal"
         @click="prepareAddCoursesModal()">
