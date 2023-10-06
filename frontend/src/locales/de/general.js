@@ -43,6 +43,8 @@ export const general_de = {
     courses: "Kurse",
     database_id: "#id",
     role: "Rolle",
+    teacher: "Lehrer/in",
+    pupil: "Schüler/in",
     settings: "Einstellungen",
     edit_settings: "Einstellungen bearbeiten",
     deadline: "Abgabefrist",

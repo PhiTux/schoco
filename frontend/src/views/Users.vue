@@ -1114,7 +1114,7 @@ function removeCourseFromNewPupils(id) {
           <div class="modal-body text-center">
             <h4>
               <i18n-t keypath="delete_pupil_or_teacher_confirm" tag="span">
-                <u v-if="state.deleteUserIsTeacher">Lehrer</u><u v-else>Schüler</u>
+                <u v-if="state.deleteUserIsTeacher">{{ $t("teacher") }}</u><u v-else>{{ $t("pupil") }}</u>
               </i18n-t>
               <br />
               <b>{{ state.deleteUserFullname }} ({{

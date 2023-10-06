@@ -40,8 +40,8 @@ You wanna know more about schoco? Then I recommend to read the [main-features](#
 - Pupils directly see coding-homework when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
 - JUnit for automatic testing of the homework - the newest test-result (percent of how many JUnit-Tests passed successfully) of pupils is directly visible to the teacher.
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity of sending directories or files.
+- After a configurable start-date, pupils can see the solution of the teacher and compare it with their own solution.
 - Pupils can only open their own project or homework - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
-- No registration methods for pupils. Only teachers can register pupils who can be member of multiple courses.
 
 
 # Installation
@@ -236,12 +236,12 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 
 # Changelog
-I use [semver](https://semver.org/) for versioning!
+I use [semver](https://semver.org/) for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry...
 
 ## 1.0.0
-(2023-10-xx)  
+(2023-10-06)  
 ````
-Initial release
+Initial release 🌟
 ````
 
 
