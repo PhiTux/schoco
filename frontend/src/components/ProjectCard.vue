@@ -184,6 +184,7 @@ onMounted(() => {
 
 .text-clamp {
     white-space: pre-line;
+    font-family: monospace;
 }
 
 
