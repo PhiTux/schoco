@@ -758,7 +758,7 @@ def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.ge
     # download project info
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=uuid)
-    meta = {"name": project.name, "description": project.description}
+    meta = {"name": project.name, "description": project.description, "main_class": project.main_class}
 
     if user.role == "teacher":
         meta["computation_time"] = project.computation_time
@@ -800,10 +800,11 @@ async def uploadProject(file: UploadFile, db: Session = Depends(database_config.
             meta = json.loads(zipped.read("meta.json"))
             if user.role == "pupil":
                 new_project = models_and_schemas.Project(uuid=project_uuid, name=meta["name"],
-                                                         description=meta["description"], owner_id=user.id)
+                                                         description=meta["description"], owner_id=user.id, main_class=meta.get("main_class", ""))
             else:
                 new_project = models_and_schemas.Project(uuid=project_uuid, name=meta.get("name", "__no_title__"),
-                                                         description=meta.get("description", ""), owner_id=user.id, computation_time=meta.get("computation_time", 10))
+                                                         description=meta.get("description", ""), owner_id=user.id,
+                                                         computation_time=meta.get("computation_time", 10), main_class=meta.get("main_class", ""))
 
             if not crud.create_project(db=db, project=new_project):
                 # delete git repo
