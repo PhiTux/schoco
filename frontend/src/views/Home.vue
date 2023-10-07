@@ -1098,6 +1098,9 @@ function collapseMyProjects() {
             @duplicateProject="duplicateProject" @downloadProject="downloadProject" @deleteProject="askDeleteProject" />
         </div>
       </div>
+
+      <div class="height-buffer">
+      </div>
     </div>
   </div>
 </template>
@@ -1120,6 +1123,10 @@ function collapseMyProjects() {
 </style>
 
 <style scoped>
+.height-buffer {
+  height: 100px;
+}
+
 .fit-content {
   width: fit-content;
 }

@@ -721,7 +721,7 @@ def duplicateProject(project_uuid: str = Path(), db: Session = Depends(database_
         db=db, project_uuid=project_uuid)
 
     new_project = models_and_schemas.Project(uuid=new_project_uuid, name=orig_project.name + " (copy)",
-                                             description=orig_project.description, owner_id=user.id, computation_time=orig_project.computation_time)
+                                             description=orig_project.description, owner_id=user.id, computation_time=orig_project.computation_time, main_class=orig_project.main_class)
 
     if not crud.create_project(db=db, project=new_project):
         # delete git repo
