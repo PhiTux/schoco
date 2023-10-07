@@ -241,7 +241,7 @@ I use [semver](https://semver.org/) for versioning! I <ins>strongly</ins> recomm
 ## 1.0.1
 (2023-10-07)  
 ````
-Minor bugfixes, especially for importing/exporting projects
+Minor bugfixes, especially for importing/exporting/duplication of projects
 ````
 
 ## 1.0.0
