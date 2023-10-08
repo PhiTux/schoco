@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, onBeforeUnmount, reactive, ref, onMounted } from "vue";
+import { onBeforeMount, onBeforeUnmount, reactive, ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Toast, Popover, Modal, Tooltip } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
@@ -97,6 +97,9 @@ let ws;
 
 var isMac = /mac/i.test(navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform);
 
+const entry_point_without_slash = computed(() => {
+  return state.entry_point.endsWith("/") ? state.entry_point.slice(0, -1) : state.entry_point
+})
 
 function scrollResults() {
   let output = document.getElementById("output");
@@ -176,7 +179,6 @@ onBeforeMount(() => {
         state.files = response.data.files;
       }
       state.entry_point = response.data.entry_point;
-      let entry_point_without_slash = state.entry_point.endsWith("/") ? state.entry_point.slice(0, -1) : state.entry_point
       openFile(entry_point_without_slash);
     },
     (error) => {
@@ -321,7 +323,7 @@ function setLight(light) {
 
 function openFile(inputPath) {
   let path = inputPath;
-  if (inputPath.endsWith("/")) {
+  if (inputPath.toString().endsWith("/")) {
     path = inputPath.slice(0, -1);
   }
 
@@ -2370,14 +2372,14 @@ function setComputationTime() {
             <pane>
               <div class="editor-relative d-flex flex-column">
                 <ul class="nav nav-tabs pt-2">
-                  <li class="nav-item" v-for=" f  in  state.openFiles ">
+                  <li class="nav-item" v-for="f in state.openFiles">
                     <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
                       active: f.tab == state.activeTab,
                     }">
                       <div class="d-inline me-1" :class="{ changed: state.tabsWithChanges.includes(f.tab) }">
                         {{ f.path }}
                       </div>
-                      <a v-if="f.path !== 'Schoco.java'" @click.stop="checkCloseTab(f.tab)">
+                      <a v-if="f.path !== entry_point_without_slash" @click.stop="checkCloseTab(f.tab)">
                         <font-awesome-layers class="closeTabBtn">
                           <font-awesome-icon id="background" icon="fa-circle" />
                           <div style="color: var(--bs-light)">

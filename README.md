@@ -236,7 +236,13 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 
 # Changelog
-I use [semver](https://semver.org/) for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry...
+[Semver](https://semver.org/) is used for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... I use alembic for automatic database-migrations, but I'm not yet fully confident using it...
+
+## 1.0.2
+(2023-10-xx)  
+````
+Bugfix for tabs in IDE
+````
 
 ## 1.0.1
 (2023-10-07)  
