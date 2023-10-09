@@ -20,7 +20,7 @@ export const users_de = {
     add_users_to_courses_error: "Es gab Fehler bei der Zuordnung von Schülern zu Kursen. Bitte überprüfe die Zuordnung manuell.",
     delete_course: "Kurs löschen",
     delete_course_confirm: "Möchtest du den Kurs {0} wirklich löschen?",
-    delete_course_confirm_info: "Damit werden auch Hausaufgaben gelöscht, die diesem Kurs zugeordnet sind. Außerdem werden alle Schüler aus dem Kurs entfernt.",
+    delete_course_confirm_info: "Damit werden auch Aufgaben gelöscht, die diesem Kurs zugeordnet sind. Außerdem werden alle Schüler aus dem Kurs entfernt.",
     create_new_course: "Neuen Kurs erstellen",
     course_name: "Kursname",
     background_color: "Hintergrundfarbe",

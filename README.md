@@ -241,7 +241,7 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 ## 1.0.2
 (2023-10-xx)  
 ````
-Bugfix for tabs in IDE
+Bugfix for tabs and entry_point class in IDE
 ````
 
 ## 1.0.1
