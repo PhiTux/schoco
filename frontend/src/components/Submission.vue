@@ -19,7 +19,7 @@ const result = computed(() => {
         return 0;
     }
 
-    return (passed_tests / (passed_tests + failed_tests)) * 100;
+    return ((passed_tests / (passed_tests + failed_tests)) * 100).toFixed();
 
 });
 
