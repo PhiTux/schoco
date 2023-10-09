@@ -72,7 +72,7 @@ watch(() => props.entryPoint, () => {
             <a v-else>
                 <div class="name px-1">{{ props.name }}</div>
             </a>
-            <a v-if="(route.params.user_id == 0 && props.path == 'Schoco.java/') || (props.path !== 'Tests.java/' && props.path !== 'Schoco.java/')"
+            <a v-if="(route.params.user_id == 0 && props.path === props.entryPoint) || (props.path !== 'Tests.java/' && props.path !== props.entryPoint)"
                 class="file-dropdown dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown"></a>
             <!-- if file -->
             <ul v-if="Object.keys(props.value).length === 0" class="dropdown-menu" data-bs-theme="light">
