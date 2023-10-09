@@ -42,6 +42,7 @@ You wanna know more about schoco? Then I recommend to read the [main-features](#
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity of sending directories or files.
 - After a configurable start-date, pupils can see the solution of the teacher and compare it with their own solution.
 - Pupils can only open their own project or homework - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
+- Schoco is available in english and german language. Other languages can be added easily, see [here](./frontend/src/locales/).
 
 
 # Installation
@@ -239,9 +240,10 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 [Semver](https://semver.org/) is used for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... I use alembic for automatic database-migrations, but I'm not yet fully confident using it...
 
 ## 1.0.2
-(2023-10-xx)  
+(2023-10-09)  
 ````
-Bugfix for tabs and entry_point class in IDE
+Bugfixes for tabs and entry_point class in IDE
+Bugfix for result calculation
 ````
 
 ## 1.0.1
