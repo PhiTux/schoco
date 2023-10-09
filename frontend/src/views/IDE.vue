@@ -179,7 +179,7 @@ onBeforeMount(() => {
         state.files = response.data.files;
       }
       state.entry_point = response.data.entry_point;
-      openFile(entry_point_without_slash);
+      openFile(entry_point_without_slash.value);
     },
     (error) => {
       if (
