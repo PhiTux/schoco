@@ -9,24 +9,24 @@ services:
     image: phitux/schoco-backend:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
     container_name: schoco-backend
     restart: always
-    user: "1000:1000" # find out your user-id (uid) and group-id (gid) with 'id' in your bash
+    user: "1000:1000" # find out the user-id (uid) and group-id (gid) of the new user schoco by running 'id schoco' in your bash
     group_add:
-      - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      # find your docker group ID. Either run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      # and import it as variable, or just run the command from within the brackets and replace ${DOCKER_GROUP_ID} with the output.
+      # Important: the group ID must be used as String (in quotes)!
+      - ${DOCKER_GROUP_ID}
     environment:
       - FULL_DATA_PATH=/path/to/my/data 
       # same as (left part of) first volume - but here as FULL PATH!!!
 
       - MAX_CONTAINERS=4 
-      # sets the amount of java-workers
+      # sets the amount of java-workers (you want to set this higher!) I recommend as rule of thumb 1.5x the amout of cores of your CPU
 
       - SECRET_KEY=secret 
       # used for session token
 
       - TEACHER_KEY=teacherkey 
       # this is the 'password' that is used to create new teacher-accounts. It must only be known to the teachers.
-
-      - COOKIES_TAG=1.0.0 (not yet implemented) 
-      # can be left away right now
 
       - GITEA_USERNAME=schoco 
       # this is the username of the gitea-user (see last image in this yaml-file) 
@@ -45,11 +45,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   schoco-frontend:
-    image: phitux/schoco-frontend:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-frontend/tags
+    image: phitux/schoco-frontend:<tag> # always use the same tag as schoco-backend (see https://hub.docker.com/r/phitux/schoco-frontend/tags)
     container_name: schoco-frontend
     restart: always
     group_add:
-      - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      - ${DOCKER_GROUP_ID} # see above
     networks:
       - schoco
     volumes:

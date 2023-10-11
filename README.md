@@ -50,11 +50,14 @@ You wanna know more about schoco? Then I recommend to read the [main-features](#
 Installation requires a few more steps than your average docker-service, but it's still pretty straight-forward, and only requires a few minutes.
 
   1. You need `docker` and `docker-compose` installed.
-  2. I recommend to create a separate user for running schoco. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.
-  3. Make sure, that your normal user (not root / sudo) is member of the docker-group! If you created a separate user for schoco (previous step) than this rule applies to this user!
+  2. I strongly recommend to create a separate user for running schoco and this guide will from now on assume, that you create and use this separate user. Why? Because nproc is used to limit the number of running processes to prevent fork-bombs (soft-limit=3700, hard-limit=5000). If you don't create a separate user, the nproc-limit will be applied to all processes of your user, which might affect any other running software.   
+  *Create the new user schoco (without creating a separate home-folder, since it is not necessary):*  
+  `sudo adduser --no-create-home schoco`
+  3. Make sure, that the new user (assuming name 'schoco') is member of the docker-group! 
+  `sudo usermod -a -G docker schoco`
   4. Create the data-forder `data` where you want to store the DB and temporary code. This step must be done BEFORE starting up the docker containers.
      
-     ❗ <ins>YOU</ins> (or the user from step 2) must be the owner of this folder - not root (don't use sudo). ❗ 
+     ❗ The new user `schoco` must be the owner of this folder - not root (don't use sudo). ❗ 
   5. Prepare your Web-Server / Reverse-Proxy to forward requests to schoco. It requires special care for the websocket-connection to work! Here are two example configurations for Apache2 and NGINX (both assuming, that schoco is running on port 1234):
      - NGINX
       ```nginx
@@ -98,24 +101,24 @@ networks:
 
 services:
   schoco-backend:
-    image: phitux/schoco-backend:<tag> 
-    # use the latest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
+    image: phitux/schoco-backend:<tag> # use the newest tag, see https://hub.docker.com/r/phitux/schoco-backend/tags
     container_name: schoco-backend
     restart: always
-    user: "1000:1000" 
-    # find out your user-id (uid) and group-id (gid) with 'id' in your bash. Must be the same user as the owner of the data-folder!
+    user: "1000:1000" # find out the user-id (uid) and group-id (gid) of the new user schoco by running 'id schoco' in your bash
     group_add:
-      - ${DOCKER_GROUP_ID} 
-      # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      # find your docker group ID. Either run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      # and import it as variable, or just run the command from within the brackets and replace ${DOCKER_GROUP_ID} with the output.
+      # Important: the group ID must be used as String (in quotes)!
+      - ${DOCKER_GROUP_ID}
     environment:
       - FULL_DATA_PATH=/path/to/my/data 
       # same as (left part of) first volume - but here as FULL PATH!!!
 
       - MAX_CONTAINERS=4 
-      # sets the amount of java-workers
+      # sets the amount of java-workers (you want to set this higher!) I recommend as rule of thumb 1.5x the amout of cores of your CPU
 
       - SECRET_KEY=secret 
-      # used for session token - run 'openssl rand -base64 32' to generate a random key. Changing it and restarting the backend will log out all users!
+      # used for session token
 
       - TEACHER_KEY=teacherkey 
       # this is the 'password' that is used to create new teacher-accounts. It must only be known to the teachers.
@@ -137,11 +140,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   schoco-frontend:
-    image: phitux/schoco-frontend:<tag> # use the latest tag, see https://hub.docker.com/r/phitux/schoco-frontend/tags
+    image: phitux/schoco-frontend:<tag> # always use the same tag as schoco-backend (see https://hub.docker.com/r/phitux/schoco-frontend/tags)
     container_name: schoco-frontend
     restart: always
     group_add:
-      - ${DOCKER_GROUP_ID} # run in your bash: export DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+      - ${DOCKER_GROUP_ID} # see above
     networks:
       - schoco
     volumes:
@@ -165,7 +168,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
 ```
-  7. **On the first startup** you will need to add the gitea user using the following command
+  7. **On the first startup** you will need to add the gitea user using the following command. Adapt the user-ID and the username/password as you set it in the yaml-file for the gitea-container.
   > `docker exec --user 1000 schoco-gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
 
 
@@ -237,7 +240,11 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 
 # Changelog
-[Semver](https://semver.org/) is used for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... I use alembic for automatic database-migrations, but I'm not yet fully confident using it...
+[Semver](https://semver.org/) is used for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
+
+I use alembic for automatic database-migrations, AND AS YOU READ THIS THERE IS STILL A BUG IN MY ALEMBIC-IMPLEMENTATION! 
+Right now Schoco is only save to use, when you have a bit of knowledge of sqlite3 DB usage...
+
 
 ## 1.0.2
 (2023-10-09)  
