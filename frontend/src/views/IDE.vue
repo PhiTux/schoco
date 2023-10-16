@@ -2334,7 +2334,7 @@ function setComputationTime() {
                 <!-- Description -->
                 <pane min-size="30" size="50" max-size="70">
                   <div v-if="!state.editingDescription" class="description p-1">
-                    <div class="description-content">
+                    <div class="description-content text-break">
                       {{ state.projectDescription }}
                     </div>
                     <div v-if="route.params.user_id == 0 && !state.isSolution" class="description-button bottom-0 end-0">
@@ -2572,7 +2572,6 @@ function setComputationTime() {
 }
 
 .description-content {
-  position: absolute;
   height: 100%;
   width: 100%;
   overflow-y: auto;
