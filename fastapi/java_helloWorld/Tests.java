@@ -23,15 +23,15 @@ public class Tests {
 	// Two examples
 	@Test
 	public void isGreaterTrue() {
-		Schoco schoco = new Schoco();
-		//assertTrue("Num 1 is greater than Num 2", schoco.isGreater(4, 3));
-		//assertTrue(schoco.isGreater(4, 3));
+		/*Schoco schoco = new Schoco();
+		assertTrue("Num 1 is greater than Num 2", schoco.isGreater(4, 3));
+		assertTrue(schoco.isGreater(4, 3));*/
 	}
 	
 	@Test
 	public void isGreaterFalse() {
-		Schoco schoco = new Schoco();
-		//assertEquals(4, schoco.addition(1, 3));
+		/*Schoco schoco = new Schoco();
+		assertEquals(4, schoco.addition(1, 3));*/
 	}	
 
 }
