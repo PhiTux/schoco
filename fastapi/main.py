@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import JSONResponse
 from multiprocessing import Lock, Manager
-import database_config
 import users
 import code
 import cookies_api
@@ -59,7 +58,6 @@ def startup_event():
         # delete all container_dirs from previous runs
         cookies_api.remove_all_container_dirs()
 
-        database_config.create_db_and_tables()
         with lock:
             cookies_api.fillNewContainersQueue()
     else:
