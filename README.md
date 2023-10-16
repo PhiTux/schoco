@@ -26,11 +26,9 @@ The project is heavily inspired by [codeboard.io](https://codeboard.io) ([github
 
 ---
  ![IDE](./readme/schoco-promo.jpg)
-  See all screenshots [here](./readme/README.md)!
-
 ---
 
-You wanna know more about schoco? Then I recommend to read the [main-features](#main-features), read the [FAQ](#faq) and take a look into the wiki (YET TO COME).
+You wanna know more about schoco? Then I recommend to read the [main-features](#main-features), read the [FAQ](#faq) and take a look into the [Wiki](https://github.com/phitux/schoco/wiki).
 
 
 ## Main-features
