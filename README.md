@@ -240,10 +240,19 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 
 # Changelog
-[Semver](https://semver.org/) is used for versioning! I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
+[Semver](https://semver.org/) is used for versioning! 
 
-I use alembic for automatic database-migrations, AND AS YOU READ THIS THERE IS STILL A BUG IN MY ALEMBIC-IMPLEMENTATION! 
-Right now Schoco is only save to use, when you have a bit of knowledge of sqlite3 DB usage...
+I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
+
+
+## 1.0.3
+(2023-10-16)
+🌟 This version includes a bugfix for alembic (DB-migration). This version is now save to install. I recommend to start a new installation. Otherwise you manually have to change data inside the sqlite3 file `sql_app.db`: Go to table `alembic_version` and set `version_num` to `f031d57aa4e6`. This should do the trick.
+````
+Slightly changed Hello-World-Template
+Bugfix for alembic! Now this version is save to install!
+Minor fixes
+````
 
 
 ## 1.0.2
