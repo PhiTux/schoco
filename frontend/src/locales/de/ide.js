@@ -6,7 +6,7 @@ export const ide_de = {
     program_running: "Programm wird ausgeführt...",
     program_testing: "Programm wird getestet 📝➡️✅ bitte warten...",
     no_executables_found: "🔎 Leider keine ausführbaren Dateien gefunden. Bitte zuerst kompilieren ⚙",
-    program_exited_without_output: "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔.",
+    program_exited_without_output: "Programm wurde (erfolgreich, aber ohne Ausgabe) beendet! ✔",
     program_exited_probably_with_error: "Programm wurde (vermutlich fehlerhaft) beendet! ❌",
     security_error: "💥🙈 es gab wohl einen Sicherheitsfehler beim Testen deines Programms. Scheinbar hat dein Programm versucht, Dinge auszuführen, die nicht erlaubt sind. Korrigiere dies zuerst.\nWenn das Problem bestehen bleibt, solltest du dich an deine Lehrerin / deinen Lehrer wenden.",
     computation_time_exceeded: "❌ Programm wurde frühzeitig beendet! Die Rechenzeit ist vermutlich abgelaufen. Hast du irgendwo eine Endlosschleife?",

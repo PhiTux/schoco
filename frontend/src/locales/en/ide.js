@@ -6,7 +6,7 @@ export const ide_en = {
     program_running: "Program running...",
     program_testing: "Program testing 📝➡️✅ please wait...",
     no_executables_found: "🔎 Unfortunately, no executables were found. Please compile first ⚙",
-    program_exited_without_output: "Program exited (successfully, but without output)! ✔.",
+    program_exited_without_output: "Program exited (successfully, but without output)! ✔",
     program_exited_probably_with_error: "Program exited (probably with an error)! ❌",
     security_error: "💥🙈 There seems to have been a security error while testing your program. Apparently, your program tried to execute things that are not allowed. Please correct this first.\nIf the problem persists, you should contact your teacher.",
     computation_time_exceeded: "❌ Program was terminated prematurely! The computation time has probably expired. Do you have an infinite loop somewhere?",
