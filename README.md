@@ -16,7 +16,7 @@ SCHOCO stands for <ins>**SCH**</ins>ool <ins>**O**</ins>nline <ins>**CO**</ins>d
 
 Schoco is a web-based IDE for Java-Programming (Java 8) with a focus on learning programming at school. It's designed to be used by pupils and teachers in the classroom and at home. 
 
-Until now, it has hardly been possible to assign **programming homework** because the installation of the software at home may be difficult or cannot be presupposed and the submission and control of the results is cumbersome.
+Until now, it has hardly been possible to assign **programming homework/assignments** because the installation of the software at home may be difficult or cannot be presupposed and the submission and control of the results is cumbersome.
 
 Therefore the **core feature** of schoco is the possibility to create **coding-homework** for students, which can even be tested automatically by JUnit-Tests. The tool works completely online without the need of an offline installation of the JRE or any other software by any user.
 
@@ -34,12 +34,12 @@ You wanna know more about schoco? Then I recommend to read the [main-features](#
 ## Main-features
 
 - Web-based IDE for Java-Programming (Java 8), which is fully functional to Java <ins>except</ins> UIs (obviously), writing files to disk, accessing the internet and a few others. The restrictions are needed for security reasons and are provided by Java's security manager.
-- Each user can create private projects and teachers can convert their projects into homework, which are then editable by the pupils of the selected course.
-- Pupils directly see coding-homework when logging in and they can code, compile, run and test their homework completely online without the need of an offline installation of the JRE or any other software.
-- JUnit for automatic testing of the homework - the newest test-result (percent of how many JUnit-Tests passed successfully) of pupils is directly visible to the teacher.
+- Each user can create private projects and teachers can convert their projects into assignments, which are then editable by the pupils of the selected course.
+- Pupils directly see coding-assignments when logging in and they can code, compile, run and test their assignments completely online without the need of an offline installation of the JRE or any other software.
+- JUnit for automatic testing of the assignment - the newest test-result (percent of how many JUnit-Tests passed successfully) of pupils is directly visible to the teacher.
 - Teachers can open pupils solutions with a single click and show/compare them at the beamer in the classroom without the necessity of sending directories or files.
 - After a configurable start-date, pupils can see the solution of the teacher and compare it with their own solution.
-- Pupils can only open their own project or homework - no possibility to open the homework-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
+- Pupils can only open their own project or assignment - no possibility to open the assignment-solution of your best buddy. That's first because of privacy-reasons and second to minimize copying from others.
 - Schoco is available in english and german language. Other languages can be added easily, see [here](./frontend/src/locales/).
 
 
@@ -166,7 +166,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
 ```
-  7. **On the first startup** you will need to add the gitea user using the following command. Adapt the user-ID and the username/password as you set it in the yaml-file for the gitea-container.
+  7. **On the first startup** you will need to add the gitea user using the following command. Adapt the user-ID as you set it in the yaml-file for the gitea-container and adapt the username/password as set for the schoco-backend.
   > `docker exec --user 1000 schoco-gitea gitea admin user create --admin --username schoco --password schoco1234 --email schoco@example.com`
 
 
@@ -177,16 +177,16 @@ services:
 - The logical Core is the API, which is build with [Python Fastapi](https://fastapi.tiangolo.com/). The frontend is build with [Vite 4](https://vitejs.dev/) and [Vue 3](https://v3.vuejs.org/).
 - The API is communicating with [Gitea](https://gitea.io/), SQLite and the workers [schoco-cookies](./cookies/)
 - The 'cookies' in 'schoco-cookies' stands for <ins>**Co**</ins>mpile <ins>**o**</ins>nline, <ins>**k**</ins>eep <ins>**i**</ins>ts <ins>**e**</ins>xecution <ins>**s**</ins>upervised. Since it's part of schoco it's of course called 'schoco-cookies' 🍪🤭. They are docker-containers, that are running parallely at a configurable amount. They are doing the actual 'work' with the Java-code and are used for compiling, executing and testing all the code. Each container is only used for a single action and is then replaced by a new one. This is done for security-reasons, so that no code of a user can be executed in the same container as the code of other users. 
-- Gitea (a git repo, by default running as separate docker-container) is used to store the code. Each project has an own repository with an UUID as name, which is also visible in the browser-URL when opening a project. When editing a homework as pupil, each pupil gets it's own branch.
-- SQLite (a single-file DB) is used to store everything that is NOT code, like the users, courses, and meta-information about projects and homework.
+- Gitea (a git repo, by default running as separate docker-container) is used to store the code. Each project has an own repository with an UUID as name, which is also visible in the browser-URL when opening a project. When editing an assignment as pupil, each pupil gets it's own branch.
+- SQLite (a single-file DB) is used to store everything that is NOT code, like the users, courses, and meta-information about projects and assignments.
 - Nginx is included as mandatory gateway. Since the websocket-connection (to view the live-output of the code) connects to the Docker Socket (Docker-API), this whould be a major security issue. Therefore, the websocket-connection is proxied by Nginx, which only allows websocket-connections to Docker.
 
 ## FAQ
 
-- What happens after a homework deadline has passed? 
+- What happens after an assignment deadline has passed? 
 > At the moment the pupils can continue using schoco just as before (edit, save, run, test,...). At [progress](#progress) you can see, that there might be coming a button within the next months to see previous version of students' solutions, e.g. before deadline.
 - Can I code everything that's normally possible in Java? 
-> No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, homework can have a higher limit).
+> No, the 'Java security manager' restricts several things like accessing the internet, writing files to the disk or executing commands. Beside that, UIs are obviously not possible and there is also a limited code-execution-time (set to 10s for pupils' private projects, assignments can have a higher limit).
 - A teacher can change passwords of other teachers. Is this intended?
 > Yes! Since there is no mail-service included to send a password-reset-link, you need another possibility to login as teacher in case you lost your password. Since schoco will probably always be hosted individually for each educational institution, there is hopefully no hostility between colleagues.
 - Code execution and testing is quite fast, how does it come?
