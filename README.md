@@ -243,6 +243,14 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
 
+## 1.0.4
+(2023-10-18)
+````
+Bugfix for tooltips in IDE
+Drastically (!) reduced size of schoco-backend image
+Updated CSS of Projectcards in Home
+```` 
+
 ## 1.0.3
 (2023-10-16)
 🌟 This version includes a bugfix for alembic (DB-migration). This version is now save to install. I recommend to start a new installation. Otherwise you manually have to change data inside the sqlite3 file `sql_app.db`: Go to table `alembic_version` and set `version_num` to `f031d57aa4e6`. This should do the trick.
