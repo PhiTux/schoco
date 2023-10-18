@@ -99,11 +99,11 @@ class UserService {
     }
 
     getLatestVersion() {
-        return axiosAuth.get(API_URL + 'getLatestVersion')
+        return axiosAuth.get('getLatestVersion')
     }
 
     skipLatestVersion(skip_version) {
-        return axiosAuth.post(API_URL + 'skipLatestVersion', { 'skip_version': skip_version })
+        return axiosAuth.post('skipLatestVersion', { 'skip_version': skip_version })
     }
 }
 

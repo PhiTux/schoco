@@ -51,8 +51,7 @@ firstRun = m.Value(bool, True)
 @app.on_event("startup")
 @repeat_every(seconds=60)
 def startup_event():
-    logger.info("startup_event")
-    #global firstRun
+    # logger.info("startup_event")
     if firstRun.value:
         firstRun.value = False
         # delete all container_dirs from previous runs
