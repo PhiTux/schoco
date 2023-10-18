@@ -307,7 +307,7 @@ onMounted(async () => {
 
 function enableTooltips() {
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl))
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, { delay: { "show": 500, "hide": 0 }, trigger: "hover" }))
 }
 
 function setLight(light) {

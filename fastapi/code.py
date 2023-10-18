@@ -630,7 +630,6 @@ def renameFile(file: models_and_schemas.RenameFile, project_uuid: str = Path(), 
     # update entry_point if old_path was entry_point
     entry_point = crud.get_entry_point_by_project_uuid(
         db=db, project_uuid=project_uuid)
-    print(entry_point, file.old_path)
 
     if entry_point == file.old_path or entry_point == file.old_path + "/":
         if not crud.set_entry_point_by_project_uuid(db=db, project_uuid=project_uuid, entry_point=file.new_path):
@@ -758,7 +757,8 @@ def downloadProject(uuid: str = Path(), db: Session = Depends(database_config.ge
     # download project info
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=uuid)
-    meta = {"name": project.name, "description": project.description, "main_class": project.main_class}
+    meta = {"name": project.name, "description": project.description,
+            "main_class": project.main_class}
 
     if user.role == "teacher":
         meta["computation_time"] = project.computation_time
