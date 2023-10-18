@@ -94,7 +94,8 @@ onMounted(() => {
                 </ul>
             </div>
 
-            <text-clamp :id="props.isHomework ? 'description-' + props.id : 'description-' + props.uuid" class="text-clamp"
+            <text-clamp :class="{ 'visually-hidden': !description }"
+                :id="props.isHomework ? 'description-' + props.id : 'description-' + props.uuid" class="text-clamp"
                 :text="description" :max-lines="2">
                 <template #after="{ toggle, clamped }">
                     <a v-if="state.showToggle" class="description-toggle" @click="toggle">
@@ -183,8 +184,22 @@ onMounted(() => {
 }
 
 .text-clamp {
+    max-height: 150px;
+    padding: 5px;
+    border-radius: 10px;
+    overflow: auto !important;
     white-space: pre-line;
     font-family: monospace;
+}
+
+.text-clamp {
+    [data-bs-theme=light] & {
+        background-color: #e8e8e8;
+    }
+
+    [data-bs-theme=dark] & {
+        background-color: #32373c;
+    }
 }
 
 
@@ -240,10 +255,6 @@ onMounted(() => {
         background-color: #292e33;
     }
 }
-
-/* .card-body {
-    
-} */
 
 .card:hover {
     box-shadow: 0 0 10px 3px #555 !important;
