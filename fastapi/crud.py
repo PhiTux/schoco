@@ -368,7 +368,7 @@ def get_pupils_homework_by_username(db: Session, username: str):
     for h in homework:
         project = get_project_by_id(db=db, id=h.template_project_id)
         results.append({"deadline": h.deadline, "id": h.id,
-                       "name": project.name, "description": project.description, "uuid": project.uuid, "solution_project_id": h.solution_project_id, "solution_start_showing": h.solution_start_showing})
+                       "name": project.name, "description": project.description, "uuid": project.uuid, "solution_project_id": h.solution_project_id, "solution_start_showing": h.solution_start_showing, "enable_tests": h.enable_tests})
 
     return results
 
@@ -617,6 +617,24 @@ def get_template_project_by_homework_id(db: Session, id: int):
     project = db.exec(select(models_and_schemas.Project).where(
         models_and_schemas.Project.id == homework.template_project_id)).first()
     return project
+
+
+def update_enable_tests(db: Session, id: int, enable_tests: bool):
+    # get homework
+    homework = get_homework_by_id(db, id)
+    if homework is None:
+        return False
+
+    # update enable tests
+    homework.enable_tests = enable_tests
+    try:
+        db.add(homework)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
 
 
 def update_template_computation_time(db: Session, id: int, computation_time: int):

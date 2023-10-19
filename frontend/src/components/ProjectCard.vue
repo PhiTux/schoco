@@ -33,6 +33,7 @@ const props = defineProps({
     submission: String,
     pupils_editing: Number,
     pupils_in_course: Number,
+    enableTests: Boolean,
 });
 
 onMounted(() => {
@@ -140,18 +141,18 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <div v-if="isHomework && !isTeacher" class="card-footer">
+        <div v-if="isHomework && !isTeacher && enableTests" class="card-footer">
             <i18n-t keypath="percent_solved" tag="span">
                 <Submission :submission="submission"></Submission>
             </i18n-t>
         </div>
         <div v-if="isHomework && isTeacher" class="card-footer row mx-0">
-            <div class="col-6 border-end">
+            <div class="col-6" :class="{ 'border-end': enableTests }">
                 <i18n-t keypath="pupils_editing" tag="span">
                     <u>{{ pupils_editing }} / {{ pupils_in_course }}</u>
                 </i18n-t>
             </div>
-            <div class="col-6">
+            <div v-if="enableTests" class="col-6">
                 <i18n-t keypath="percent_solved" tag="span">
                     <Submission :submission="submission"></Submission>
                 </i18n-t>

@@ -96,7 +96,6 @@ def project_access_allowed_teacher_only(project_uuid: str, db: Session = Depends
     # user must be owner
     project = crud.get_project_by_project_uuid(
         db=db, project_uuid=project_uuid)
-    print(project_uuid)
     if project.owner.username == username:
         return True
 
@@ -190,6 +189,9 @@ def getProjectName(project_uuid: str = Path(), user_id: int = Path(), db: Sessio
         result['deadline'] = homework.deadline
         result['id'] = homework.id
 
+    if isHomework:
+        result['enable_tests'] = homework.enable_tests
+
     return result
 
 
@@ -259,7 +261,7 @@ def getProjectsAsTeacher(db: Session = Depends(database_config.get_db), username
                 homework.append({"deadline": h.deadline, "name": p.name, "description": p.description, "id": h.id,
                                 "course_id": h.course_id, "course_name": course.name, "course_color": course.color, "course_font_dark": course.fontDark,
                                  "solution_name": solution_name, "solution_id": 0 if h.solution_project_id == None else h.solution_project_id, "solution_start_showing": h.solution_start_showing,
-                                 "pupils_editing": pupils_editing, "pupils_in_course": pupils_in_course, "submission": submission})
+                                 "pupils_editing": pupils_editing, "pupils_in_course": pupils_in_course, "submission": submission, "enable_tests": h.enable_tests})
                 break
 
         # ...otherwise its a regular project
@@ -315,12 +317,12 @@ def getProjectsAsPupil(db: Session = Depends(database_config.get_db), username=D
                     db=db, homework_id=h['id'])
 
                 homework.append({"is_editing": True, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                                "id": h["id"], "uuid": uuid, "branch": user.id, "solution_uuid": solution_uuid, "submission": e.submission})
+                                "id": h["id"], "uuid": uuid, "branch": user.id, "solution_uuid": solution_uuid, "submission": e.submission, "enable_tests": h["enable_tests"]})
                 break
         # ... and those, which are not yet started by the pupil
         if not already_edited:
             homework.append({"is_editing": False, "deadline": h["deadline"], "name": h["name"], "description": h["description"],
-                             "id": h["id"], "solution_uuid": solution_uuid, "submission": ""})
+                             "id": h["id"], "solution_uuid": solution_uuid, "submission": "", "enable_tests": h["enable_tests"]})
 
     return {"homework": homework, "projects": all_projects}
 
@@ -466,7 +468,7 @@ def createHomework(create_homework: models_and_schemas.create_homework, project_
     template_project_id = p.id
 
     homework = models_and_schemas.Homework(course_id=create_homework.course_id, template_project_id=template_project_id,
-                                           original_project_id=original_project_id, deadline=create_homework.deadline_date)
+                                           original_project_id=original_project_id, deadline=create_homework.deadline_date, enable_tests=create_homework.enable_tests)
 
     if not crud.create_homework(db,
                                 homework=homework):
@@ -521,7 +523,8 @@ def getHomeworkInfo(homeworkId: models_and_schemas.homeworkId, db: Session = Dep
         db=db, id=homework.template_project_id)
 
     result = {"name": template_project.name, "uuid": template_project.uuid, "course_name": homework.course.name,
-              "course_color": homework.course.color, "course_font_dark": homework.course.fontDark, "deadline": homework.deadline, "computation_time": template_project.computation_time}
+              "course_color": homework.course.color, "course_font_dark": homework.course.fontDark, "deadline": homework.deadline,
+              "computation_time": template_project.computation_time, "enable_tests": homework.enable_tests}
 
     # get each user's results
     pupils = crud.get_all_users_of_course_id(db=db, id=homework.course_id)
@@ -853,6 +856,10 @@ def updateHomeworkSettings(homework: models_and_schemas.UpdateHomeworkSettings, 
     if not crud.update_template_computation_time(db=db, id=homework.id, computation_time=homework.computation_time):
         raise HTTPException(
             status_code=500, detail="Error on updating computation time.")
+
+    if not crud.update_enable_tests(db=db, id=homework.id, enable_tests=homework.enable_tests):
+        raise HTTPException(
+            status_code=500, detail="Error on updating enable tests.")
 
     if not crud.update_deadline(db=db, id=homework.id, deadline=homework.deadline_date):
         raise HTTPException(

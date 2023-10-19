@@ -242,6 +242,12 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
+## 1.1.0
+(2023-10-xx)
+````
+Added possibility to disable JUnit Tests in assignments
+Bugfix for update notification
+````
 
 ## 1.0.4
 (2023-10-18)

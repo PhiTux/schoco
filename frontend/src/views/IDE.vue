@@ -77,12 +77,14 @@ let state = reactive({
   isGettingComputationTime: false,
   teacherComputationTime: "",
   isSettingComputationTime: false,
+  enableTests: true,
 });
 
 let homework = reactive({
   deadlineDate: new Date(),
   selectedCourse: "",
   computationTime: "",
+  enableTests: true,
   id: 0,
 })
 
@@ -220,6 +222,7 @@ onBeforeMount(() => {
           state.fullUserName = response.data.fullusername;
           state.deadline = response.data.deadline
           homework.id = response.data.id
+          state.enableTests = response.data.enable_tests;
 
           // show warning about editing the template
           if (route.params.user_id == 0) {
@@ -985,7 +988,7 @@ function createHomework() {
     });
   }
 
-  CodeService.createHomework(route.params.project_uuid, projectFiles, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime).then(
+  CodeService.createHomework(route.params.project_uuid, projectFiles, homework.selectedCourse.id, homework.deadlineDate.toISOString(), homework.computationTime, homework.enableTests).then(
     (response) => {
       state.isCreatingHomework = false;
 
@@ -1028,6 +1031,7 @@ function prepareHomeworkModal() {
   homework.selectedCourse = {}
   homework.deadlineDate = new Date()
   homework.computationTime = 10
+  homework.enableTests = true
 
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
   const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl, { html: true }))
@@ -2029,7 +2033,26 @@ function setComputationTime() {
               </div>
             </div>
             <div class="mb-3 row">
-              <label for="deadline" class="col-sm-4 col-form-label">
+              <label class="col-sm-4 col-form-label">
+                <font-awesome-icon icon="fa-square-check" style="color: var(--bs-success)" />
+                {{ $t("enable_tests") }}:
+                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
+                  :title="$t('enable_tests_question')" :data-bs-content="$t('enable_tests_description')">
+                  <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
+                </a>
+              </label>
+              <div class="col-sm-8">
+                <div class="form-check form-switch">
+                  <input v-model="homework.enableTests" class="form-check-input" type="checkbox" role="switch"
+                    id="flexSwitchEnableTests">
+                  <label class="form-check-label" for="flexSwitchEnableTests">{{ $t("use_test_functions") }}</label>
+                </div>
+                <span v-if="homework.enableTests" v-html="$t('activate_tests')"></span>
+                <span v-else v-html="$t('deactivate_tests')"></span>
+              </div>
+            </div>
+            <div class="mb-3 row">
+              <label for="computationTime" class="col-sm-4 col-form-label">
                 <font-awesome-icon
                   v-if="homework.computationTime >= 3 && Number.isInteger(Number(homework.computationTime))"
                   icon="fa-square-check" style="color: var(--bs-success)" />
@@ -2228,9 +2251,10 @@ function setComputationTime() {
                   <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
                   <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
                 </button>
-                <button v-if="authStore.isTeacher() || state.isHomework" @click.prevent="testBtn()" type="button"
-                  class="btn btn-indigo d-flex align-items-center" data-bs-trigger="hover" data-bs-toggle="tooltip"
-                  :data-bs-title="$t('ctrl_3')" data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                <button v-if="authStore.isTeacher() || (state.isHomework && state.enableTests)" @click.prevent="testBtn()"
+                  type="button" class="btn btn-indigo d-flex align-items-center" data-bs-trigger="hover"
+                  data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_3')" data-bs-delay='{"show":500,"hide":0}'
+                  data-bs-placement="bottom">
                   <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>

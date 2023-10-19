@@ -89,7 +89,7 @@ class Homework(SQLModel, table=True):
         default=None, foreign_key="project.id")
     # datetime, when the solution may be shown to pupils
     solution_start_showing: Optional[str] = ""
-    # oldest_commit_allowed: str
+    enable_tests: Optional[bool] = True
 
     course: "Course" = Relationship(back_populates="homeworks")
 
@@ -195,6 +195,7 @@ class create_homework(BaseModel):
     course_id: int
     deadline_date: str
     computation_time: int
+    enable_tests: bool
 
 
 class homeworkId(BaseModel):
@@ -235,6 +236,7 @@ class UpdateHomeworkSettings(BaseModel):
     id: int
     deadline_date: str
     computation_time: int
+    enable_tests: bool
 
 
 class UUID(BaseModel):

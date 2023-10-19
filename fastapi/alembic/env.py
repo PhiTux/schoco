@@ -4,6 +4,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from sqlmodel import SQLModel
 
+# this line has to stay, otherwise the models won't be found (although the import seems not to be used!)
+from models_and_schemas import UserCourseLink, User, Course, Project, Homework, EditingHomework
+
 from alembic import context
 
 # this is the Alembic Config object, which provides

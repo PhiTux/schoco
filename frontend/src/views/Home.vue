@@ -1046,13 +1046,13 @@ function collapseMyProjects() {
             :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
             @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
             @deleteSolution="openDeleteSolutionModal" :pupils_editing="h.pupils_editing"
-            :pupils_in_course="h.pupils_in_course" :submission="h.submission" />
+            :pupils_in_course="h.pupils_in_course" :submission="h.submission" :enableTests="h.enable_tests" />
 
           <!-- else -->
           <ProjectCard v-else v-for="( h, index2 ) in  newHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework
             @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :description="h.description"
             :uuid="h.uuid" :branch="h.branch" :id="h.id" :deadline="h.deadline" :solution_uuid="h.solution_uuid"
-            @deleteHomeworkBranch="askDeleteHomeworkBranch" :submission="h.submission" />
+            @deleteHomeworkBranch="askDeleteHomeworkBranch" :submission="h.submission" :enableTests="h.enable_tests" />
         </div>
       </div>
 
@@ -1072,13 +1072,14 @@ function collapseMyProjects() {
             :solution_start_showing="h.solution_start_showing" :solution_id="h.solution_id"
             @renameHomework="askRenameHomework" @deleteHomework="askDeleteHomework" @addSolution="openAddSolutionModal"
             @deleteSolution="openDeleteSolutionModal" :pupils_editing="h.pupils_editing"
-            :pupils_in_course="h.pupils_in_course" :submission="h.submission" />
+            :pupils_in_course="h.pupils_in_course" :submission="h.submission" :enableTests="h.enable_tests" />
 
           <!-- else -->
           <ProjectCard v-else v-for="( h, index2 ) in  oldHomeworkFiltered " :key="`${index2}-${h.id}`" isHomework isOld
             @startHomework="startHomework" :isEditing="h.is_editing" :name="h.name" :uuid="h.uuid"
             :description="h.description" :branch="h.branch" :id="h.id" :deadline="h.deadline"
-            :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" :submission="h.submission" />
+            :solution_uuid="h.solution_uuid" @deleteHomeworkBranch="askDeleteHomeworkBranch" :submission="h.submission"
+            :enableTests="h.enable_tests" />
         </div>
       </div>
 

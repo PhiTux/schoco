@@ -84,8 +84,8 @@ class CodeService {
         return axiosAuth.post(`startTest/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid })
     }
 
-    createHomework(orig_project_uuid, project_files, course_id, deadlineDate, computationTime) {
-        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'files': project_files, 'course_id': course_id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
+    createHomework(orig_project_uuid, project_files, course_id, deadlineDate, computationTime, enableTests) {
+        return axiosAuth.post(`createHomework/${orig_project_uuid}`, { 'files': project_files, 'course_id': course_id, 'deadline_date': deadlineDate, 'computation_time': computationTime, 'enable_tests': enableTests })
     }
 
     startHomework(id) {
@@ -138,8 +138,8 @@ class CodeService {
         return axiosAuth.post(`deleteFile/${project_uuid}/${user_id}`, { 'path': path, 'sha': sha })
     }
 
-    updateHomeworkSettings(id, deadlineDate, computationTime) {
-        return axiosAuth.post('updateHomeworkSettings', { 'id': id, 'deadline_date': deadlineDate, 'computation_time': computationTime })
+    updateHomeworkSettings(id, deadlineDate, computationTime, enableTests) {
+        return axiosAuth.post('updateHomeworkSettings', { 'id': id, 'deadline_date': deadlineDate, 'computation_time': computationTime, 'enable_tests': enableTests })
     }
 
     stopContainer(uuid) {

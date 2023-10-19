@@ -22,16 +22,19 @@ let state = reactive({
     showDetails: false,
     uuid: "",
     isUpdatingHomework: false,
+
 })
 
 let homework = reactive({
     deadlineDate: new Date(),
     computationTime: 10,
+    enableTests: true,
 })
 
 let newSettings = reactive({
     deadlineDate: new Date(),
     computationTime: 10,
+    enableTests: true,
 })
 
 onBeforeMount(() => {
@@ -46,6 +49,7 @@ onBeforeMount(() => {
 
             homework.deadlineDate = new Date(response.data.deadline)
             homework.computationTime = response.data.computation_time
+            homework.enableTests = response.data.enable_tests;
 
             document.title = state.name
         },
@@ -59,6 +63,7 @@ onBeforeMount(() => {
 function prepareEditHomeworkModal() {
     newSettings.deadlineDate = homework.deadlineDate
     newSettings.computationTime = homework.computationTime
+    newSettings.enableTests = homework.enableTests
 
     //open Modal
     let myModal = new Modal(document.getElementById('editHomeworkModal'))
@@ -73,13 +78,14 @@ function updateSettings() {
         return
     state.isUpdatingHomework = true
 
-    CodeService.updateHomeworkSettings(route.params.id, newSettings.deadlineDate, newSettings.computationTime).then(
+    CodeService.updateHomeworkSettings(route.params.id, newSettings.deadlineDate, newSettings.computationTime, newSettings.enableTests).then(
         response => {
             state.isUpdatingHomework = false
 
             if (response.data.success) {
                 homework.deadlineDate = newSettings.deadlineDate
                 homework.computationTime = newSettings.computationTime
+                homework.enableTests = newSettings.enableTests
 
                 let myModal = Modal.getInstance(document.getElementById('editHomeworkModal'))
                 myModal.hide()
@@ -171,14 +177,35 @@ function updateSettings() {
                             </div>
                         </div>
                         <div class="mb-3 row">
+                            <label class="col-sm-4 col-form-label">
+                                <font-awesome-icon icon="fa-square-check" style="color: var(--bs-success)" />
+                                {{ $t("enable_tests") }}:
+                                <a class="btn-round btn" data-bs-trigger="focus" tabindex="0" data-bs-toggle="popover"
+                                    :title="$t('enable_tests_question')" :data-bs-content="$t('enable_tests_description')">
+                                    <font-awesome-icon icon="fa-circle-question" size="lg"
+                                        style="color: var(--bs-primary)" />
+                                </a>
+                            </label>
+                            <div class="col-sm-8">
+                                <div class="form-check form-switch">
+                                    <input v-model="newSettings.enableTests" class="form-check-input" type="checkbox"
+                                        role="switch" id="flexSwitchEnableTests">
+                                    <label class="form-check-label" for="flexSwitchEnableTests">{{ $t("use_test_functions")
+                                    }}</label>
+                                </div>
+                                <span v-if="newSettings.enableTests" v-html="$t('activate_tests')"></span>
+                                <span v-else v-html="$t('deactivate_tests')"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
                             <label for="deadline" class="col-sm-4 col-form-label">
                                 <font-awesome-icon
                                     v-if="newSettings.computationTime >= 3 && Number.isInteger(Number(newSettings.computationTime))"
                                     icon="fa-square-check" style="color: var(--bs-success)" />
                                 <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
                                 {{ $t("computation_time") }}:
-                                <a class="btn-round btn" tabindex="0" @click.prevent="openComputationTimePopover()"
-                                    data-bs-toggle="popover" title="Rechenzeit" data-bs-trigger="focus"
+                                <a class="btn-round btn" tabindex="0" data-bs-toggle="popover"
+                                    :title="$t('computation_time')" data-bs-trigger="focus"
                                     :data-bs-content="$t('computation_time_description')">
                                     <font-awesome-icon icon="fa-circle-question" size="lg"
                                         style="color: var(--bs-primary)" />
@@ -243,7 +270,7 @@ function updateSettings() {
                         <th scope="col">{{ $t("name") }}</th>
                         <th scope="col">{{ $t("username") }}</th>
                         <th scope="col"></th>
-                        <th scope="col">{{ $t("result") }}</th>
+                        <th v-if="homework.enableTests" scope="col">{{ $t("result") }}</th>
                         <th scope="col">{{ $t("number_of_compilations") }}</th>
                         <th scope="col">{{ $t("number_of_runs") }}</th>
                         <th scope="col">{{ $t("number_of_tests") }}</th>
@@ -255,7 +282,7 @@ function updateSettings() {
                         <td>{{ p.username }}</td>
                         <td><a class="btn btn-primary" v-if="p.uuid !== ''" :href="'#/ide/' + p.uuid + '/' + p.branch">{{
                             $t("open") }}</a></td>
-                        <td>
+                        <td v-if="homework.enableTests">
                             <div v-if="state.showDetails">
                                 <Submission :submission="p.result"></Submission> %
                             </div>

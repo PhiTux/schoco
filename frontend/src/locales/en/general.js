@@ -71,4 +71,10 @@ export const general_en = {
     project: "Project",    
     usermanagement: "User management",
     version: "Version",
+    enable_tests: "Enable tests",
+    enable_tests_question: "Enable tests?",
+    enable_tests_description: "Should students have access to tests for this task? For this, the file Tests.java must contain meaningful JUnit tests. Otherwise, students will not see the test button and the teacher will of course not see an overview of the results at a glance.",
+    use_test_functions: "Use test functions",
+    activate_tests: "<b>Activate</b> tests",
+    deactivate_tests: "<b>Deactivate</b> tests",
 }
