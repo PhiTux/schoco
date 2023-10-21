@@ -2609,7 +2609,6 @@ function setComputationTime() {
 .bottom {
   width: 100%;
   height: 100%;
-  /* background-color: #383838; */
 }
 
 .input {
@@ -2618,10 +2617,13 @@ function setComputationTime() {
 
 .output {
   width: 100%;
-  /* height: 100%; */
-  /* background-color: #383838; */
   font-family: "Courier New", Courier, monospace;
   overflow-y: auto;
+}
+
+.output>pre {
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .changed {
