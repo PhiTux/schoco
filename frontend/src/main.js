@@ -2,9 +2,6 @@ import { createApp, markRaw } from 'vue'
 import { createPinia } from 'pinia'
 import { router } from './router'
 import App from './App.vue'
-//import "bootstrap/dist/css/bootstrap.min.css"
-//import "./sass/main.scss"
-//import "bootstrap/dist/css/bootstrap.css"
 import "bootstrap"
 import { VAceEditor } from 'vue3-ace-editor';
 import { library } from '@fortawesome/fontawesome-svg-core'
