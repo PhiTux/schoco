@@ -29,7 +29,7 @@ router.afterEach((to, from) => {
     <div :class="{ main: route.name !== 'ide' }">
       <router-view v-slot="{ Component }">
         <Transition :name="state.transitionName" mode="out-in" appear>
-          <component :is="Component" :key="$route.path" />
+          <component :is="Component" :key="route.path" />
         </Transition>
       </router-view>
     </div>

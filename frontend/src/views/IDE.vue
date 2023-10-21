@@ -342,9 +342,11 @@ function openFile(inputPath) {
   // it's not yet open
   if (tab == -1) {
     let content = "";
+    let sha = "";
     for (let i = 0; i < state.files.length; i++) {
       if (state.files[i]["path"] === path) {
         content = state.files[i]["content"];
+        sha = state.files[i]["sha"];
         break;
       }
     }
@@ -364,6 +366,7 @@ function openFile(inputPath) {
       content: content,
       tab: tab,
       session: session,
+      sha: sha,
     };
     let editor = ace.edit("editor");
     editor.setSession(session);
@@ -2396,7 +2399,7 @@ function setComputationTime() {
             <pane>
               <div class="editor-relative d-flex flex-column">
                 <ul class="nav nav-tabs pt-2">
-                  <li class="nav-item" v-for="f in state.openFiles">
+                  <li class="nav-item" v-for="f in state.openFiles" :key="state.openFiles.sha">
                     <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
                       active: f.tab == state.activeTab,
                     }">
