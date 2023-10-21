@@ -1244,8 +1244,6 @@ function zoomMinus() {
 }
 
 function checkCloseTab(tabID) {
-  console.log(tabID)
-
   if (state.tabsWithChanges.includes(tabID)) {
     state.closeTabID = tabID
     state.closeTabAfterSaving = true
@@ -1356,7 +1354,6 @@ function addFile() {
 }
 
 function deleteFileModal(path) {
-  console.log(path)
   state.deleteFilePath = String(path).replace(/\/$/g, "")
 
   var modal = new Modal(document.getElementById("deleteFileModal"));
@@ -2399,7 +2396,7 @@ function setComputationTime() {
             <pane>
               <div class="editor-relative d-flex flex-column">
                 <ul class="nav nav-tabs pt-2">
-                  <li class="nav-item" v-for="f in state.openFiles" :key="state.openFiles.sha">
+                  <li class="nav-item" v-for="f in state.openFiles" :key="f.sha">
                     <div class="nav-link tab" @click.prevent="openFile(f.path)" :id="'fileTab' + f.tab" :class="{
                       active: f.tab == state.activeTab,
                     }">
