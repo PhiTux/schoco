@@ -191,6 +191,7 @@ onMounted(() => {
     overflow: auto !important;
     white-space: pre-line;
     font-family: monospace;
+    white-space: pre-wrap;
 }
 
 .text-clamp {

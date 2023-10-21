@@ -2599,6 +2599,7 @@ function setComputationTime() {
   height: 100%;
   width: 100%;
   overflow-y: auto;
+  white-space: pre-wrap;
 }
 
 .description-button {
