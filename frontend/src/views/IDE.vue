@@ -310,7 +310,7 @@ onMounted(async () => {
 
 function enableTooltips() {
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, { delay: { "show": 500, "hide": 0 }, trigger: "hover" }))
+  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, { delay: { "show": 500, "hide": 0 }, trigger: 'hover' }))
 }
 
 function setLight(light) {
@@ -1835,6 +1835,19 @@ function setComputationTime() {
           </div>
           <div class="modal-body">
             <span v-html="$t('description_new_file')"></span>
+
+            <br>
+
+            <button type="button" class="btn btn-outline-primary btn-sm my-2" data-bs-toggle="collapse"
+              href="#directory_description">
+              {{ $t("create_directory") }}
+            </button>
+
+            <div class="collapse" id="directory_description">
+              <div class="card card-body">
+                <span v-html="$t('description_new_file_directory')"></span>
+              </div>
+            </div>
 
             <div class="input-group my-3">
               <input type="text" class="form-control" id="addFilenameInput" v-model="state.newFileName"

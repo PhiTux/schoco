@@ -248,6 +248,7 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 Added possibility to disable JUnit Tests in assignments
 Bugfix for update notification
 Bugfix for creating tabs when opening a file
+Minor CSS fixes, changed text/layout when creating a new file
 ````
 
 ## 1.0.4
