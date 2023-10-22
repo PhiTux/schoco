@@ -249,6 +249,7 @@ Added possibility to disable JUnit Tests in assignments
 Bugfix for update notification
 Bugfix for creating tabs when opening a file
 Minor CSS fixes, changed text/layout when creating a new file
+Updated packages
 ````
 
 ## 1.0.4
