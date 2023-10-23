@@ -418,6 +418,12 @@ def get_template_project_of_editing_homework_by_uuid(db: Session, project_uuid: 
     return project
 
 
+def get_editing_homework_by_homework_id_and_user_id(db: Session, homework_id: int, user_id: int):
+    editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
+        models_and_schemas.EditingHomework.homework_id == homework_id, models_and_schemas.EditingHomework.owner_id == user_id)).first()
+    return editing_homework
+
+
 def get_editing_homework_by_uuid_and_user_id(db: Session, uuid: str, user_id: int):
     template_project = db.exec(select(models_and_schemas.Project).where(
         models_and_schemas.Project.uuid == uuid)).first()

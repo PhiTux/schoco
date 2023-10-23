@@ -499,16 +499,21 @@ def startHomework(homeworkId: models_and_schemas.homeworkId, username=Depends(au
     # create branch
     if not git.create_branch(uuid=template_project.uuid, new_branch=user.id):
         raise HTTPException(
-            status_code=409, detail="You're already working on this Homework.")
+            status_code=409, detail="Could not create personal copy of the code (git-branch).")
 
-    # create editing_homework - otherwise remove repo
-    editing_homework = models_and_schemas.EditingHomework(
-        homework_id=id, owner_id=user.id)
-    if not crud.create_editing_homework(db,
-                                        editing_homework=editing_homework):
-        git.remove_branch(uuid=template_project.uuid, branch=user.id)
-        raise HTTPException(
-            status_code=500, detail=f"Error on starting homework with id {id}.")
+    # check if editing_homework already exists
+    editing_homework = crud.get_editing_homework_by_homework_id_and_user_id(
+        db=db, homework_id=id, user_id=user.id)
+    if editing_homework == None:
+
+        # create editing_homework - otherwise remove repo
+        editing_homework = models_and_schemas.EditingHomework(
+            homework_id=id, owner_id=user.id)
+        if not crud.create_editing_homework(db,
+                                            editing_homework=editing_homework):
+            git.remove_branch(uuid=template_project.uuid, branch=user.id)
+            raise HTTPException(
+                status_code=500, detail=f"Error on starting homework with id {id}.")
 
     return {'success': True, 'uuid': template_project.uuid, 'branch': user.id}
 

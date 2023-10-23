@@ -222,6 +222,10 @@ def create_branch(uuid: str, new_branch: int):
     res_code = c.getinfo(c.RESPONSE_CODE)
     c.close()
 
+    # don't abort, if branch already exists
+    if (res_code == 409):
+        return True
+
     if not (res_code >= 200 and res_code < 300):
         print(buffer.getvalue().decode('utf8'))
         return False
