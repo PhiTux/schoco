@@ -3,6 +3,7 @@ export const homework_en = {
     error_on_changing_settings: "Error on changing settings.",
     settings_updated: "Settings updated.",
     cant_change_course_of_assignment: "You <b>can not change</b> the course of an already created assignment!<br/>You can only delete the homework in <b>Home</b> and then create it again for a different course.",
+    already_expired: "Already expired",
     show_results: "Show results",
     edit_template: "Edit template",
     number_of_compilations: "# Compilations",

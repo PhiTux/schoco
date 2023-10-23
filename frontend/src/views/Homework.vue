@@ -157,23 +157,23 @@ function updateSettings() {
                         </div>
                         <div class="mb-3 row">
                             <label for="deadline" class="col-sm-4 col-form-label">
-                                <font-awesome-icon v-if="newSettings.deadlineDate > new Date()" icon="fa-square-check"
-                                    style="color: var(--bs-success)" />
-                                <font-awesome-icon v-else icon="fa-square" style="color: var(--bs-secondary)" />
+                                <font-awesome-icon icon="fa-square-check" style="color: var(--bs-success)" />
                                 {{ $t("deadline") }}:
                             </label>
                             <div class="col-sm-8">
                                 <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
                                 <VueDatePicker v-model="newSettings.deadlineDate" placeholder="Start Typing ..." text-input
-                                    auto-apply :min-date="new Date()" prevent-min-max-navigation locale="de"
-                                    :format="$t('long_date_format')" />
+                                    auto-apply prevent-min-max-navigation locale="de" :format="$t('long_date_format')" />
                                 {{ $t("UTC") }}: <em>{{ newSettings.deadlineDate.toISOString() }}</em><br>
-                                {{ $t("editing_time") }}: <em v-if="newSettings.deadlineDate > new Date()"><b>{{
+                                {{ $t("editing_time") }}:
+                                <em v-if="newSettings.deadlineDate > new Date()"><b>{{
                                     Math.floor((newSettings.deadlineDate
                                         -
                                         new Date()) / (1000 * 3600 * 24)) }} {{ $t("days") }},
                                         {{ Math.floor((newSettings.deadlineDate - new Date()) / (1000 * 3600) % 24) }}
-                                        {{ $t("hours") }}</b></em>
+                                        {{ $t("hours") }}</b>
+                                </em>
+                                <em v-else><b>{{ $t("already_expired") }}</b></em>
                             </div>
                         </div>
                         <div class="mb-3 row">
@@ -224,7 +224,7 @@ function updateSettings() {
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("abort") }}</button>
                         <button type="button" class="btn btn-primary" @click.prevent="updateSettings()"
-                            :disabled="newSettings.deadlineDate <= new Date() || !(newSettings.computationTime >= 3 && Number.isInteger(Number(newSettings.computationTime)))">
+                            :disabled="!(newSettings.computationTime >= 3 && Number.isInteger(Number(newSettings.computationTime)))">
                             <div v-if="!state.isUpdatingHomework">
                                 {{ $t("save") }}
                             </div>

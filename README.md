@@ -242,51 +242,58 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
+## 1.1.1
+(2023-10-xx)
+````
+- Attempt of a bugfix when starting an assignment as pupil which resulted in a duplicate DB-entry
+- When changing settings of an assignment, you now no longer have to set the deadline to a future date
+````
+
 ## 1.1.0
 (2023-10-22)
 ````
-Added possibility to disable JUnit Tests in assignments
-Bugfix for update notification
-Bugfix for creating tabs when opening a file
-Minor CSS fixes, changed text/layout when creating a new file
-Updated npm packages
+- Added possibility to disable JUnit Tests in assignments
+- Bugfix for update notification
+- Bugfix for creating tabs when opening a file
+- Minor CSS fixes, changed text/layout when creating a new file
+- Updated npm packages
 ````
 
 ## 1.0.4
 (2023-10-18)
 ````
-Bugfix for tooltips in IDE
-Drastically (!) reduced size of schoco-backend image
-Updated CSS of Projectcards in Home
+- Bugfix for tooltips in IDE
+- Drastically (!) reduced size of schoco-backend image
+- Updated CSS of Projectcards in Home
 ```` 
 
 ## 1.0.3
 (2023-10-16)
 🌟 This version includes a bugfix for alembic (DB-migration). This version is now save to install. I recommend to start a new installation. Otherwise you manually have to change data inside the sqlite3 file `sql_app.db`: Go to table `alembic_version` and set `version_num` to `f031d57aa4e6`. This should do the trick.
 ````
-Slightly changed Hello-World-Template
-Bugfix for alembic! Now this version is save to install!
-Minor fixes
+- Slightly changed Hello-World-Template
+- Bugfix for alembic! Now this version is save to install!
+- Minor fixes
 ````
 
 
 ## 1.0.2
 (2023-10-09)  
 ````
-Bugfixes for tabs and entry_point class in IDE
-Bugfix for result calculation
+- Bugfixes for tabs and entry_point class in IDE
+- Bugfix for result calculation
 ````
 
 ## 1.0.1
 (2023-10-07)  
 ````
-Minor bugfixes, especially for importing/exporting/duplication of projects
+- Minor bugfixes, especially for importing/exporting/duplication of projects
 ````
 
 ## 1.0.0
 (2023-10-06)  
 ````
-Initial release 🌟
+- Initial release 🌟
 ````
 
 
