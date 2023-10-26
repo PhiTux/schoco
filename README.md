@@ -243,7 +243,7 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
 ## 1.1.1
-(2023-10-xx)
+(2023-10-26)
 ````
 - Attempt to fix a rare bug, which resulted in a duplicate DB-entry when starting an assignment as pupil
 - When changing settings of an assignment, you now no longer have to set the deadline to a future date
