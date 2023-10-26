@@ -238,15 +238,16 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 
 # Changelog
-[Semver](https://semver.org/) is used for versioning! 
+[Semver](https://semver.org/) is used for versioning! ((New) docker-hub image-versions below 1.0.0 are used only for testing!)
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
 ## 1.1.1
 (2023-10-xx)
 ````
-- Attempt of a bugfix when starting an assignment as pupil which resulted in a duplicate DB-entry
+- Attempt to fix a rare bug, which resulted in a duplicate DB-entry when starting an assignment as pupil
 - When changing settings of an assignment, you now no longer have to set the deadline to a future date
+- Added scroll to filetree if necessary
 ````
 
 ## 1.1.0

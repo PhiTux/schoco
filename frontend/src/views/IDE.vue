@@ -2363,10 +2363,12 @@ function setComputationTime() {
                       </div>
                     </div>
                   </div>
-                  <IDEFileTree :files="state.files" :entryPoint="state.entry_point" :rename-allowed="!state.isSolution"
-                    :delete-allowed="!state.isSolution" @openFile="openFile" @renameFile="renameFileModal"
-                    @deleteFile="deleteFileModal" @renameDirectory="renameDirectoryModal"
-                    @deleteDirectory="deleteDirectoryModal" @setEntryPoint="setEntryPoint" />
+                  <div id="scrollableFileTree">
+                    <IDEFileTree :files="state.files" :entryPoint="state.entry_point" :rename-allowed="!state.isSolution"
+                      :delete-allowed="!state.isSolution" @openFile="openFile" @renameFile="renameFileModal"
+                      @deleteFile="deleteFileModal" @renameDirectory="renameDirectoryModal"
+                      @deleteDirectory="deleteDirectoryModal" @setEntryPoint="setEntryPoint" />
+                  </div>
                 </pane>
                 <!-- Description -->
                 <pane min-size="30" size="50" max-size="70">
@@ -2462,6 +2464,11 @@ function setComputationTime() {
 
 
 <style scoped lang="scss">
+#scrollableFileTree {
+  height: calc(100% - 50px);
+  overflow-y: auto;
+}
+
 @media (max-width: 1368px) {
   .smallBadge {
     width: 150px;
