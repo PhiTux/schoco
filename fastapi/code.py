@@ -363,7 +363,6 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
         crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
 
     # save compilation-results (.class-files) if there was no error
-    print(result)
     if ('stdout' in result.keys() and result['stdout'].strip() == ""):
         cookies_api.save_compilation_result(
             startCompile.container_uuid, f"{project_uuid}_{user_id}")
