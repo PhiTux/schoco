@@ -1311,6 +1311,8 @@ function addFile() {
           sha: response.data.sha
         })
 
+        openFile(state.newFileName.trim())
+
         // close modal
         var elem = document.getElementById("addFileModal");
         var modal = Modal.getInstance(elem);
