@@ -342,7 +342,7 @@ def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = 
         filesList.files.append(models_and_schemas.File(
             path="Tests.java", content=tests))
 
-    # remove .class files (if existing), they are now outdated
+    # remove .class files (if existing), they are no longer necessary
     cookies_api.remove_compilation_result(f"{project_uuid}_{user_id}")
 
     # write files to container-mount and return WS-URL
@@ -357,13 +357,14 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
     computation_time = getComputationTime(db=db, project_uuid=project_uuid)
 
     result = cookies_api.startCompile(
-        startCompile.container_uuid, startCompile.port, computation_time, startCompile.save_output)
+        startCompile.container_uuid, startCompile.port, computation_time, True)
 
     if user_id != 0:
         crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
 
     # save compilation-results (.class-files) if there was no error
-    if ('stdout' in result.keys() and result['stdout'].strip() == ""):
+    # a good result is {'exitCode': '0'} or {'stdout': '', 'stdout': '\n'}
+    if ('exitCode' in result.keys() and result['exitCode'] == '0' and (not 'stdout' in result.keys() or ('stdout' in result.keys() and result['stdout'].strip() == ""))):
         cookies_api.save_compilation_result(
             startCompile.container_uuid, f"{project_uuid}_{user_id}")
 
