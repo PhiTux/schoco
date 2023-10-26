@@ -342,6 +342,9 @@ def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = 
         filesList.files.append(models_and_schemas.File(
             path="Tests.java", content=tests))
 
+    # remove .class files (if existing), they are now outdated
+    cookies_api.remove_compilation_result(f"{project_uuid}_{user_id}")
+
     # write files to container-mount and return WS-URL
     c = cookies_api.prepareCompile(filesList)
 
@@ -360,7 +363,8 @@ def startCompile(startCompile: models_and_schemas.startCompile, background_tasks
         crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
 
     # save compilation-results (.class-files) if there was no error
-    if (result['stdout'].strip() == ""):
+    print(result)
+    if ('stdout' in result.keys() and result['stdout'].strip() == ""):
         cookies_api.save_compilation_result(
             startCompile.container_uuid, f"{project_uuid}_{user_id}")
 

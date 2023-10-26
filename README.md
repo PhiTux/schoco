@@ -341,9 +341,8 @@ For Websocket-communication, there must always be running nginx (even during dev
 
 ## 5) Backend ('Cookies' for compilation/execution)
 
-Considering nproc, the separate schoco-user might get interesting!?
+Considering nproc, the separate schoco-user is interesting, otherwise this step is not necessary in development: 
 
-Otherwise not necessary (neither during developing nor production): 
 - Prepare System by creating a new user:group 'schoco:schoco' with ids '1234:1234', which is used to run the containers! `sudo groupadd --gid 1234 schoco` and  `sudo useradd --uid 1234 --gid 1234 -m -d /home/schoco schoco`
 
 
