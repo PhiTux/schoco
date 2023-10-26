@@ -162,8 +162,6 @@ def createNewContainer():
     port = apiclient.inspect_container(new_name)[
         'NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
 
-    print("created: " + str(new_uuid) + " with port: " + str(port))
-
     # 'ip': ip,
     return {'id': new_container.id, 'uuid': str(new_uuid), 'port': port, 'in_use': False}
 
@@ -208,7 +206,6 @@ def prepareCompile(filesList: models_and_schemas.filesList):
         return {'success': False, 'message': 'No worker ready for compilation within 3 seconds 😥 Please retry!'}
 
     runningContainers.append(c)
-    print("prepared: " + c['uuid'] + " with port: " + str(c['port']))
 
     # write files to filesystem
     writeFiles(filesList, os.path.join(containers, c['uuid']))
