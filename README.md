@@ -249,6 +249,7 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 - When changing settings of an assignment, you now no longer have to set the deadline to a future date
 - Added scroll to filetree if necessary
 - Bugfix: saved partial compilation result - now only on successful compilation
+- Directly open new file after creation
 ````
 
 ## 1.1.0
