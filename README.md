@@ -1,3 +1,7 @@
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/phitux/schoco-backend?label=latest%20docker%20version)
+![GitHub](https://img.shields.io/github/license/PhiTux/DailyTxT)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/PhiTux)
+
 # Chapters
 - [What is schoco? {🍫}](#what-is-schoco-)
   - [Main-features](#main-features)
