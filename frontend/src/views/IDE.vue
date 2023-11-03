@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeMount, onBeforeUnmount, reactive, ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Toast, Popover, Modal, Tooltip } from "bootstrap";
+import { Toast, Popover, Modal } from "bootstrap";
 import { Splitpanes, Pane } from "splitpanes";
 import "splitpanes/dist/splitpanes.css";
 import { useAuthStore } from "../stores/auth.store.js";
@@ -301,17 +301,7 @@ onMounted(async () => {
   });
   observer.observe(resultsElement.value, { childList: true });
 
-  // enable tooltips (wait until test-button is rendered after getProjectInfo())
-  setTimeout(() => {
-    enableTooltips()
-  }, 500)
-
 })
-
-function enableTooltips() {
-  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, { delay: { "show": 500, "hide": 0 }, trigger: 'hover' }))
-}
 
 function setLight(light) {
   if (document.getElementById('editor') == null) return
@@ -2182,6 +2172,58 @@ function setComputationTime() {
       </div>
     </div>
 
+    <div class="modal fade" id="shortcutsModal" tabindex="-1" aria-labelledby="shortcutsModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">
+              {{ $t("keyboard_shortcuts") }}
+            </h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3 row">
+              <label class="col-sm-3">
+                <kbd>{{ $t('ctrl') }}</kbd> + <kbd>S</kbd>
+              </label>
+              <label class="col-sm-9">
+                {{ $t("save_changes") }}
+              </label>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-3">
+                <kbd>{{ $t('ctrl') }}</kbd> + <kbd>1</kbd>
+              </label>
+              <label class="col-sm-9">
+                {{ $t("compile_program") }}
+              </label>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-3">
+                <kbd>{{ $t('ctrl') }}</kbd> + <kbd>2</kbd>
+              </label>
+              <label class="col-sm-9">
+                {{ $t("execute_program") }}
+              </label>
+            </div>
+            <div class="mb-3 row">
+              <label class="col-sm-3">
+                <kbd>{{ $t('ctrl') }}</kbd> + <kbd>3</kbd>
+              </label>
+              <label class="col-sm-9">
+                {{ $t("test_program") }}
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" data-bs-dismiss="modal" class="btn btn-primary">
+              <span>{{ $t("close") }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Navbar -->
     <nav class="navbar sticky-top navbar-expand-lg">
@@ -2209,6 +2251,11 @@ function setComputationTime() {
                   <!-- only teachers -->
                   <a class="dropdown-item" @click.prevent="prepareComputationTimeModal()"><font-awesome-icon
                       icon="fa-solid fa-stopwatch" fixed-width /> {{ $t("edit_computation_time") }}</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#shortcutsModal">
+                    <font-awesome-icon icon="fa-solid fa-keyboard" fixed-width /> {{ $t("keyboard_shortcuts") }}
+                  </a>
                 </li>
                 <li class="dropdown-divider"></li>
                 <li v-if="state.isHomework && route.params.user_id != 0">
@@ -2239,27 +2286,21 @@ function setComputationTime() {
             <li class="nav-item mx-3">
               <div class="btn-group h-100" role="group" aria-label="Basic example">
                 <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
-                  :disabled="state.tabsWithChanges.length == 0 || state.isSolution" data-bs-trigger="hover"
-                  data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_s')" data-bs-delay='{"show":500,"hide":0}'
-                  data-bs-placement="bottom">
+                  :disabled="state.tabsWithChanges.length == 0 || state.isSolution">
                   <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>
                   <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
                   <span class="ms-1 hideOnSmall">{{ $t("save") }}</span>
                 </button>
-                <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center"
-                  data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_1')"
-                  data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center">
                   <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>
                   <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
                   <span class="ms-1 hideOnSmall">{{ $t("compile") }}</span>
                 </button>
-                <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center"
-                  data-bs-trigger="hover" data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_2')"
-                  data-bs-delay='{"show":500,"hide":0}' data-bs-placement="bottom">
+                <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center">
                   <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>
@@ -2267,9 +2308,7 @@ function setComputationTime() {
                   <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
                 </button>
                 <button v-if="authStore.isTeacher() || (state.isHomework && state.enableTests)" @click.prevent="testBtn()"
-                  type="button" class="btn btn-indigo d-flex align-items-center" data-bs-trigger="hover"
-                  data-bs-toggle="tooltip" :data-bs-title="$t('ctrl_3')" data-bs-delay='{"show":500,"hide":0}'
-                  data-bs-placement="bottom">
+                  type="button" class="btn btn-indigo d-flex align-items-center">
                   <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>
