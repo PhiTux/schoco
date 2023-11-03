@@ -246,6 +246,12 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
+## 1.1.2
+(2023-11-xx)
+````
+- Bugfix for tooltips in 1.0.4 didn't work reliably -> removed button-tooltips in IDE and moved shortcut-info to separate modal
+````
+
 ## 1.1.1
 (2023-10-26)
 ````
