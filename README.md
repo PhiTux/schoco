@@ -212,12 +212,12 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 ## Progress
 
-**There a few more features missing that might be implemented within the next months:**
+**There are a few more features missing that might be implemented at some time (if needed, please open an issue):**
 - [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
 - [ ] Mark projects as templates (when being a teacher)
 - [ ] Perhaps some possibility to view pupil's private projects as teacher?!
 
-**Below are the things, that are already working**
+**Below are the things, that are working**
 
 - [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
 - [x] Classroom-management (Creation of courses and assigning pupils to courses)
@@ -247,7 +247,7 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
 ## 1.1.2
-(2023-11-xx)
+(2023-11-20)
 ````
 - Bugfix for tooltips in 1.0.4 didn't work reliably -> removed button-tooltips in IDE and moved shortcut-info to separate modal
 - Changed order of projects in home (now: most recent project on top)
