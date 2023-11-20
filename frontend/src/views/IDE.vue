@@ -358,7 +358,7 @@ function openFile(inputPath) {
       session: session,
       sha: sha,
     };
-    
+
     let editor = ace.edit("editor");
     editor.setSession(session);
     editor.focus();
@@ -2308,7 +2308,7 @@ function setComputationTime() {
                   <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
                   <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
                 </button>
-                <button v-if="authStore.isTeacher() || (state.isHomework && state.enableTests)" @click.prevent="testBtn()"
+                <button v-if="(authStore.isTeacher() && !(state.isHomework && !state.enableTests)) || (state.isHomework && state.enableTests)" @click.prevent="testBtn()"
                   type="button" class="btn btn-indigo d-flex align-items-center">
                   <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>

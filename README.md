@@ -251,6 +251,7 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 ````
 - Bugfix for tooltips in 1.0.4 didn't work reliably -> removed button-tooltips in IDE and moved shortcut-info to separate modal
 - Changed order of projects in home (now: most recent project on top)
+- Minor Bugfix: Teachers no longer see "Test"-Button in IDE, when viewing a homework with disabled tests
 ````
 
 ## 1.1.1
