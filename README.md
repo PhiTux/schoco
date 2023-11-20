@@ -250,6 +250,7 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 (2023-11-xx)
 ````
 - Bugfix for tooltips in 1.0.4 didn't work reliably -> removed button-tooltips in IDE and moved shortcut-info to separate modal
+- Changed order of projects in home (now: most recent project on top)
 ````
 
 ## 1.1.1
