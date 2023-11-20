@@ -71,15 +71,18 @@ function filterForSearchString(array, searchstring) {
 }
 
 const myProjectsFiltered = computed(() => {
-  return filterForSearchString(state.myProjects, state.searchProject)
+  let arr = filterForSearchString(state.myProjects, state.searchProject)
+  return arr.reverse()
 });
 
 const newHomeworkFiltered = computed(() => {
-  return filterForSearchString(state.new_homework, state.searchProject)
+  let arr = filterForSearchString(state.new_homework, state.searchProject)
+  return arr.reverse()
 });
 
 const oldHomeworkFiltered = computed(() => {
-  return filterForSearchString(state.old_homework, state.searchProject)
+  let arr = filterForSearchString(state.old_homework, state.searchProject)
+  return arr.reverse()
 });
 
 function getCoursesOutOfHomework(homework) {
