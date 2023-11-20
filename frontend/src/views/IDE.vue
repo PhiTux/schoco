@@ -179,9 +179,9 @@ onBeforeMount(() => {
     (response) => {
       if (response.status == 200) {
         state.files = response.data.files;
+        state.entry_point = response.data.entry_point;
+        openFile(entry_point_without_slash.value);
       }
-      state.entry_point = response.data.entry_point;
-      openFile(entry_point_without_slash.value);
     },
     (error) => {
       if (
@@ -358,6 +358,7 @@ function openFile(inputPath) {
       session: session,
       sha: sha,
     };
+    
     let editor = ace.edit("editor");
     editor.setSession(session);
     editor.focus();
