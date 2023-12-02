@@ -283,7 +283,14 @@ function skip_latest_version() {
 
   <nav class="navbar fixed-top navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
-      <router-link class="navbar-brand" to="/home">{🍫}<span class="ms-2">{{ $t("home_title") }}</span></router-link>
+      <router-link class="navbar-brand px-1" to="/home">
+        <div id="logo-part">
+          <span class="logo-bracket">{</span>
+          <img id="logo" src="/schoco-icon.svg" alt="schoco" class="img-fluid" />
+          <div class="logo-bracket">}</div>
+        </div>
+        <span class="ms-2">{{ $t("home_title") }}</span>
+      </router-link>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -332,7 +339,46 @@ function skip_latest_version() {
   </nav>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+.navbar-brand {
+  border: 1px solid #6c757d5e;
+  border-radius: 5px;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
+
+[data-bs-theme=dark] {
+  .navbar-brand:hover #logo {
+    filter: drop-shadow(0px 0px 4px rgb(255, 255, 255));
+  }
+}
+
+[data-bs-theme=light] {
+  .navbar-brand:hover #logo {
+    filter: drop-shadow(0px 0px 4px rgb(92, 92, 92));
+  }
+}
+
+
+#logo-part {
+  display: inline-flex;
+  font-size: 30px;
+  margin-top: -15px;
+  margin-bottom: -15px;
+}
+
+.logo-bracket {
+  opacity: 0.75;
+}
+
+#logo {
+  width: 28px;
+  filter: drop-shadow(0px 0px 2px rgb(255, 255, 255));
+  margin-left: 3px;
+  margin-right: -1px;
+  transition: 0.3s ease;
+}
+
 .versionBtn {
   width: 38px;
 }

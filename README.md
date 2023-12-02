@@ -2,8 +2,12 @@
 ![GitHub](https://img.shields.io/github/license/PhiTux/DailyTxT)
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/PhiTux)
 
+<p align="center">
+  <img src="./readme/schoco-full.png" width="200">
+</p>
+
 # Chapters
-- [What is schoco? {🍫}](#what-is-schoco-)
+- [What is schoco? {<img src="./readme/schoco-logo.svg" width="24">}](#what-is-schoco-)
   - [Main-features](#main-features)
 - [Installation](#installation)
 - [Architecture](#architecture)
@@ -14,7 +18,7 @@
 - [Start developing](#start-developing)
 - [Build and run schoco locally](#build-and-run-schoco-locally)
 
-# What is schoco? {🍫}
+# What is schoco? {<img src="./readme/schoco-logo.svg" width="32">}
 
 SCHOCO stands for <ins>**SCH**</ins>ool <ins>**O**</ins>nline <ins>**CO**</ins>ding.
 
@@ -175,7 +179,7 @@ services:
 
 
 # Architecture
-<img src="./schoco_architecture.svg">
+<img src="./readme/schoco_architecture.svg">
 
 ## How it works under the hood
 - The logical Core is the API, which is build with [Python Fastapi](https://fastapi.tiangolo.com/). The frontend is build with [Vite 4](https://vitejs.dev/) and [Vue 3](https://v3.vuejs.org/).
@@ -242,9 +246,15 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 
 # Changelog
-[Semver](https://semver.org/) is used for versioning! ((New) docker-hub image-versions below 1.0.0 are used only for testing!)
+[Semver](https://semver.org/) is used for versioning! (New) docker-hub image-versions below 1.0.0 (mostly 0.9.xx) are used only for testing!
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
+
+## 1.1.3 (IN DEVELOPMENT)
+(2023-11-??)
+````
+- Changed schoco-icon/-logo
+````
 
 ## 1.1.2
 (2023-11-20)

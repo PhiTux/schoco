@@ -3,7 +3,7 @@ import { reactive, computed, onMounted } from "vue";
 import { useAuthStore } from "../stores/auth.store.js";
 import UserService from "../services/user.service.js";
 import { useRoute, useRouter } from "vue-router";
-import { Toast } from "bootstrap";
+import { Toast, Collapse } from "bootstrap";
 import { version } from "../../package.json"
 import PasswordInput from "../components/PasswordInput.vue"
 import PasswordInfo from "../components/PasswordInfo.vue"
@@ -18,6 +18,7 @@ const state = reactive({
   showRegistrationError: false,
   showRegistrationErrorMessage: false,
   registrationErrorMessage: "",
+  showHiddenText: false,
 });
 
 const login = reactive({
@@ -35,6 +36,22 @@ const register = reactive({
 
 
 onMounted(() => {
+  const collapseElementList = document.querySelectorAll('.schoco-text-hideme')
+  const collapseList = [...collapseElementList].map(collapseEl => {
+    collapseEl.addEventListener('hidden.bs.collapse', function () {
+      if (state.showHiddenText) {
+        triggerSchocoDescription(true);
+      }
+    })
+    collapseEl.addEventListener('shown.bs.collapse', function () {
+      if (!state.showHiddenText) {
+        triggerSchocoDescription(false);
+      }
+    })
+  }
+
+  )
+
   let route = useRoute()
   if (route.query.token_expired) {
     const toast = new Toast(
@@ -131,6 +148,19 @@ const registerPasswordTooShort = computed(() => {
     register.password1.length > 0 && register.password1.length < 8
   );
 });
+
+function triggerSchocoDescription(show) {
+  state.showHiddenText = show;
+
+  const collapseElementList = document.querySelectorAll('.schoco-text-hideme')
+  const collapseList = [...collapseElementList].map(collapseEl => {
+    let myCollapse = Collapse.getOrCreateInstance(collapseEl)
+    if (show)
+      myCollapse.show();
+    else
+      myCollapse.hide();
+  })
+}
 </script>
 
 <template>
@@ -190,11 +220,32 @@ const registerPasswordTooShort = computed(() => {
       <div class="container-fluid flex-fill align-items-center d-flex justify-content-center">
         <div class="w-100 row text-center align-items-center">
           <div class="col-xxl-1"></div>
-          <div class="col-xs-12 col-lg-6 col-xxl-4">
-            <div class="container-lg mb-5">
-              <div class="schoco-icon">{🍫}</div>
-              SCHOCO<br />
-              <b><u>SCH</u></b>ool <b><u>O</u></b>nline <b><u>CO</u></b>ding
+          <div class="col-xs-12 col-lg-6 col-xxl-5 logo-area" @mouseover="triggerSchocoDescription(true)"
+            @mouseleave="triggerSchocoDescription(false)">
+            <div class="container-lg mb-5 d-flex flex-column">
+              <div class="d-flex flex-row justify-content-center">
+                <div class="logo-bracket">
+                  {
+                </div>
+                <img id="main-logo" src="/schoco-icon.svg" alt="schoco" class="img-fluid" />
+                <div class="logo-bracket">
+                  }
+                </div>
+              </div>
+              <div class="logo-text d-flex flex-row justify-content-center align-items-center">
+                <img id="schoco-text-1" src="/schoco-text-1.svg" alt="schoco" />
+                <div class="schoco-text-hideme collapse collapse-horizontal">
+                  <div class="">ool&nbsp;&nbsp;</div>
+                </div>
+                <img id="schoco-text-2" src="/schoco-text-2.svg" alt="schoco" class="ms-1" />
+                <div class="schoco-text-hideme collapse collapse-horizontal">
+                  <div>nline&nbsp;&nbsp;</div>
+                </div>
+                <img id="schoco-text-3" src="/schoco-text-3.svg" alt="schoco" class="ms-1" />
+                <div class="schoco-text-hideme collapse collapse-horizontal">
+                  <div>ding&nbsp;&nbsp;</div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="col-xs-12 col-lg-6 col-xxl-4 z-1">
@@ -321,7 +372,7 @@ const registerPasswordTooShort = computed(() => {
               </div>
             </div>
           </div>
-          <div class="col-xxl-3"></div>
+          <div class="col-xxl-2"></div>
         </div>
 
       </div>
@@ -335,6 +386,48 @@ const registerPasswordTooShort = computed(() => {
 </template>
 
 <style scoped lang="scss">
+.logo-area {
+  user-select: none;
+}
+
+.schoco-text-hideme {
+  color: #6c483e;
+  display: flex;
+  white-space: nowrap;
+}
+
+#schoco-text-1,
+#schoco-text-2,
+#schoco-text-3 {
+  filter: drop-shadow(3px 3px 5px rgba(150, 150, 150, 0.5));
+}
+
+#schoco-text-1 {
+  height: 70px;
+}
+
+#schoco-text-2 {
+  height: 50px;
+}
+
+#schoco-text-3 {
+  height: 60px;
+}
+
+
+.logo-bracket {
+  font-size: 14rem;
+  opacity: 0.4;
+}
+
+#main-logo {
+  width: 50%;
+  max-width: 200px;
+  filter: drop-shadow(3px 3px 5px rgba(184, 184, 184, 0.5));
+  transition: filter 0.5s;
+}
+
+
 .versionBottom {
   z-index: 0 !important;
 }
@@ -353,6 +446,10 @@ $fill2: #151513;
   .octo-face {
     fill: $color;
   }
+
+  .logo-area:hover #main-logo {
+    filter: drop-shadow(4px 4px 8px rgba(23, 23, 23, 0.89));
+  }
 }
 
 [data-bs-theme=dark] {
@@ -364,6 +461,10 @@ $fill2: #151513;
   .octo-background,
   .octo-face {
     fill: $fill;
+  }
+
+  .logo-area:hover #main-logo {
+    filter: drop-shadow(4px 4px 8px rgba(199, 199, 199, 0.6));
   }
 }
 
