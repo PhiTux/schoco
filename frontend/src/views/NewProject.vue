@@ -12,6 +12,7 @@ const router = useRouter();
 
 let state = reactive({
   helloWorldName: "",
+  className: "",
   helloWorldDescription: "",
   creatingProject: false,
   files: [],
@@ -63,9 +64,26 @@ function newHelloWorld() {
     return;
   }
 
+  if (state.className.trim() === "") {
+    const toast = new Toast(
+      document.getElementById("toastClassNameEmpty")
+    );
+    toast.show();
+    return;
+  }
+
+  if (/^[^a-zA-Z]/.test(state.className) || /[^a-zA-Z0-9_]/.test(state.className) || state.className.includes(" ")) {
+    console.log(state.className)
+    const toast = new Toast(
+      document.getElementById("toastClassNameIllegal")
+    );
+    toast.show();
+    return;
+  }
+
   state.creatingProject = true;
 
-  CodeService.createNewHelloWorld(state.helloWorldName.trim(), state.helloWorldDescription).then(
+  CodeService.createNewHelloWorld(state.helloWorldName.trim(), state.className.trim(), state.helloWorldDescription, i18n.locale.value).then(
     (response) => {
       state.creatingProject = false;
       router.push({
@@ -179,6 +197,24 @@ function resetFileList() {
         </div>
       </div>
 
+      <div class="toast align-items-center text-bg-danger border-0" id="toastClassNameEmpty" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("class_name_must_not_be_empty") }}
+          </div>
+        </div>
+      </div>
+
+      <div class="toast align-items-center text-bg-danger border-0" id="toastClassNameIllegal" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+            {{ $t("class_name_illegal") }}
+          </div>
+        </div>
+      </div>
+
       <div class="toast align-items-center text-bg-danger border-0" id="toastProjectNotCreated" role="alert"
         aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
@@ -231,15 +267,24 @@ function resetFileList() {
       <h2 class="mt-4">{{ $t("new_empty_project") }}</h2>
 
       <div class="row">
-        <div class="col-md-4 col-sm-6">
-          <label for="HelloWorldName">{{ $t("project_name") }}*</label>
-          <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
-            :placeholder="$t('project_name')" />
+        <div class="col-md-4 col-sm-6 d-flex flex-column justify-space-between">
+          <div class="form-floating">
+            <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
+              :placeholder="$t('project_name')" />
+            <label for="HelloWorldName">{{ $t("project_name") }}*</label>
+          </div>
+          <div class="form-floating mt-2">
+            <input type="text" id="className" class="form-control" v-model="state.className"
+              :placeholder="$t('class_name')" />
+            <label for="className">{{ $t("class_name") }}*</label>
+          </div>
         </div>
         <div class="col-md-4 col-sm-6">
-          <label for="HelloWorldDescription">{{ $t("project_description") }}</label>
-          <textarea id="HelloWorldDescription" class="form-control" v-model="state.helloWorldDescription"
-            :placeholder="$t('project_description')" rows="3" />
+          <div class="form-floating">
+            <textarea id="HelloWorldDescription" class="form-control" v-model="state.helloWorldDescription"
+              :placeholder="$t('project_description')" rows="4" />
+            <label for="HelloWorldDescription">{{ $t("project_description") }}</label>
+          </div>
         </div>
         <div class="col">
           <button class="btn btn-outline-success my-3" type="submit" @click.prevent="newHelloWorld()"
@@ -309,6 +354,10 @@ function resetFileList() {
 </template>
 
 <style scoped>
+.justify-space-between {
+  justify-content: space-between;
+}
+
 .or {
   font-size: 20px;
   font-style: italic;
@@ -383,6 +432,7 @@ function resetFileList() {
 }
 
 #HelloWorldDescription {
+  height: 100%;
   font-family: monospace;
 }
 </style>

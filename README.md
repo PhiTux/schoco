@@ -254,6 +254,9 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 (2023-11-??)
 ````
 - Changed schoco-icon/-logo
+- Included link to wiki into Tests.java file
+- Template-project is now available in english and german
+- User must specify a classname when creating a new project
 ````
 
 ## 1.1.2

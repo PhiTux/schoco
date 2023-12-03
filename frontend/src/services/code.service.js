@@ -28,8 +28,8 @@ axiosAuth.interceptors.request.use((config) => {
 })
 
 class CodeService {
-    createNewHelloWorld(helloWorldName, helloWorldDescription) {
-        return axiosAuth.post('createNewHelloWorld', { 'projectName': helloWorldName, 'projectDescription': helloWorldDescription })
+    createNewHelloWorld(helloWorldName, className, helloWorldDescription, language) {
+        return axiosAuth.post('createNewHelloWorld', { 'projectName': helloWorldName, 'className': className, 'projectDescription': helloWorldDescription, 'language': language })
     }
 
     loadAllFiles(project_uuid, user_id) {

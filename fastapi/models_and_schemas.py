@@ -147,7 +147,9 @@ class changeName(BaseModel):
 
 class newProject(BaseModel):
     projectName: str
+    className: str
     projectDescription: str
+    language: str
 
 
 class updateText(BaseModel):

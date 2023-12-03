@@ -34,6 +34,7 @@ export const general_en = {
     select_date: "Select date...",
     input_missing: "Input missing",
     project_name: "Project name",
+    class_name: "Java class name",
     project_description: "Project description",
     upload: "Upload",
     change_password: "Change password",

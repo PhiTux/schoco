@@ -22,6 +22,7 @@ DEFAULT_COMPUTATION_TIME = 10
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
 def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
+    className = newProject.className.capitalize()
 
     if newProject.projectName.strip() == "":
         raise HTTPException(status_code=400, detail="Project name empty")
@@ -29,7 +30,7 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
     project_uuid = str(uuid.uuid4())
     user = crud.get_user_by_username(db=db, username=username)
     project = models_and_schemas.Project(
-        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id, computation_time=DEFAULT_COMPUTATION_TIME, main_class="Schoco.java/")
+        name=newProject.projectName, description=newProject.projectDescription, uuid=project_uuid, owner_id=user.id, computation_time=DEFAULT_COMPUTATION_TIME, main_class=f"{className}.java/")
 
     # create git repo
     if not git.create_repo(project_uuid):
@@ -37,10 +38,22 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
 
     # load the template files into the git repo
     # don't load Tests.java if user is a pupil
-    for file in os.listdir("./java_helloWorld"):
+    languageCode = ""
+    if newProject.language.startswith("de"):
+        languageCode = "de"
+    else:
+        languageCode = "en"
+
+    for file in os.listdir(f"./java_helloWorld/{languageCode}"):
         if file.endswith(".class") or (user.role == "pupil" and file == "Tests.java"):
             continue
-        file_content = open(file=f"./java_helloWorld/{file}", mode="rb").read()
+        file_content = open(file=f"./java_helloWorld/{languageCode}/{file}", mode="rb").read()
+
+        # replace placeholders by className
+        file_content = file_content.replace(b"<classname>", className.encode())
+        if file != "Tests.java":
+            file = f"{className}.java"
+
         if not git.add_file(project_uuid=project_uuid,
                             file_name=file, file_content=file_content):
             git.remove_repo(project_uuid=project_uuid)

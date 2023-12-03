@@ -2,6 +2,8 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+// 🚀 See the wiki for explanation: https://github.com/PhiTux/schoco/wiki/Create-JUnit-Tests-%28en%29
+
 /**
  * ⭐⭐⭐
  *  This class / file is NOT visible to students.
@@ -20,7 +22,7 @@ public class Tests {
 	 *================================================*/
 
 
-	// Two examples
+	// Two examples for JUnit-Tests
 	@Test
 	public void isGreaterTrue() {
 		/*Schoco schoco = new Schoco();
