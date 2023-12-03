@@ -70,7 +70,7 @@ export const ide_de = {
     placeholder_for_input: "Eingabe (Entertaste zum Senden)",
     set_as_entry_point: "Als Einstiegspunkt setzen",
     error_main_class_not_found: "In der Haupt-/Einstiegsklasse (mit 🏠) wurde keine main-Methode gefunden. Stelle sicher, dass dort eine Methode mit folgender Signatur existiert:\npublic static void main(String[] args)",
-    tooltip_entry_point: "Die Haupt/Einstiegsklasse des Programms, welche auch die main-Methode enthalten muss.",
+    tooltip_entry_point: "Die Haupt-/Einstiegsklasse des Programms, welche auch die main-Methode enthalten muss.",
     edit_computation_time: "Rechenzeit bearbeiten",
     success_setting_computation_time: "Rechenzeit erfolgreich gesetzt.",
     error_setting_computation_time: "Fehler beim Setzen der Rechenzeit.",
