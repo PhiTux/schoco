@@ -225,8 +225,9 @@ class ChangePassword(BaseModel):
     newPassword: str
 
 
-class AddFile(BaseModel):
-    path: str
+class AddClass(BaseModel):
+    className: str
+    language: str
 
 
 class DeleteFile(BaseModel):

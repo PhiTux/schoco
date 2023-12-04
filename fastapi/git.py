@@ -282,13 +282,17 @@ def renameFile(old_path: str, new_path: str, uuid: str, user_id: int, content: s
     return False
 
 
-def add_empty_file(uuid: str, user_id: int, path: str):
+def add_new_class(uuid: str, user_id: int, className: str, file_content: bytes):
+    # make sure first letter is uppercase    
+    path = f"{className[0].upper() + className[1:]}.java"
+    
     buffer = BytesIO()
     c = pycurl.Curl()
     c.setopt(c.URL, api_full_url(
         f"/repos/{settings.GITEA_USERNAME}/{uuid}/contents/{path}"))
     c.setopt(c.USERPWD, f"{settings.GITEA_USERNAME}:{settings.GITEA_PASSWORD}")
-    post_data = {'content': ""}
+    
+    post_data = {'content': base64.b64encode(file_content).decode('ascii')}
 
     if user_id != 0:
         post_data['branch'] = str(user_id)
@@ -306,7 +310,7 @@ def add_empty_file(uuid: str, user_id: int, path: str):
     res = json.loads(res)
 
     if (res_code >= 200 and res_code < 300):
-        return {'success': True, 'sha': res['content']['sha']}
+        return {'success': True, 'sha': res['content']['sha'], 'path': path}
     return {'success': False}
 
 

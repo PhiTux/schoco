@@ -130,8 +130,8 @@ class CodeService {
         return axiosAuth.postForm('uploadProject', file, config)
     }
 
-    addEmptyFile(project_uuid, user_id, path) {
-        return axiosAuth.post(`addEmptyFile/${project_uuid}/${user_id}`, { 'path': path })
+    addNewClass(project_uuid, user_id, className, language) {
+        return axiosAuth.post(`addNewClass/${project_uuid}/${user_id}`, { 'className': className, 'language': language })
     }
 
     deleteFile(project_uuid, user_id, path, sha) {

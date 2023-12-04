@@ -62,9 +62,9 @@ let state = reactive({
   closeIDEAfterSaving: false,
   closeTabID: 0,
   actionGoal: "",
-  newFileName: "",
+  newClassName: "",
   isAddingFile: false,
-  newFileNameInvalid: false,
+  newClassNameInvalid: false,
   deleteFilePath: "",
   isDeletingFile: false,
   isResettingHomework: false,
@@ -1049,7 +1049,7 @@ function deleteDirectoryModal() {
 function renameFileModal(path) {
   state.renameFilePath = String(path).replace(/\/$/g, "")
   state.renameFileNewName = ""
-  state.newFileNameInvalid = false
+  state.newClassNameInvalid = false
 
   var modal = new Modal(document.getElementById("renameFileModal"));
   modal.show();
@@ -1075,7 +1075,7 @@ function loadEntryPoint() {
 function renameFile() {
 
   if (state.renameFileNewName.trim() === "" || state.renameFileNewName.trim().includes(" ")) {
-    state.newFileNameInvalid = true
+    state.newClassNameInvalid = true
     return;
   }
 
@@ -1268,9 +1268,9 @@ function closeTab(tabID) {
 }
 
 function prepareAddFileModal() {
-  state.newFileName = ""
+  state.newClassName = ""
   state.isAddingFile = false
-  state.newFileNameInvalid = false
+  state.newClassNameInvalid = false
 
   var modal = new Modal(document.getElementById("addFileModal"));
   modal.show();
@@ -1280,29 +1280,29 @@ function prepareAddFileModal() {
   })
 }
 
-function addFile() {
+function addClass() {
   if (state.isAddingFile) return;
 
-  if (state.newFileName.trim() === "" || state.newFileName.trim().includes(" ")) {
-    state.newFileNameInvalid = true
+  if (state.newClassName.trim() === "" || state.newClassName.trim().includes(" ") || /^[^a-zA-Z]/.test(state.newClassName) || /[^a-zA-Z0-9_]/.test(state.newClassName) || state.newClassName.endsWith(".java")) {
+    state.newClassNameInvalid = true
     return;
   }
 
   state.isAddingFile = true
 
-  CodeService.addEmptyFile(route.params.project_uuid, route.params.user_id, state.newFileName.trim()).then(
+  CodeService.addNewClass(route.params.project_uuid, route.params.user_id, state.newClassName.trim(), i18n.locale.value).then(
     (response) => {
       state.isAddingFile = false
 
       if (response.data.success) {
         // add to file list
         state.files.push({
-          path: state.newFileName.trim(),
-          content: "",
+          path: response.data.path,
+          content: response.data.content,
           sha: response.data.sha
         })
 
-        openFile(state.newFileName.trim())
+        openFile(response.data.path)
 
         // close modal
         var elem = document.getElementById("addFileModal");
@@ -1316,7 +1316,7 @@ function addFile() {
         toast.show();
 
       } else if (response.data.error === "filename_invalid") {
-        state.newFileNameInvalid = true
+        state.newClassNameInvalid = true
       } else {
         // close modal
         var elem = document.getElementById("addFileModal");
@@ -1823,38 +1823,25 @@ function setComputationTime() {
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("add_new_file") }}</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ $t("add_new_class") }}</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <span v-html="$t('description_new_file')"></span>
-
-            <br>
-
-            <button type="button" class="btn btn-outline-primary btn-sm my-2" data-bs-toggle="collapse"
-              href="#directory_description">
-              {{ $t("create_directory") }}
-            </button>
-
-            <div class="collapse" id="directory_description">
-              <div class="card card-body">
-                <span v-html="$t('description_new_file_directory')"></span>
-              </div>
-            </div>
+            <span v-html="$t('description_new_class')"></span>
 
             <div class="input-group my-3">
-              <input type="text" class="form-control" id="addFilenameInput" v-model="state.newFileName"
-                @keyup.enter="addFile()">
+              <input type="text" class="form-control" id="addFilenameInput" v-model="state.newClassName"
+                @keyup.enter="addClass()">
             </div>
 
-            <div v-if="state.newFileNameInvalid" class="alert alert-danger" role="alert">
-              {{ $t("filename_is_invalid") }}
+            <div v-if="state.newClassNameInvalid" class="alert alert-danger" role="alert">
+              {{ $t("classname_is_invalid") }}
             </div>
 
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t("close") }}</button>
-            <button type="button" class="btn btn-primary" @click.prevent="addFile()">
+            <button type="button" class="btn btn-primary" @click.prevent="addClass()">
               <span v-if="!state.isAddingFile">{{ $t("add") }}</span>
               <div v-else class="spinner-border spinner-border-sm" role="status">
                 <span class="visually-hidden">Loading...</span>
@@ -1936,17 +1923,22 @@ function setComputationTime() {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <i18n-t keypath="rename_file_description" tag="span">
+            <i18n-t keypath="rename_file_description" tag="p">
               <code>{{ state.renameFilePath }}</code>
-              <i>.java</i>
+              <code>.java</code>
             </i18n-t>
+
+            <i18n-t keypath="rename_file_description_2" tag="p">
+              <code>.java</code>
+            </i18n-t>
+
 
             <div class="input-group my-3">
               <input type="text" class="form-control" id="renameFilenameInput" :placeholder="state.renameFilePath"
                 v-model="state.renameFileNewName" @keyup.enter="renameFile()">
             </div>
 
-            <div v-if="state.newFileNameInvalid" class="alert alert-danger" role="alert">
+            <div v-if="state.newClassNameInvalid" class="alert alert-danger" role="alert">
               {{ $t("rename_file_invalid") }}
             </div>
           </div>
@@ -2245,7 +2237,7 @@ function setComputationTime() {
                   <a v-if="!state.isSolution" class="dropdown-item"
                     @click.prevent="prepareAddFileModal()"><font-awesome-icon icon="fa-solid fa-file-circle-plus"
                       fixed-width />
-                    {{ $t("new_file") }}
+                    {{ $t("new_class") }}
                   </a>
                 </li>
                 <li v-if="!state.isHomework && authStore.isTeacher()">
@@ -2308,8 +2300,9 @@ function setComputationTime() {
                   <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
                   <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
                 </button>
-                <button v-if="(authStore.isTeacher() && !(state.isHomework && !state.enableTests)) || (state.isHomework && state.enableTests)" @click.prevent="testBtn()"
-                  type="button" class="btn btn-indigo d-flex align-items-center">
+                <button
+                  v-if="(authStore.isTeacher() && !(state.isHomework && !state.enableTests)) || (state.isHomework && state.enableTests)"
+                  @click.prevent="testBtn()" type="button" class="btn btn-indigo d-flex align-items-center">
                   <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
                     <span class="visually-hidden">Loading...</span>
                   </div>

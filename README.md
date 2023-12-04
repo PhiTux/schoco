@@ -250,13 +250,14 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
-## 1.1.3 (IN DEVELOPMENT)
+## 1.2.0 (IN DEVELOPMENT)
 (2023-11-??)
 ````
 - Changed schoco-icon/-logo
 - Included link to wiki into Tests.java file
 - Template-project is now available in english and german
 - User must specify a classname when creating a new project
+- Refactored "create/rename file" to "create/rename class"
 ````
 
 ## 1.1.2

@@ -19,6 +19,11 @@ code = APIRouter(prefix="/api")
 #CODE_PATH = "code/"
 DEFAULT_COMPUTATION_TIME = 10
 
+def get_template_file(className: str, languageCode: str):
+    """Returns a tuple of (file_name, file_content)"""
+    file_content = open(file=f"./java_helloWorld/{languageCode}/Schoco.java", mode="rb").read()
+    file_content = file_content.replace(b"<classname>", className.encode())
+    return file_content
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
 def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session = Depends(database_config.get_db), username=Depends(auth.get_username_by_token)):
@@ -843,18 +848,24 @@ async def uploadProject(file: UploadFile, db: Session = Depends(database_config.
     return True
 
 
-@code.post('/addEmptyFile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def addEmptyFile(addFile: models_and_schemas.AddFile, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
-    if addFile.path.strip() == "" or " " in addFile.path.strip():
+@code.post('/addNewClass/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def addEmptyFile(addClass: models_and_schemas.AddClass, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if addClass.className.strip() == "" or " " in addClass.className.strip():
         raise HTTPException(
-            status_code=400, detail="Wrong input: Invalid Path.")
+            status_code=400, detail="Wrong input: Invalid classname.")
 
-    res = git.add_empty_file(project_uuid, user_id, addFile.path)
+    className = addClass.className
+    if className.endswith(".java"):
+        className = className[:-5]
+
+    file_content = get_template_file(className, addClass.language)
+    
+    res = git.add_new_class(project_uuid, user_id, className, file_content)
     if not res['success']:
         raise HTTPException(
-            status_code=500, detail="Error on adding file.")
+            status_code=500, detail="Error on adding class.")
 
-    return {'success': True, 'sha': res['sha']}
+    return {'success': True, 'sha': res['sha'], 'path': res['path'], 'content': file_content}
 
 
 @code.post('/deleteFile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
