@@ -1024,7 +1024,7 @@ function createHomework() {
 function prepareHomeworkModal() {
   homework.selectedCourse = {}
   homework.deadlineDate = new Date()
-  homework.computationTime = 10
+  homework.computationTime = 5
   homework.enableTests = true
 
   const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
@@ -1216,8 +1216,8 @@ function zoom(zoom) {
     newZoom = zoom
   }
 
-  state.editorZoom = parseInt(newZoom)
   document.getElementById('editor').style.fontSize = newZoom + 'px';
+  state.editorZoom = parseInt(newZoom)
 }
 
 function zoomPlus() {
@@ -2040,8 +2040,8 @@ function setComputationTime() {
                 </a>
               </label>
               <div class="col-sm-8">
-                <div class="form-check form-switch">
-                  <input v-model="homework.enableTests" class="form-check-input" type="checkbox" role="switch"
+                <div class="form-check">
+                  <input v-model="homework.enableTests" class="form-check-input" type="checkbox"
                     id="flexSwitchEnableTests">
                   <label class="form-check-label" for="flexSwitchEnableTests">{{ $t("use_test_functions") }}</label>
                 </div>
@@ -2061,10 +2061,9 @@ function setComputationTime() {
                   <font-awesome-icon icon="fa-circle-question" size="lg" style="color: var(--bs-primary)" />
                 </a></label>
               <div class="col-sm-8">
-                <input class="hwTimeInput" :value="homework.computationTime"
+                <input class="hwTimeInput form-control" :value="homework.computationTime"
                   @input="event => homework.computationTime = event.target.value" type="number" min="3" step="1"
-                  :placeholder="$t('at_least_3_default_10')" />
-                <br>
+                  :placeholder="$t('at_least_3_default_5')" />
                 {{ homework.computationTime }} {{ $t("seconds") }}
               </div>
             </div>
@@ -2138,10 +2137,9 @@ function setComputationTime() {
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <div v-else>
-                  <input class="hwTimeInput" :value="state.teacherComputationTime"
+                  <input class="hwTimeInput form-control" :value="state.teacherComputationTime"
                     @input="event => state.teacherComputationTime = event.target.value" type="number" min="3" step="1"
-                    :placeholder="$t('at_least_3_default_10')" />
-                  <br>
+                    :placeholder="$t('at_least_3_default_5')" />
                   {{ state.teacherComputationTime }} {{ $t("seconds") }}
                 </div>
 
@@ -2381,7 +2379,8 @@ function setComputationTime() {
                     </div>
                     <div v-if="state.editingProjectName" class="flex-fill">
                       <div class="align-items-center d-flex flex-row">
-                        <input class="rounded flex-fill" type="text" id="inputMessage" v-model="state.newProjectName" />
+                        <input class="rounded flex-fill form-control" type="text" id="inputMessage"
+                          v-model="state.newProjectName" />
                         <a @click.prevent="abortProjectName()" class="btn btn-overlay btn-abort mx-1">
                           <div>
                             <font-awesome-icon icon="fa-solid fa-times" />
@@ -2483,8 +2482,9 @@ function setComputationTime() {
             </div>
             <div class="input align-items-center d-flex flex-row">
               <label for="inputMessage" class="px-2 col-form-label">{{ $t("input") }}:</label>
-              <input class="rounded flex-fill" :disabled="!state.websocket_open" @keyup.enter="sendMessage()" type="text"
-                id="inputMessage" v-model="state.sendMessage" :placeholder="$t('placeholder_for_input')" />
+              <input class="rounded flex-fill form-control form-control-sm" :disabled="!state.websocket_open"
+                @keyup.enter="sendMessage()" type="text" id="inputMessage" v-model="state.sendMessage"
+                :placeholder="$t('placeholder_for_input')" />
               <button :disabled="!state.websocket_open" @click.prevent="sendMessage()" type="button"
                 class="btn btn-light btn-sm mx-2" id="messageSendButton">
                 {{ $t("send") }}
@@ -2528,7 +2528,8 @@ function setComputationTime() {
 
 .hwTimeInput {
   background-color: white;
-  color: #333
+  color: #333;
+  width: 100px;
 }
 
 .courseDropdown {
@@ -2594,7 +2595,7 @@ function setComputationTime() {
 }
 
 #inputMessage:disabled {
-  background-color: white;
+  /* background-color: white; */
 }
 
 #messageSendButton {

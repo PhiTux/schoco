@@ -56,7 +56,7 @@ export const general_en = {
     seconds: "seconds",
     computation_time: "Computation time",
     computation_time_description: "Set the number of <b>seconds</b> of computation time (i.e. runtime) available on the server per action. An action is:<ul><li>Compiling</li><li>Running</li><li>Testing</li></ul>The default value is 10 seconds, which students cannot change in their own projects, as it could cause the server to be overwhelmed with endlessly running programs. However, it may be useful to increase the runtime for certain tasks, e.g. if a program needs to wait for user input, which also takes time.",
-    at_least_3_default_10: "At least 3, default 10",
+    at_least_3_default_5: "At least 3, default 5",
     result: "Result",
     open: "Open",
     error_changing_password: "Error changing password.",
