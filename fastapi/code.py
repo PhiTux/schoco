@@ -17,7 +17,7 @@ import datetime
 code = APIRouter(prefix="/api")
 
 #CODE_PATH = "code/"
-DEFAULT_COMPUTATION_TIME = 10
+DEFAULT_COMPUTATION_TIME = 5
 
 def get_template_file(className: str, languageCode: str):
     """Returns a tuple of (file_name, file_content)"""
