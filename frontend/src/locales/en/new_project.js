@@ -14,5 +14,6 @@ export const new_project_en = {
     upload_zips_description: "Upload previously exported projects. Multiple projects can be uploaded at once.",
     drop_files_to_upload: "Drop files to upload",
     selected_files: "Selected files:",
-    reset_file_list: "Reset file list"
+    reset_file_list: "Reset file list",
+    classname_explanation: "Enter the name of the first Java class. The name should be based on the purpose of the project. The name must start with a capital letter and must not contain any special characters except numbers (with a few exceptions)."
 }

@@ -14,5 +14,6 @@ export const new_project_de = {
     upload_zips_description: "Lade zuvor exportierte Projekte hoch. Es können mehrere Projekte auf einmal hochgeladen werden.",
     drop_files_to_upload: "Dateien zum Hochladen ablegen",
     selected_files: "Ausgewählte Dateien:",
-    reset_file_list: "Datei-Liste zurücksetzen"
+    reset_file_list: "Datei-Liste zurücksetzen",
+    classname_explanation: "Gib den Namen der ersten Java-Klasse an. Sinnvollerweise orieniert sich der Name am Zweck des Projekts. Der Name muss mit einem Großbuchstaben beginnen und darf außer Zahlen keine Sonderzeichen enthalten (von wenigen Ausnahmen abgesehen)."
 }

@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { Toast } from "bootstrap";
+import { Toast, Popover } from "bootstrap";
 import CodeService from "../services/code.service.js";
 import FileUpload from 'vue-upload-component'
 import { useI18n } from 'vue-i18n'
@@ -34,6 +34,9 @@ onMounted(() => {
   })
 
   document.title = i18n.t("new_project_title")
+
+  const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+  const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new Popover(popoverTriggerEl))
 })
 
 watch(() => state.files, (files) => {
@@ -273,11 +276,18 @@ function resetFileList() {
               :placeholder="$t('project_name')" />
             <label for="HelloWorldName">{{ $t("project_name") }}*</label>
           </div>
-          <div class="form-floating mt-2">
-            <input type="text" id="className" class="form-control" v-model="state.className"
-              :placeholder="$t('class_name')" />
-            <label for="className">{{ $t("class_name") }}*</label>
+          <div class="d-flex flex-row align-items-center">
+            <div class="form-floating mt-2 flex-fill">
+              <input type="text" id="className" class="form-control" v-model="state.className"
+                :placeholder="$t('class_name')" />
+              <label for="className">{{ $t("class_name") }}*</label>
+            </div>
+            <a class="btn btn-round" tabindex="0" data-bs-trigger="focus" data-bs-toggle="popover"
+              :data-bs-content="$t('classname_explanation')">
+              <font-awesome-icon icon="fa-solid fa-question-circle" size="lg" style="color: var(--bs-primary)" />
+            </a>
           </div>
+
         </div>
         <div class="col-md-4 col-sm-6">
           <div class="form-floating">
