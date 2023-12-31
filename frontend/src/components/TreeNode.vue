@@ -67,7 +67,8 @@ watch(() => props.entryPoint, () => {
             <a v-if="Object.keys(props.value).length === 0" @click="$emit('openFile', props.path)">
                 <div class="d-flex name px-1"><font-awesome-icon v-if="props.entryPoint === props.path"
                         data-bs-toggle="tooltip" data-bs-placement="top" :data-bs-title="$t('tooltip_entry_point')"
-                        icon="fa-solid fa-house" class="mx-1 treeItem my-auto" fixed-width /> {{ props.name }}</div>
+                        icon="fa-solid fa-house" class="mx-1 treeItem my-auto" fixed-width /> {{ props.name.replace(".java",
+                            "") }}</div>
             </a>
             <a v-else>
                 <div class="name px-1">{{ props.name }}</div>

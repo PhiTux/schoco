@@ -1883,8 +1883,8 @@ function setComputationTime() {
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <i18n-t keypath="ask_delete_file_x" tag="span">
-              <code>{{ state.deleteFilePath }}</code>
+            <i18n-t keypath="ask_delete_class_x" tag="span">
+              <code>{{ state.deleteFilePath.replace(".java", "") }}</code>
             </i18n-t>
           </div>
           <div class="modal-footer">
@@ -2470,7 +2470,7 @@ function setComputationTime() {
                       active: f.tab == state.activeTab,
                     }">
                       <div class="d-inline me-1" :class="{ changed: state.tabsWithChanges.includes(f.tab) }">
-                        {{ f.path }}
+                        {{ f.path.replace(".java", "") }}
                       </div>
                       <a v-if="f.path !== entry_point_without_slash" @click.stop="checkCloseTab(f.tab)">
                         <font-awesome-layers class="closeTabBtn">
@@ -2709,9 +2709,9 @@ function setComputationTime() {
 
 [data-bs-theme=dark] {
   .tab:not(.active) {
-    border-left: 1px solid #6a6a6a;
-    border-top: 1px solid #6a6a6a;
-    border-right: 1px solid #6a6a6a;
+    border-left: 1px solid #515151;
+    border-top: 1px solid #515151;
+    border-right: 1px solid #515151;
     background-color: #6a6a6a;
     color: lightgray;
   }
