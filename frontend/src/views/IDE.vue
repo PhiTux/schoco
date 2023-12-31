@@ -55,6 +55,7 @@ let state = reactive({
   websocket_open: false,
   websocket_working: true,
   renameFilePath: "",
+  renameFile: "",
   renameFileNewName: "",
   isRenamingFile: false,
   editorZoom: 16,
@@ -1048,6 +1049,7 @@ function deleteDirectoryModal() {
 
 function renameFileModal(path) {
   state.renameFilePath = String(path).replace(/\/$/g, "")
+  state.renameFile = state.renameFilePath.replace(".java", "")
   state.renameFileNewName = ""
   state.newClassNameInvalid = false
 
@@ -1074,9 +1076,15 @@ function loadEntryPoint() {
 
 function renameFile() {
 
-  if (state.renameFileNewName.trim() === "" || state.renameFileNewName.trim().includes(" ")) {
+  state.renameFileNewName = state.renameFileNewName.trim()
+
+  if (fileNameInvalid(state.renameFileNewName)) {
     state.newClassNameInvalid = true
     return;
+  }
+
+  if (!state.renameFileNewName.endsWith(".java")) {
+    state.renameFileNewName += ".java"
   }
 
   state.isRenamingFile = true;
@@ -1280,10 +1288,19 @@ function prepareAddFileModal() {
   })
 }
 
+function fileNameInvalid(name) {
+  if (name === "" || name.includes(" ") || /^[^a-zA-Z]/.test(name) || /[^a-zA-Z0-9_]/.test(name)) {
+    return true;
+  }
+  return false;
+}
+
 function addClass() {
   if (state.isAddingFile) return;
 
-  if (state.newClassName.trim() === "" || state.newClassName.trim().includes(" ") || /^[^a-zA-Z]/.test(state.newClassName) || /[^a-zA-Z0-9_]/.test(state.newClassName) || state.newClassName.endsWith(".java")) {
+  state.newClassName = state.newClassName.trim()
+
+  if (fileNameInvalid(state.newClassName)) {
     state.newClassNameInvalid = true
     return;
   }
@@ -1924,17 +1941,15 @@ function setComputationTime() {
           </div>
           <div class="modal-body">
             <i18n-t keypath="rename_file_description" tag="p">
-              <code>{{ state.renameFilePath }}</code>
-              <code>.java</code>
+              <code>{{ state.renameFile }}</code>
             </i18n-t>
 
             <i18n-t keypath="rename_file_description_2" tag="p">
-              <code>.java</code>
             </i18n-t>
 
 
             <div class="input-group my-3">
-              <input type="text" class="form-control" id="renameFilenameInput" :placeholder="state.renameFilePath"
+              <input type="text" class="form-control" id="renameFilenameInput" :placeholder="state.renameFile"
                 v-model="state.renameFileNewName" @keyup.enter="renameFile()">
             </div>
 
