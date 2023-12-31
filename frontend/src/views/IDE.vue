@@ -1585,6 +1585,10 @@ function prepareComputationTimeModal() {
       state.teacherComputationTime = 10
       state.isGettingComputationTime = false
     })
+
+  document.getElementById('editComputationTimeModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("hwTimeInput").focus();
+  })
 }
 
 function setComputationTime() {
@@ -1870,7 +1874,8 @@ function setComputationTime() {
     </div>
 
 
-    <div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteFileModal" tabindex="-1" aria-labelledby="deleteFileLabel" aria-hidden="true"
+      @keyup.enter="deleteFile()">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -2152,9 +2157,9 @@ function setComputationTime() {
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 <div v-else>
-                  <input class="hwTimeInput form-control" :value="state.teacherComputationTime"
+                  <input id="hwTimeInput" class="hwTimeInput form-control" :value="state.teacherComputationTime"
                     @input="event => state.teacherComputationTime = event.target.value" type="number" min="3" step="1"
-                    :placeholder="$t('at_least_3_default_5')" />
+                    :placeholder="$t('at_least_3_default_5')" @keyup.enter="setComputationTime()" />
                   {{ state.teacherComputationTime }} {{ $t("seconds") }}
                 </div>
 

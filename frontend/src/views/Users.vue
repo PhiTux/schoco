@@ -530,6 +530,10 @@ onMounted(() => {
   const modal = new Modal(document.getElementById("confirmPasswordModal"));
   modal.show();
 
+  document.getElementById('confirmPasswordModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("confirmPasswordInput").focus();
+  })
+
   document.title = i18n.t("usermanagement")
 });
 
@@ -1143,7 +1147,7 @@ function removeCourseFromNewPupils(id) {
           </div>
           <div class="modal-body">
             <form @submit.prevent="confirmPassword()">
-              <PasswordInput v-model="state.confirmPassword" :description="$t('password')" />
+              <PasswordInput id="confirmPasswordInput" v-model="state.confirmPassword" :description="$t('password')" />
             </form>
             <div v-if="state.confirmPasswordInvalid" class="alert alert-danger">
               {{ $t("password_invalid") }}

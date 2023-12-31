@@ -48,6 +48,10 @@ function openPasswordModal() {
   // open Modal
   var modal = new Modal(document.getElementById("changePasswordModal"));
   modal.show();
+
+  document.getElementById('changePasswordModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("pwd1").focus();
+  })
 }
 
 const passwordInvalid = computed(() => {
@@ -201,7 +205,7 @@ function skip_latest_version() {
         </div>
         <div class="modal-body">
 
-          <PasswordInput v-model="state.oldPassword" :description="$t('current_password')" id="pwd1" focus />
+          <PasswordInput v-model="state.oldPassword" :description="$t('current_password')" id="pwd1" />
 
           <PasswordInfo />
 

@@ -266,8 +266,13 @@ function askRenameHomework(id, name) {
   state.renameId = id;
   state.renameName = name;
   state.renameNameNew = name;
+
   const modal = new Modal(document.getElementById("renameHomeworkModal"));
   modal.show();
+
+  document.getElementById('renameHomeworkModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("renameHomeworknameInput").focus();
+  })
 }
 
 function renameHomework() {
@@ -322,8 +327,13 @@ function askRenameProject(uuid, name) {
   state.renameUuid = uuid;
   state.renameName = name;
   state.renameNameNew = name;
+
   const modal = new Modal(document.getElementById("renameProjectModal"));
   modal.show();
+
+  document.getElementById('renameProjectModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("renameProjectnameInput").focus();
+  })
 }
 
 function renameProject() {

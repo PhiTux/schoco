@@ -273,13 +273,13 @@ function resetFileList() {
         <div class="col-md-4 col-sm-6 d-flex flex-column justify-space-between">
           <div class="form-floating">
             <input type="text" id="HelloWorldName" class="form-control" v-model="state.helloWorldName"
-              :placeholder="$t('project_name')" />
+              :placeholder="$t('project_name')" @keyup.enter="newHelloWorld()" />
             <label for="HelloWorldName">{{ $t("project_name") }}*</label>
           </div>
           <div class="d-flex flex-row align-items-center">
             <div class="form-floating mt-2 flex-fill">
               <input type="text" id="className" class="form-control" v-model="state.className"
-                :placeholder="$t('class_name')" />
+                :placeholder="$t('class_name')" @keyup.enter="newHelloWorld()" />
               <label for="className">{{ $t("class_name") }}*</label>
             </div>
             <a class="btn btn-round" tabindex="0" data-bs-trigger="focus" data-bs-toggle="popover"
@@ -325,7 +325,7 @@ function resetFileList() {
       <div v-if="state.files.length">
         <h5>{{ $t("selected_files") }}</h5>
         <ul>
-          <li v-for="( file, index ) in  state.files " :key="file.name" class="d-flex align-items-center">
+          <li v-for="(  file, index  ) in   state.files  " :key="file.name" class="d-flex align-items-center">
             <font-awesome-icon v-if="state.successIndexes.includes(index)" icon="fa-circle-check" class="greenLabel" />
             <font-awesome-icon v-else-if="state.errorIndexes.includes(index)" icon="fa-triangle-exclamation"
               class="redLabel" />
@@ -335,8 +335,9 @@ function resetFileList() {
             </div>
             <font-awesome-icon v-else icon="fa-list-ul" />
 
-            <span class="mx-2"><b :class="{ redLabel: state.errorIndexes.includes(index) }"><u>{{ file.name }}</u></b> ({{
-              file.size / 1000 }} kB)</span>
+            <span class="mx-2"><b :class="{ redLabel: state.errorIndexes.includes(index) }"><u>{{ file.name }}</u></b>
+              ({{
+                file.size / 1000 }} kB)</span>
 
             <a v-if="state.uploadIndexes.length + state.successIndexes.length + state.errorIndexes.length == 0"
               class="btn-remove d-flex align-items-center" @click="removeFile(index)">
