@@ -2594,10 +2594,6 @@ function setComputationTime() {
   width: 200px;
 }
 
-#inputMessage:disabled {
-  /* background-color: white; */
-}
-
 #messageSendButton {
   transition: 0.4s;
 }

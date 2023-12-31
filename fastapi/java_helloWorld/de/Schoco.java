@@ -9,7 +9,7 @@ public class <classname> {
 		
 	}
 
-	public static void main(String[] args) {
+	#main#public static void main(String[] args) {
 		<classname> object1 = new <classname>();
-	}
+	}!#main#
 }

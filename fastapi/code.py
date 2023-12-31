@@ -13,16 +13,21 @@ import os
 import git
 from sqlmodel import Session
 import datetime
+import re
 
 code = APIRouter(prefix="/api")
 
 #CODE_PATH = "code/"
 DEFAULT_COMPUTATION_TIME = 5
 
-def get_template_file(className: str, languageCode: str):
+def get_template_file(className: str, languageCode: str, withMainMethod: bool):
     """Returns a tuple of (file_name, file_content)"""
     file_content = open(file=f"./java_helloWorld/{languageCode}/Schoco.java", mode="rb").read()
     file_content = file_content.replace(b"<classname>", className.encode())
+    if (withMainMethod):
+        file_content = re.sub(b"\!?#main#", b"", file_content, flags=re.DOTALL)
+    else: 
+        file_content = re.sub(b"#main#.*!#main#", b"", file_content, flags=re.DOTALL)
     return file_content
 
 @code.post('/createNewHelloWorld', dependencies=[Depends(auth.oauth2_scheme)])
@@ -52,10 +57,14 @@ def createNewHelloWorld(newProject: models_and_schemas.newProject, db: Session =
     for file in os.listdir(f"./java_helloWorld/{languageCode}"):
         if file.endswith(".class") or (user.role == "pupil" and file == "Tests.java"):
             continue
-        file_content = open(file=f"./java_helloWorld/{languageCode}/{file}", mode="rb").read()
+        
+        if file == "Schoco.java":
+            file_content = get_template_file(className, languageCode, True)
+        else:
+            file_content = open(file=f"./java_helloWorld/{languageCode}/{file}", mode="rb").read()
 
-        # replace placeholders by className
-        file_content = file_content.replace(b"<classname>", className.encode())
+            # replace placeholders by className
+            file_content = file_content.replace(b"<classname>", className.encode())
         if file != "Tests.java":
             file = f"{className}.java"
 
@@ -858,7 +867,7 @@ def addEmptyFile(addClass: models_and_schemas.AddClass, project_uuid: str = Path
     if className.endswith(".java"):
         className = className[:-5]
 
-    file_content = get_template_file(className, addClass.language)
+    file_content = get_template_file(className, addClass.language, False)
     
     res = git.add_new_class(project_uuid, user_id, className, file_content)
     if not res['success']:
