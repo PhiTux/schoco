@@ -2237,20 +2237,21 @@ function setComputationTime() {
 
 
     <!-- Navbar -->
-    <nav class="navbar sticky-top navbar-expand-lg">
+    <nav class="navbar sticky-top navbar-expand-md">
       <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse d-flex" id="navbarSupportedContent">
+
+        <div class="collapse navbar-collapse d-md-flex" id="navbarSupportedContent">
           <ul class="navbar-nav">
             <li class="nav-item dropdown mx-3">
               <a class="dropdown-toggle btn btn-outline-secondary" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 {{ $t("project") }}
               </a>
-              <ul class="dropdown-menu" data-bs-theme="light">
+              <ul class="dropdown-menu position-absolute" data-bs-theme="light">
                 <li>
                   <a v-if="!state.isSolution" class="dropdown-item"
                     @click.prevent="prepareAddFileModal()"><font-awesome-icon icon="fa-solid fa-file-circle-plus"
@@ -2293,60 +2294,67 @@ function setComputationTime() {
                 </button>
               </div>
             </li>
-
-            <li class="nav-item mx-3">
-              <div class="btn-group h-100" role="group" aria-label="Basic example">
-                <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
-                  :disabled="state.tabsWithChanges.length == 0 || state.isSolution">
-                  <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
-                  <span class="ms-1 hideOnSmall">{{ $t("save") }}</span>
-                </button>
-                <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center">
-                  <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
-                  <span class="ms-1 hideOnSmall">{{ $t("compile") }}</span>
-                </button>
-                <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center">
-                  <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
-                  <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
-                </button>
-                <button
-                  v-if="(authStore.isTeacher() && !(state.isHomework && !state.enableTests)) || (state.isHomework && state.enableTests)"
-                  @click.prevent="testBtn()" type="button" class="btn btn-indigo d-flex align-items-center">
-                  <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                  </div>
-                  <font-awesome-icon v-else icon="fa-solid fa-list-check" />
-                  <span class="ms-1 hideOnSmall">{{ $t("test") }}</span>
-                </button>
-              </div>
-            </li>
-
           </ul>
+        </div>
+
+        <div class="navbar-brand d-flex">
+          <li class="nav-item mx-3 list-style-none">
+            <div class="btn-group h-100" role="group" aria-label="Basic example">
+              <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
+                :disabled="state.tabsWithChanges.length == 0 || state.isSolution">
+                <div v-if="state.isSaving" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid fa-floppy-disk" />
+                <span class="ms-1 hideOnSmall">{{ $t("save") }}</span>
+              </button>
+              <button @click.prevent="compileBtn()" type="button" class="btn btn-yellow d-flex align-items-center">
+                <div v-if="state.isCompiling" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid btn-yellow fa-gear" />
+                <span class="ms-1 hideOnSmall">{{ $t("compile") }}</span>
+              </button>
+              <button @click.prevent="executeBtn()" type="button" class="btn btn-blue d-flex align-items-center">
+                <div v-if="state.isExecuting" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid fa-circle-play" />
+                <span class="ms-1 hideOnSmall">{{ $t("execute") }}</span>
+              </button>
+              <button
+                v-if="(authStore.isTeacher() && !(state.isHomework && !state.enableTests)) || (state.isHomework && state.enableTests)"
+                @click.prevent="testBtn()" type="button" class="btn btn-indigo d-flex align-items-center">
+                <div v-if="state.isTesting" class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <font-awesome-icon v-else icon="fa-solid fa-list-check" />
+                <span class="ms-1 hideOnSmall">{{ $t("test") }}</span>
+              </button>
+            </div>
+          </li>
+
+          <button :class="{ hidden: !state.isExecuting && !state.isTesting }" @click.prevent="stopContainer()"
+            type="button" class="btn btn-outline-danger me-3">
+            <div v-if="state.isStopping" class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <font-awesome-icon v-else icon="fa-solid fa-ban" /> <span class="hideOnMedium">{{ $t("abort") }}</span>
+          </button>
+
+          <button v-if="authStore.isTeacher() && !state.isHomework" @click.prevent="prepareHomeworkModal()" type="button"
+            data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
+            <font-awesome-icon icon="fa-solid fa-share-nodes" />
+            <span class="ms-1 hideOnSmall">{{ $t("create_assignment") }}</span>
+          </button>
+        </div>
+        <div class="navbar-brand d-flex flex-grow-1 navbar-fill-dummy"><!-- dummy --></div>
+        <div class="collapse navbar-collapse d-md-flex" id="navbarSupportedContent">
+
           <div class="d-flex w-100">
 
-            <button :class="{ hidden: !state.isExecuting && !state.isTesting }" @click.prevent="stopContainer()"
-              type="button" class="btn btn-outline-danger me-3">
-              <div v-if="state.isStopping" class="spinner-border spinner-border-sm" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <font-awesome-icon v-else icon="fa-solid fa-ban" /> <span class="hideOnMedium">{{ $t("abort") }}</span>
-            </button>
-
-            <button v-if="authStore.isTeacher() && !state.isHomework" @click.prevent="prepareHomeworkModal()"
-              type="button" data-bs-toggle="modal" data-bs-target="#createHomeworkModal" class="btn btn-outline-info">
-              <font-awesome-icon icon="fa-solid fa-share-nodes" /> {{ $t("create_assignment") }}
-            </button>
-
-            <div class="px-2 d-flex align-items-center homework-badge text-truncate smallBadge" v-if="state.isHomework">💡
+            <div class="px-2 me-2 d-flex align-items-center homework-badge text-truncate smallBadge"
+              v-if="state.isHomework">💡
               |
               <span v-if="authStore.isTeacher() && route.params.user_id == 0">{{ $t("template") }}
               </span>
@@ -2360,16 +2368,17 @@ function setComputationTime() {
               </span>
             </div>
 
-            <!-- <div class="flex-grow-1"></div> -->
-
             <ColorModeSwitch @setLight="setLight" class="ms-auto me-2" />
 
-            <a class=" btn btn-primary" @click.prevent="checkExit()">
-              <span class="me-2 hideOnMedium">{{ $t("close") }}</span><font-awesome-icon icon="fa-solid fa-xmark"
-                size="xl" /></a>
           </div>
 
         </div>
+        <div class="navbar-brand">
+          <a class=" btn btn-primary" @click.prevent="checkExit()">
+            <span class="me-2 hideOnMedium">{{ $t("close") }}</span><font-awesome-icon icon="fa-solid fa-xmark"
+              size="xl" /></a>
+        </div>
+
       </div>
     </nav>
 
@@ -2519,6 +2528,10 @@ function setComputationTime() {
 
 
 <style scoped lang="scss">
+.list-style-none {
+  list-style: none;
+}
+
 #scrollableFileTree {
   height: calc(100% - 50px);
   overflow-y: auto;
@@ -2526,7 +2539,7 @@ function setComputationTime() {
 
 @media (max-width: 1368px) {
   .smallBadge {
-    width: 150px;
+    max-width: 150px;
   }
 }
 
@@ -2539,6 +2552,12 @@ function setComputationTime() {
 @media (max-width: 1280px) {
   .hideOnSmall {
     display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .navbar-fill-dummy {
+    width: 100%;
   }
 }
 
@@ -2763,7 +2782,7 @@ function setComputationTime() {
 }
 
 .ide-main {
-  height: calc(100% - 56px);
+  height: calc(100% - 64px);
 }
 
 .btn-green {
