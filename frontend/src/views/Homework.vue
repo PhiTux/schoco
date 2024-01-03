@@ -164,7 +164,7 @@ function updateSettings() {
                                 <!-- Sadly can't use the option :format-locale="de" because then I can't manually edit the input-field for some reason... -->
                                 <VueDatePicker v-model="newSettings.deadlineDate" placeholder="Start Typing ..." text-input
                                     auto-apply prevent-min-max-navigation locale="de" :format="$t('long_date_format')" />
-                                {{ $t("UTC") }}: <em>{{ newSettings.deadlineDate.toISOString() }}</em><br>
+                                {{ $t("utc") }}: <em>{{ newSettings.deadlineDate.toISOString() }}</em><br>
                                 {{ $t("editing_time") }}:
                                 <em v-if="newSettings.deadlineDate > new Date()"><b>{{
                                     Math.floor((newSettings.deadlineDate
@@ -215,7 +215,7 @@ function updateSettings() {
                             <div class="col-sm-8">
                                 <input class="hwTimeInput" :value="newSettings.computationTime"
                                     @input="event => newSettings.computationTime = event.target.value" type="number" min="3"
-                                    step="1" :placeholder="$t('at_least_3_default_10')" data-bs-theme="light" />
+                                    step="1" :placeholder="$t('at_least_3_default_5')" data-bs-theme="light" />
                                 <br>
                                 {{ newSettings.computationTime }} {{ $t("seconds") }}
                             </div>
