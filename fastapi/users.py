@@ -108,6 +108,9 @@ async def setNewPassword(setPassword: models_and_schemas.setPassword, db: Sessio
     if not crud.change_password_by_username(setPassword.username, setPassword.password, db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")
+    
+    crud.set_must_change_password(db=db, username=setPassword.username)
+
     return {'success': True}
 
 
@@ -125,6 +128,8 @@ async def changePassword(changePassword: models_and_schemas.ChangePassword, db: 
     if not crud.change_password_by_username(username=username, password=changePassword.newPassword, db=db):
         raise HTTPException(
             status_code=500, detail="Password change not successful")
+    
+    crud.set_password_changed(db=db, username=username)
 
     return {'success': True}
 
@@ -203,7 +208,7 @@ def login(db: Session = Depends(database_config.get_db), form_data: OAuth2Passwo
         raise HTTPException(status_code=401, detail="Bad username or password")
     if auth.verify_password(form_data.password, db_user.hashed_password):
         token = auth.create_access_token(db_user)
-        return {"username": db_user.username, "role": db_user.role, "access_token": token, "token_type": "Bearer"}
+        return {"username": db_user.username, "role": db_user.role, "access_token": token, "token_type": "Bearer", "must_change_password": db_user.must_change_password}
     raise HTTPException(status_code=401, detail="Bad username or password")
 
 

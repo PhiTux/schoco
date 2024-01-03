@@ -86,6 +86,8 @@ function changePassword() {
         document.getElementById("toastChangePasswordSuccess")
       );
       toast.show();
+
+      authStore.setPasswordChanged();
     },
     (error) => {
       state.isChangingPassword = false;
@@ -204,14 +206,18 @@ function skip_latest_version() {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-
-          <PasswordInput v-model="state.oldPassword" :description="$t('current_password')" id="pwd1" />
-
+          <form @submit.prevent="changePassword()">
+            <PasswordInput v-model="state.oldPassword" :description="$t('current_password')" id="pwd1" />
+          </form>
           <PasswordInfo />
 
-          <PasswordInput v-model="state.newPassword1" :description="$t('new_password')" id="pwd2" />
+          <form @submit.prevent="changePassword()">
+            <PasswordInput v-model="state.newPassword1" :description="$t('new_password')" id="pwd2" />
+          </form>
+          <form @submit.prevent="changePassword()">
+            <PasswordInput v-model="state.newPassword2" :description="$t('new_password')" id="pwd3" />
+          </form>
 
-          <PasswordInput v-model="state.newPassword2" :description="$t('new_password')" id="pwd3" />
 
           <div v-if="passwordTooShort" class="alert alert-danger" role="alert">
             {{ $t("password_at_least_8") }}

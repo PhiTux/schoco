@@ -7,12 +7,17 @@ import git
 
 
 def create_user(db: Session, user: models_and_schemas.UserSchema):
+    if user.role == "teacher":
+        must_change_password = False
+    else:
+        must_change_password = True
     hashed_password = auth.create_password_hash(user.password)
     db_user = models_and_schemas.User(
         username=user.username,
         full_name=user.full_name,
         role=user.role,
-        hashed_password=hashed_password
+        hashed_password=hashed_password,
+        must_change_password=must_change_password
     )
     try:
         db.add(db_user)
@@ -776,6 +781,41 @@ def update_computation_time_by_project_uuid(db: Session, project_uuid: str, comp
     project.computation_time = computation_time
     try:
         db.add(project)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+
+def set_password_changed(db: Session, username: str):
+    # get user
+    user = get_user_by_username(db, username)
+    if user is None:
+        return False
+
+    # update password changed
+    user.must_change_password = False
+    try:
+        db.add(user)
+        db.commit()
+    except Exception as e:
+        print(e)
+        db.rollback()
+        return False
+    return True
+
+def set_must_change_password(db: Session, username: str):
+    # get user
+    user = get_user_by_username(db, username)
+    if user is None:
+        return False
+
+    # update password changed
+    user.must_change_password = True
+    try:
+        db.add(user)
         db.commit()
     except Exception as e:
         print(e)

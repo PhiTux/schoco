@@ -40,6 +40,7 @@ class BaseUser(SQLModel):
 class User(BaseUser, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     hashed_password: str
+    must_change_password: Optional[bool] = False
 
     courses: List["Course"] = Relationship(
         back_populates="users", link_model=UserCourseLink)

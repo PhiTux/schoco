@@ -26,7 +26,12 @@ export const useAuthStore = defineStore({
             } catch (err) {
                 return err
             }
-            this.$router.push(this.returnUrl || '/home');
+            
+            if (this.user.must_change_password) {
+                this.$router.push('/changePassword');
+            } else {
+                this.$router.push(this.returnUrl || '/home');
+            }
             return
         },
         logout() {
@@ -46,6 +51,10 @@ export const useAuthStore = defineStore({
         },
         isTeacher() {
             return (this.user && this.user.role == 'teacher')
+        },
+        setPasswordChanged() {
+            this.user.must_change_password = false
+            localStorage.setItem('user', JSON.stringify(this.user))
         }
     }
 });

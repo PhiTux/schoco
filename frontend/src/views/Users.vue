@@ -249,6 +249,10 @@ function openModalChangePassword(id) {
     }
     return true;
   });
+
+  document.getElementById('changeUserPasswordModal').addEventListener('shown.bs.modal', function () {
+    document.getElementById("newpwd").focus();
+  })
 }
 
 function changePassword() {
@@ -1078,7 +1082,7 @@ function removeCourseFromNewPupils(id) {
             </h4>
 
             <form @submit.prevent="changePassword()">
-              <PasswordInput v-model="state.newPassword" :description="$t('new_password')" />
+              <PasswordInput v-model="state.newPassword" :description="$t('new_password')" id="newpwd" />
             </form>
 
             <PasswordInfo />

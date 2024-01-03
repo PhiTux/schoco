@@ -6,6 +6,7 @@ import Users from "../views/Users.vue"
 import NewProject from "../views/NewProject.vue"
 import Ide from "../views/IDE.vue"
 import Homework from "../views/Homework.vue"
+import ChangePassword from "../views/ChangePassword.vue"
 
 
 const routes = [
@@ -15,6 +16,7 @@ const routes = [
     { path: '/newProject', name: "newProject", component: NewProject },
     { path: '/ide/:project_uuid/:user_id', name: "ide", component: Ide, params: { project_uuid: "", user_id: "" } },
     { path: '/homework/:id', name: "homework", component: Homework, params: { id: "" } },
+    { path: '/changePassword', name: "changePassword", component: ChangePassword},
     { path: '/:pathMatch(.*)*', redirect: "/home" }
 ]
 
