@@ -326,7 +326,7 @@ function skip_latest_version() {
         <div v-if="authStore.user" class="dropdown">
           <button class="dropdown-toggle btn btn-outline-secondary" href="#" role="button" data-bs-toggle="dropdown"
             aria-expanded="false">
-            {{ authStore.user.username }}
+            <font-awesome-icon icon="fa-solid fa-gear" fixed-width /> | {{ authStore.user.username }}
           </button>
           <ul class="dropdown-menu dropdown-menu-end" data-bs-theme="light">
             <li>
