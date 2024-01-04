@@ -819,7 +819,7 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
       } else if (response.data.passed_tests == 0 && response.data.failed_tests == 0) {
         results.value += i18n.t("error_during_testing")
       } else if (state.aborted) {
-        results.value += i18n.t("error_aborted")
+        results.value += i18n.t("test_aborted")
       }
       else {
         let percent = Math.round((response.data.passed_tests / (response.data.passed_tests + response.data.failed_tests)) * 100 * 10) / 10

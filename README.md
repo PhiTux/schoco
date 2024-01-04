@@ -258,6 +258,7 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 - Template-project is now available in english and german
 - User must specify a classname when creating a new project
 - Removed visibility of .java file-ending from frontend
+- Refactored Compilation: now only one POST is necessary AND the containers are reused after compilation
 ````
 
 ## 1.1.2

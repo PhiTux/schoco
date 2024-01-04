@@ -253,7 +253,7 @@ def startCompile(uuid: str, port: int, computation_time: int, save_output: bool)
             c.perform()
             break
         except:
-            print("connection error: " + str(port))
+            print("connection error to container port: " + str(port))
             tries -= 1
             if (tries == 0):
                 c.close()
