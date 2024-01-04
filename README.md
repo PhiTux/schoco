@@ -227,7 +227,7 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
-## 1.2.0 (IN DEVELOPMENT)
+## 1.2.0
 (2023-01-04)
 ````
 - Changed schoco-icon/-logo
