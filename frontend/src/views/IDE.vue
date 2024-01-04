@@ -2264,7 +2264,7 @@ function setComputationTime() {
           </ul>
         </div>
 
-        <div class="navbar-brand d-flex">
+        <div class="navbar-brand d-flex py-0">
           <li class="nav-item mx-3 list-style-none">
             <div class="btn-group h-100" role="group" aria-label="Basic example">
               <button @click.prevent="saveAllBtn()" type="button" class="btn btn-green d-flex align-items-center"
@@ -2315,7 +2315,7 @@ function setComputationTime() {
             <span class="ms-1 hideOnSmall">{{ $t("create_assignment") }}</span>
           </button>
         </div>
-        <div class="navbar-brand d-flex flex-grow-1 navbar-fill-dummy"><!-- dummy --></div>
+        <div class="navbar-brand d-flex flex-grow-1 navbar-fill-dummy py-0"><!-- dummy --></div>
         <div class="collapse navbar-collapse d-md-flex" id="navbarSupportedContent">
 
           <div class="d-flex w-100">
@@ -2340,7 +2340,7 @@ function setComputationTime() {
           </div>
 
         </div>
-        <div class="navbar-brand">
+        <div class="navbar-brand py-0">
           <a class=" btn btn-primary" @click.prevent="checkExit()">
             <span class="me-2 hideOnMedium">{{ $t("close") }}</span><font-awesome-icon icon="fa-solid fa-xmark"
               size="xl" /></a>
@@ -2749,7 +2749,7 @@ function setComputationTime() {
 }
 
 .ide-main {
-  height: calc(100% - 64px);
+  height: calc(100% - 56px);
 }
 
 .btn-green {
