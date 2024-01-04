@@ -9,13 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.4.2",
-    "@fortawesome/free-solid-svg-icons": "^6.4.2",
-    "@fortawesome/vue-fontawesome": "^3.0.3",
+    "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-solid-svg-icons": "^6.5.1",
+    "@fortawesome/vue-fontawesome": "^3.0.5",
     "@popperjs/core": "^2.11.8",
     "@vuepic/vue-datepicker": "^4.5.1",
-    "ace-builds": "^1.30.0",
-    "axios": "^1.5.1",
+    "ace-builds": "^1.32.3",
+    "axios": "^1.6.4",
     "bootstrap": "^5.3.2",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
@@ -25,13 +25,13 @@
     "vue-router": "^4.2.5",
     "vue-select": "^4.0.0-beta.6",
     "vue-upload-component": "^3.1.8",
-    "vue3-ace-editor": "^2.2.3",
+    "vue3-ace-editor": "^2.2.4",
     "vue3-text-clamp": "^0.1.2"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.4.0",
-    "sass": "^1.69.4",
-    "vite": "^4.5.0",
-    "vue-i18n": "^9.5.0"
+    "@vitejs/plugin-vue": "^4.6.2",
+    "sass": "^1.69.7",
+    "vite": "^4.5.1",
+    "vue-i18n": "^9.8.0"
   }
 }
