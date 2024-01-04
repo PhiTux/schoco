@@ -3,6 +3,7 @@ export const ide_en = {
     no_live_output_result_to_follow: "Live output not possible, result will follow shortly...",
     compilation_successful: "Compilation successful 🎉",
     compilation_started: "Compilation started... 🛠",
+    compilation_error: "Internal server-error while compiling! ❌",
     program_running: "Program running...",
     program_testing: "Program testing 📝➡️✅ please wait...",
     no_executables_found: "🔎 Unfortunately, no executables were found. Please compile first ⚙",

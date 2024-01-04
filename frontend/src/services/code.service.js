@@ -60,12 +60,8 @@ class CodeService {
         return axiosAuth.get('getProjectsAsPupil')
     }
 
-    prepareCompile(projectFiles, project_uuid, user_id) {
-        return axiosAuth.post(`prepareCompile/${project_uuid}/${user_id}`, { 'files': projectFiles })
-    }
-
-    startCompile(ip, port, container_uuid, project_uuid, user_id, save_output) {
-        return axiosAuth.post(`startCompile/${project_uuid}/${user_id}`, { 'ip': ip, 'port': port, 'container_uuid': container_uuid, 'save_output': save_output })
+    startCompile(projectFiles, project_uuid, user_id) {
+        return axiosAuth.post(`startCompile/${project_uuid}/${user_id}`, { 'files': projectFiles })
     }
 
     prepareExecute(project_uuid, user_id) {

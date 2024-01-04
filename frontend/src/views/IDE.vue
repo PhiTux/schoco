@@ -499,8 +499,7 @@ function compile() {
 
   state.isCompiling = true;
   state.aborted = false;
-  state.receivedWS = false;
-  results.value = "";
+  results.value = i18n.t("compilation_started");;
 
   let projectFiles = [];
   for (let i = 0; i < state.files.length; i++) {
@@ -510,64 +509,26 @@ function compile() {
     });
   }
 
-  CodeService.prepareCompile(projectFiles, route.params.project_uuid, route.params.user_id).then(
-    (response) => {
-
-      if (response.data.success == false) {
-        state.isCompiling = false;
-        results.value = i18n.t("server_was_overloaded_try_again");
-        return;
-      }
-
-      state.runningContainerUuid = response.data.uuid;
-
-      // attach WS(S)
-      connectWebsocket(response.data.id);
-
-      startCompile(
-        response.data.ip,
-        response.data.port,
-        response.data.uuid,
-        route.params.project_uuid,
-        route.params.user_id
-      );
-    },
-    (error) => {
-      state.isCompiling = false;
-      state.actionGoal = ""
-      console.log(error.response);
-    }
-  );
-}
-
-function startCompile(ip, port, container_uuid, project_uuid, user_id) {
-  CodeService.startCompile(ip, port, container_uuid, project_uuid, user_id, !state.websocket_working).then(
+  CodeService.startCompile(projectFiles, route.params.project_uuid, route.params.user_id).then(
     (response) => {
       state.isCompiling = false;
 
-      if (state.actionGoal === "compile" || (state.websocket_working && state.receivedWS)) {
+      let compileSuccess = response.data.exitCode == "0" && (! "stdout" in response.data || response.data.stdout.trim() === "")
+
+      if (state.actionGoal === "compile" || !compileSuccess) {
         state.actionGoal = ""
       }
 
       if (response.data.status === "connect_error") {
-        results.value = i18n.t("server_was_overloaded_try_again");
+        results.value = i18n.t("compilation_error");
         state.actionGoal = ""
         return;
       }
-      else if (!state.websocket_working || response.data.stdout !== undefined) {
-        if (response.data.stdout === undefined) {
-          // restart compilation if from this last run no output was saved
-          compile()
-          return;
-        } else if (response.data.exitCode == 0 && (response.data.stdout === "" || response.data.stdout === "\n")) {
-          results.value = i18n.t("compilation_successful");
-        } else {
-          results.value = response.data.stdout;
-          return;
-        }
-      }
-      else if (response.data.exitCode == 0 && !state.receivedWS) {
+
+      if (compileSuccess) {
         results.value = i18n.t("compilation_successful");
+      } else {
+        results.value = response.data.stdout;
       }
 
       if (state.actionGoal === "execute") {
@@ -575,14 +536,20 @@ function startCompile(ip, port, container_uuid, project_uuid, user_id) {
       } else if (state.actionGoal === "test") {
         test(true)
       }
+
     },
     (error) => {
-      state.isCompiling = false;
-      state.actionGoal = ""
+      console.log(error.response)
 
-      console.log(error.response);
+      if (error.response.status === 503) {
+        results.value = i18n.t("server_was_overloaded_try_again");
+      } else {
+        results.value = i18n.t("compilation_error");
+      }
+
+      state.actionGoal = ""
     }
-  );
+  )
 }
 
 

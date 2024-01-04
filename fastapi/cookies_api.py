@@ -138,6 +138,23 @@ def remove_compilation_result(project_uuid: str):
         shutil.rmtree(destinationpath)
 
 
+def remove_container_content(container_uuid: str):
+    dir = os.path.join(data_path, containers, str(container_uuid))
+    if os.path.exists(dir):
+        for filename in os.listdir(dir):
+            file_path = os.path.join(dir, filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+                return False
+        return True
+    return False
+
+
 def createNewContainer():
     """Creates (and runs!) new container and returns the id, uuid and port."""
     new_uuid = uuid.uuid4()
@@ -198,12 +215,12 @@ def fillNewContainersQueue():
 
 
 def prepareCompile(filesList: models_and_schemas.filesList):
-    # get next container out of queue - return if no new one is available after 2 seconds.
+    # get next container out of queue - return if no new one is available after 3 seconds.
     # prepare the container and place it inside runningContainers
     try:
         c = newContainers.get(timeout=3)
     except queue.Empty:
-        return {'success': False, 'message': 'No worker ready for compilation within 3 seconds 😥 Please retry!'}
+        return None
 
     runningContainers.append(c)
 

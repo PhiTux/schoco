@@ -360,45 +360,44 @@ def getComputationTime(db: Session, project_uuid: str):
     return project.computation_time
 
 
-@ code.post('/prepareCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def prepareCompile(filesList: models_and_schemas.filesList, project_uuid: str = Path(), user_id: int = Path()):
-
+@code.post('/startCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
+def startCompile(filesList: models_and_schemas.filesList, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
     # separately load Tests.java from homework-template if I'm watching a pupil's solution (user_id != 0)
     if user_id != 0:
         tests = git.download_Tests_java(project_uuid=project_uuid)
         filesList.files.append(models_and_schemas.File(
             path="Tests.java", content=tests))
-
+    
     # remove .class files (if existing), they are no longer necessary
     cookies_api.remove_compilation_result(f"{project_uuid}_{user_id}")
 
     # write files to container-mount and return WS-URL
     c = cookies_api.prepareCompile(filesList)
-
-    return c
-
-
-@ code.post('/startCompile/{project_uuid}/{user_id}', dependencies=[Depends(project_access_allowed)])
-def startCompile(startCompile: models_and_schemas.startCompile, background_tasks: BackgroundTasks, project_uuid: str = Path(), user_id: int = Path(), db: Session = Depends(database_config.get_db)):
+    if c == None:
+        raise HTTPException(
+            status_code=503, detail="No free container available.")
 
     computation_time = getComputationTime(db=db, project_uuid=project_uuid)
 
     result = cookies_api.startCompile(
-        startCompile.container_uuid, startCompile.port, computation_time, True)
+        c['uuid'], c['port'], computation_time, True)
 
     if user_id != 0:
         crud.increase_compiles(db=db, uuid=project_uuid, user_id=user_id)
-
+    
     # save compilation-results (.class-files) if there was no error
     # a good result is {'exitCode': '0'} or {'stdout': '', 'stdout': '\n'}
     if ('exitCode' in result.keys() and result['exitCode'] == '0' and (not 'stdout' in result.keys() or ('stdout' in result.keys() and result['stdout'].strip() == ""))):
         cookies_api.save_compilation_result(
-            startCompile.container_uuid, f"{project_uuid}_{user_id}")
-
-    # before return: start background_task to refill new_containers
-    background_tasks.add_task(
-        cookies_api.kill_n_create, startCompile.container_uuid)
-
+            c['uuid'], f"{project_uuid}_{user_id}")
+    
+    # clean up: remove all data from container dir and move container back to newContainers
+    if cookies_api.remove_container_content(c['uuid']):
+        cookies_api.put_container_back_in_new_queue(c)
+    else:
+        background_tasks.add_task(
+            cookies_api.kill_n_create, c['uuid'])
+    
     return result
 
 
