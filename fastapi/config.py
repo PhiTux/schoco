@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     PRODUCTION: bool = True
     JWT_EXP_DAYS: int = 15
     FULL_DATA_PATH: str = "/app/data"
-    BACKEND_VER: str = "1.1.2"
+    BACKEND_VER: str = "1.2.0"
 
 
 settings = Settings()

@@ -216,33 +216,10 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 
 ## Progress
 
-**There are a few more features missing that might be implemented at some time (if needed, please open an issue):**
+**There are a few more feature ideas that might be implemented at some time (if needed, please open an issue):**
 - [ ] "way-back-button": use underlaying git-struture to view any state of a file when it was previously saved
-- [ ] Mark projects as templates (when being a teacher)
+- [ ] Mark projects as templates (when being a teacher) - other teachers could then see those templates. But: makes it difficult to handle multi-user changes on the same template!?
 - [ ] Perhaps some possibility to view pupil's private projects as teacher?!
-
-**Below are the things, that are working**
-
-- [x] Usermanagement (Registration an login for teachers and pupils) and extended rights for teachers 
-- [x] Classroom-management (Creation of courses and assigning pupils to courses)
-- [x] Create a new Java-Project based on a Hello-World-template
-- [x] Open my own Projects in the IDE
-- [x] Interaction with Gitea on localhost or different Host (HTTPS): (Loading all files and save changes)
-- [x] Worker-Queue (or comparable) for cookies
-- [x] Make cookies work (see [/cookies](/cookies))
-    - [x] Compilation
-    - [x] Running/Executing (Input and output can be send via Websocket ✔)
-    - [x] JUnit-Testing
-- [x] Make assigment out of projects with deadlines, submitting, view pupils solutions as teacher, ...
-- [x] Save amount of compilations, executions,... per project and make them visible
-- [x] Import/export projects as zip
-- [x] Automatic saving and compilation (if necessary) before executing/testing
-- [x] Automatically switching to http-response (no live-output), if websocket-connection fails and back to WS if working again.
-- [x] Add/rename/remove (Java-)Files and folders to Project
-- [x] Stop compilation/execution button
-- [x] Pupils can see a teachers' solution of an assignment after a configurable start-date
-- [x] Users can change entry-point of project (main-class)
-- [x] Teachers see automatic update notifications if a newer docker-image is available
 
 
 # Changelog
@@ -251,7 +228,7 @@ Last but not least, the <ins>Java-workers</ins> (schoco-cookies) are single-use 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry... 
 
 ## 1.2.0 (IN DEVELOPMENT)
-(2023-11-??)
+(2023-01-04)
 ````
 - Changed schoco-icon/-logo
 - Included link to wiki into Tests.java file
