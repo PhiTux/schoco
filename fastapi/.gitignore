@@ -4,3 +4,4 @@ data/*
 *.class
 .envrc*
 ..envrc.un~
+.venv
