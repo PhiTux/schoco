@@ -231,6 +231,14 @@ services:
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry...
 
+## 1.3.0
+
+(_in development_)
+
+```
+- Simplified output of test-results to increase readability
+```
+
 ## 1.2.0
 
 (2024-01-04)

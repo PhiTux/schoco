@@ -435,7 +435,7 @@ def start_test(uuid: str, port: int, computation_time: int):
 
     results = json.loads(buffer.getvalue().decode('utf-8'), strict=False)
 
-    # parse results
+    # parse results 
     lines = results['stdout'].strip().splitlines()
     lastLine = lines[-1]
     if lastLine.startswith('OK'):
@@ -451,5 +451,14 @@ def start_test(uuid: str, port: int, computation_time: int):
     else:
         results['passed_tests'] = 0
         results['failed_tests'] = 0
+    
+    # parse results to extract the test names
+    results['tests'] = []
+
+    testcounter = 1
+    for line in lines:
+        if line.startswith(str(testcounter) + ')') and line.endswith('(Tests)'):
+            results['tests'].append(line.split(str(testcounter) + ')')[1].split('(Tests)')[0].strip())
+            testcounter += 1
 
     return results

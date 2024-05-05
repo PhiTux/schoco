@@ -805,9 +805,11 @@ function startTest(ip, port, uuid, project_uuid, user_id) {
         return
       }
 
-      results.value += response.data.stdout
+      for (let i = 0; i < response.data.tests.length; i++) {
+        results.value += response.data.tests[i] + "\n"
+      }
 
-      results.value += "\n\n==================\n\n"
+      results.value += "\n==================\n\n"
 
       if (response.data.exitCode == 143) {
         results.value += i18n.t("computation_time_exceeded")
