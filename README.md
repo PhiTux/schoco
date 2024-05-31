@@ -102,8 +102,6 @@ Installation requires a few more steps than your average docker-service, but it'
 6. Adapt the following `docker-compose.yml` to your needs and run `docker compose up -d`:
 
 ```yaml
-version: "3"
-
 networks:
   schoco:
     name: schoco
@@ -233,7 +231,7 @@ I <ins>strongly</ins> recommend to create a backup of your data-folder before up
 
 ## 1.3.0
 
-(_in development_)
+(2024_05_31)
 
 ```
 - Simplified output of test-results to increase readability

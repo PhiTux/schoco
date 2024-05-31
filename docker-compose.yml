@@ -1,5 +1,3 @@
-version: "3"
-
 networks:
   schoco:
     name: schoco
@@ -16,23 +14,23 @@ services:
       # Important: the group ID must be used as String (in quotes)!
       - ${DOCKER_GROUP_ID}
     environment:
-      - FULL_DATA_PATH=/path/to/my/data 
+      - FULL_DATA_PATH=/path/to/my/data
       # same as (left part of) first volume - but here as FULL PATH!!!
 
-      - MAX_CONTAINERS=4 
+      - MAX_CONTAINERS=4
       # sets the amount of java-workers (you want to set this higher!) I recommend as rule of thumb 1.5x the amout of cores of your CPU
 
-      - SECRET_KEY=secret 
+      - SECRET_KEY=secret
       # used for session token
 
-      - TEACHER_KEY=teacherkey 
+      - TEACHER_KEY=teacherkey
       # this is the 'password' that is used to create new teacher-accounts. It must only be known to the teachers.
 
-      - GITEA_USERNAME=schoco 
-      # this is the username of the gitea-user (see last image in this yaml-file) 
+      - GITEA_USERNAME=schoco
+      # this is the username of the gitea-user (see last image in this yaml-file)
 
-      - GITEA_PASSWORD=schoco1234 
-      # and that is the password of the gitea-user. 
+      - GITEA_PASSWORD=schoco1234
+      # and that is the password of the gitea-user.
       # Actually both username and password can stay like this, if you use the gitea-image from this yaml-file and if gitea is not made public (default)!
 
       - GITEA_HOST=http://schoco-gitea:3000
