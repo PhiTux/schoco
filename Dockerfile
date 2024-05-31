@@ -1,5 +1,7 @@
+# Dockerfile for the FRONTEND
+
 # build vue
-FROM node:18.12.1-alpine3.17 as build-vue
+FROM node:18.20.3-alpine3.20 as build-vue
 WORKDIR /app
 COPY ./frontend/package*.json .
 RUN npm install
@@ -7,7 +9,7 @@ COPY ./frontend .
 RUN npm run build
 
 
-FROM nginxinc/nginx-unprivileged:1.24-alpine
+FROM nginxinc/nginx-unprivileged:1.25.5-alpine3.19
 COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-vue /app/dist /usr/share/nginx/html
 
