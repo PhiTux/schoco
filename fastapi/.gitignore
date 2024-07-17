@@ -5,3 +5,4 @@ data/*
 .envrc*
 ..envrc.un~
 .venv
+venv

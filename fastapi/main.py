@@ -33,6 +33,7 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException):
 
 
 origins = [
+    "http://lab:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5173",
 ]
