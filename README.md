@@ -229,6 +229,14 @@ services:
 
 I <ins>strongly</ins> recommend to create a backup of your data-folder before updating schoco! Better save than sorry...
 
+## 1.3.1
+
+(2025_03_18)
+
+```
+- Bugfix: Deleting groups failed when homeworks for this group where existing that were NOT YET STARTED!
+```
+
 ## 1.3.0
 
 (2024_05_31)

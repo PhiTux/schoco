@@ -164,7 +164,9 @@ def remove_user(db: Session, user: models_and_schemas.User):
             # remove user-course links
             userCourseLinks = db.exec(select(models_and_schemas.UserCourseLink).where(
                 models_and_schemas.UserCourseLink.user_id == user.id)).all()
+            print(userCourseLinks)
             for ucl in userCourseLinks:
+                print(ucl)
                 db.delete(ucl)
 
         db.delete(user)
@@ -199,7 +201,8 @@ def remove_course(db: Session, course_id: int):
             # remove editing_homework
             editing_homework = db.exec(select(models_and_schemas.EditingHomework).where(
                 models_and_schemas.EditingHomework.homework_id == h.id)).first()
-            db.delete(editing_homework)
+            if editing_homework is not None:
+                db.delete(editing_homework)
 
             # remove homework
             db.delete(h)
