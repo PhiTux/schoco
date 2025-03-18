@@ -61,7 +61,7 @@ def remove_repo(project_uuid: str):
     res_code = c.getinfo(c.RESPONSE_CODE)
     c.close()
 
-    if (res_code >= 200 and res_code < 300):
+    if ((res_code >= 200 and res_code < 300) or res_code == 404):
         return True
     return False
 
